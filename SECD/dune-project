@@ -1,0 +1,13 @@
+(lang dune 3.17)
+
+(name SECD)
+
+(generate_opam_files true)
+
+(source
+ (github ericlovesmath/abstract-machines))
+
+(package
+ (name SECD)
+ (synopsis "SECD Compiler")
+ (depends ocaml))
