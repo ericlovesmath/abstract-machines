@@ -1,4 +1,4 @@
 (library
   (name lib)
   (modules
-    SECD sexp parser intro))
+    SECD sexp parser intro flatten))

@@ -10,8 +10,8 @@ type t = {
   dump : (value list * (var * value) list * instr list) list;
 }
 
-let init (sexp : instr Sexp.t) : t =
-  { stack = []; env = []; code = Sexp.flatten sexp; dump = [] }
+let init (instrs : instr list) : t =
+  { stack = []; env = []; code = instrs; dump = [] }
 
 let is_atomic (value : value) =
   match value with
@@ -21,17 +21,18 @@ let is_atomic (value : value) =
 
 let eval_step (state : t) : t =
   let { stack; env; code; _ } = state in
+  let simpl code stack = { state with code = code; stack = stack } in
   match (stack, code) with
   | _, [] -> state
-  | _, NIL :: code -> { state with code; stack = List [] :: stack }
-  | _, LDC :: Int n :: code -> { state with code; stack = Int n :: stack }
-  | _, LD :: Var v :: code -> { state with code; stack = List.assoc v env :: stack }
-  | v :: stack, ATOM :: code -> { state with code; stack = Bool (is_atomic v) :: stack }
-  | v :: List vs :: stack, CONS :: code -> { state with code; stack = List (v :: vs) :: stack }
-  | Int n :: Int n' :: stack, ADD :: code -> { state with code; stack = Int (n' + n) :: stack }
-  | Int n :: Int n' :: stack, SUB :: code -> { state with code; stack = Int (n' - n) :: stack }
-  | Int n :: Int n' :: stack, MUL :: code -> { state with code; stack = Int (n' * n) :: stack }
-  | Int n :: Int n' :: stack, DIV :: code -> { state with code; stack = Int (n' / n) :: stack }
+  | _, NIL :: code'                         -> simpl code' (List [] :: stack)
+  | _, LDC :: Int n :: code'                -> simpl code' (Int n :: stack)
+  | _, LD :: Var v :: code'                 -> simpl code' (List.assoc v env :: stack)
+  | v :: stack', ATOM :: code'              -> simpl code' (Bool (is_atomic v) :: stack')
+  | v :: List vs :: stack', CONS :: code'   -> simpl code' (List (v :: vs) :: stack')
+  | Int n :: Int n' :: stack', ADD :: code' -> simpl code' (Int (n + n') :: stack')
+  | Int n :: Int n' :: stack', SUB :: code' -> simpl code' (Int (n - n') :: stack')
+  | Int n :: Int n' :: stack', MUL :: code' -> simpl code' (Int (n * n') :: stack')
+  | Int n :: Int n' :: stack', DIV :: code' -> simpl code' (Int (n / n') :: stack')
   | _ -> failwith "SECD.eval_step: Unimplemented or User Error"
 
 

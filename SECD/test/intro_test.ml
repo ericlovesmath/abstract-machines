@@ -8,4 +8,5 @@ let _ =
   in
   "(mul (add 5 2) 3)" == "mul(add(5, 2), 3)";
   "(mul (add +5 -2) 003)" == "mul(add(5, -2), 3)";
-  "(mul (add ((one)) -2) 003)" == "mul(add(one, -2), 3)"
+  "(mul (add ((one)) -2) 003)" == "mul(add(one, -2), 3)";
+  "(* (+ ((one)) -2) 003)" == "#*(#+(one, -2), 3)"

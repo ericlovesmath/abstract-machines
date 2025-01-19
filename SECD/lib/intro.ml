@@ -1,12 +1,21 @@
 open Parser
 
+type prim = Add | Sub | Mul | Div
+
 type t =
   | Nil
   | Int of int
   | Var of string
   | Call of t * t list
+  | Prim of prim
 
 let nilP = Nil <$ stringP (explode "nil")
+
+let primP =
+  (Prim Add <$ charP '+')
+  <|> (Prim Sub <$ charP '-')
+  <|> (Prim Mul <$ charP '*')
+  <|> (Prim Div <$ charP '/')
 
 (** alphabetic followed by (possibly multiple) ' *)
 let variableP =
@@ -27,7 +36,7 @@ let integerP =
   in
   (fun v -> Int v) <$> (int_of_string <$> (implode <$> numP))
 
-let atomP = nilP <|> integerP <|> variableP
+let atomP = nilP <|> integerP <|> primP <|> variableP
 
 let listPT p =
   let strip p = many (charP ' ') *> p <* many (charP ' ') in
@@ -53,3 +62,7 @@ let rec pp = function
   | Int i -> string_of_int i
   | Var v -> v
   | Call (e, es) -> pp e ^ "(" ^ String.concat ", " (List.map pp es) ^ ")"
+  | Prim Add -> "#+"
+  | Prim Sub -> "#-"
+  | Prim Mul -> "#*"
+  | Prim Div -> "#/"
