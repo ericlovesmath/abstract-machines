@@ -34,16 +34,16 @@ let listPT p =
   let spaces = many1 (charP ' ') in
   charP '(' *> (strip (sepBy1 spaces p)) <* charP ')'
 
-let rec introP st =
+let rec callP st =
   let call_of_list = function
-    | [] -> failwith "sepBy1 used in listP"
+    | [] -> failwith "unreachable: sepBy1 used in listPT"
     | [e] -> e
     | e :: es -> Call (e, es)
   in
-  (call_of_list <$> listPT (atomP <|> introP)) st
+  (call_of_list <$> listPT (atomP <|> callP)) st
 
 let parse s =
-  match introP (explode s) with
+  match callP (explode s) with
   | None -> None
   | Some (_, _ :: _) -> None
   | Some (res, []) -> Some res

@@ -15,6 +15,7 @@ val ( <* ) : 'a parser -> 'b parser -> 'a parser
 val ( *> ) : 'a parser -> 'b parser -> 'b parser
 
 val seq : 'a parser list -> 'a list parser
+val choice : 'a parser list -> 'a parser
 
 val many : 'a parser -> 'a list parser
 val many1 : 'a parser -> 'a list parser

@@ -49,6 +49,8 @@ let rec seq =
     [] -> pure []
   | hd :: tl -> List.cons <$> hd <*> seq tl
 
+let choice l = List.fold_right (<|>) l (Fun.const None)
+
 let rec many1 p = List.cons <$> p <*>| lazy (many p)
 and many p = many1 p <|> pure []
 
@@ -63,18 +65,3 @@ let satisfy (pred : char -> bool) : char parser =
 
 let charP c = satisfy (( = ) c)
 let stringP st = seq (List.map charP st)
-
-(* Tests *)
-(* let _ = *)
-(*   let run (p : char list parser) (str : string) =  *)
-(*     match p (explode str) with *)
-(*     | Some (res, rem) -> Printf.printf "Result: %s, Remain: %s\n" (implode res) (implode rem) *)
-(*     | None -> Printf.printf "Parser failed\n" *)
-(*   in *)
-(*   let _ = *)
-(*     let p = stringP (explode "hello") <|> stringP (explode "world") in *)
-(*     run p "hello world"; *)
-(*     run p "world hello"; *)
-(*     run p "worl fails"; *)
-(*   in *)
-(*   () *)
