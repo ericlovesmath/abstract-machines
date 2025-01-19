@@ -12,9 +12,6 @@ let flatten (sexp : 'a t) : 'a list =
   aux [] sexp
 
 
-let fail = fun _ -> None
-let choice l = List.fold_right (<|>) l fail
-
 let rec pp ppatom  = function
   | Atom a -> ppatom a
   | List es -> "(" ^ String.concat " " (List.map (pp ppatom) es) ^ ")"

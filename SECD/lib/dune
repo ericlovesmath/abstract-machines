@@ -1,2 +1,4 @@
 (library
- (name SECD))
+  (name lib)
+  (modules
+    SECD sexp parser))

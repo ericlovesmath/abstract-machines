@@ -1,2 +1,5 @@
-(test
- (name test_SECD))
+(tests
+  (names
+    secd_test
+    parser_test)
+  (libraries lib))

@@ -8,7 +8,6 @@ val ( >>= ) : 'a parser -> ('a -> 'b parser) -> 'b parser
 val ( <*> ) : ('a -> 'b) parser -> 'a parser -> 'b parser
 val ( <$> ) : ('a -> 'b) -> 'a parser -> 'b parser
 val ( <|> ) : 'a parser -> 'a parser -> 'a parser
-val ( <|>| ) : 'a parser -> 'a parser lazy_t -> 'a parser
 
 val ( <$ ) : 'a -> 'b parser -> 'a parser
 val ( $> ) : 'a parser -> 'b -> 'b parser

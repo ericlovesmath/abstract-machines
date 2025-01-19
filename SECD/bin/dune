@@ -1,4 +1,4 @@
 (executable
  (public_name SECD)
  (name main)
- (libraries SECD))
+ (libraries lib))

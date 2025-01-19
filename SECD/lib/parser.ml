@@ -65,16 +65,16 @@ let charP c = satisfy (( = ) c)
 let stringP st = seq (List.map charP st)
 
 (* Tests *)
-let _ =
-  let run (p : char list parser) (str : string) = 
-    match p (explode str) with
-    | Some (res, rem) -> Printf.printf "Result: %s, Remain: %s\n" (implode res) (implode rem)
-    | None -> Printf.printf "Parser failed\n"
-  in
-  let _ =
-    let p = stringP (explode "hello") <|> stringP (explode "world") in
-    run p "hello world";
-    run p "world hello";
-    run p "worl fails";
-  in
-  ()
+(* let _ = *)
+(*   let run (p : char list parser) (str : string) =  *)
+(*     match p (explode str) with *)
+(*     | Some (res, rem) -> Printf.printf "Result: %s, Remain: %s\n" (implode res) (implode rem) *)
+(*     | None -> Printf.printf "Parser failed\n" *)
+(*   in *)
+(*   let _ = *)
+(*     let p = stringP (explode "hello") <|> stringP (explode "world") in *)
+(*     run p "hello world"; *)
+(*     run p "world hello"; *)
+(*     run p "worl fails"; *)
+(*   in *)
+(*   () *)
