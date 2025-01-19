@@ -1,5 +1,6 @@
 (tests
   (names
     secd_test
-    parser_test)
+    parser_test
+    intro_test)
   (libraries lib))
