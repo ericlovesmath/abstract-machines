@@ -1,6 +1,6 @@
 open Parser
 
-type prim = Add | Sub | Mul | Div
+type prim = Add | Sub | Mul | Div | Cons | Car | Cdr
 
 type t =
   | Nil
@@ -16,6 +16,9 @@ let primP =
   <|> (Prim Sub <$ charP '-')
   <|> (Prim Mul <$ charP '*')
   <|> (Prim Div <$ charP '/')
+  <|> (Prim Cons <$ stringP (explode "cons"))
+  <|> (Prim Car <$ stringP (explode "car"))
+  <|> (Prim Cdr <$ stringP (explode "cdr"))
 
 (** alphabetic followed by (possibly multiple) ' *)
 let variableP =
@@ -36,23 +39,35 @@ let integerP =
   in
   (fun v -> Int v) <$> (int_of_string <$> (implode <$> numP))
 
-let atomP = nilP <|> integerP <|> primP <|> variableP
+let rec introP st = (nilP <|> integerP <|> primP <|> variableP <|> callP <|> listP) st
 
-let listPT p =
-  let strip p = many (charP ' ') *> p <* many (charP ' ') in
-  let spaces = many1 (charP ' ') in
-  charP '(' *> (strip (sepBy1 spaces p)) <* charP ')'
-
-let rec callP st =
+and callP st =
+  let listPT p =
+    let strip p = many (charP ' ') *> p <* many (charP ' ') in
+    let spaces = many1 (charP ' ') in
+    charP '(' *> (strip (sepBy1 spaces p)) <* charP ')'
+  in
   let call_of_list = function
     | [] -> failwith "unreachable: sepBy1 used in listPT"
     | [e] -> e
     | e :: es -> Call (e, es)
   in
-  (call_of_list <$> listPT (atomP <|> callP)) st
+  (call_of_list <$> listPT introP) st
+
+(* Syntactic Sugar for Lists *)
+and listP st =
+  let strip p = many (charP ' ') *> p <* many (charP ' ') in
+  let brackets p = charP '[' *> strip p <* charP ']' in
+  let spaces = many1 (charP ' ') in
+  let symlistP = brackets (sepBy spaces (introP)) in
+  let rec ast_of_list = function
+    | [] -> Nil
+    | x :: xs -> Call (Prim Cons, [x; ast_of_list xs])
+  in 
+  (ast_of_list <$> symlistP) st
 
 let parse s =
-  match callP (explode s) with
+  match introP (explode s) with
   | None -> None
   | Some (_, _ :: _) -> None
   | Some (res, []) -> Some res
@@ -66,3 +81,6 @@ let rec pp = function
   | Prim Sub -> "#-"
   | Prim Mul -> "#*"
   | Prim Div -> "#/"
+  | Prim Cons -> "#cons"
+  | Prim Car -> "#car"
+  | Prim Cdr -> "#cdr"

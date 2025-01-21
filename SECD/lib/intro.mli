@@ -1,4 +1,4 @@
-type prim = Add | Sub | Mul | Div
+type prim = Add | Sub | Mul | Div | Cons | Car | Cdr
 
 type t =
   | Nil

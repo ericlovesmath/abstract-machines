@@ -10,5 +10,8 @@ let flatten (ast : Intro.t) : SECD.instr list =
     | Prim Sub -> SUB :: acc
     | Prim Mul -> MUL :: acc
     | Prim Div -> DIV :: acc
+    | Prim Cons -> CONS :: acc
+    | Prim Car -> CAR :: acc
+    | Prim Cdr -> CDR :: acc
   in
   aux [] ast
