@@ -58,17 +58,21 @@ let listPT (p : 'a parser) (left : char) (right : char) : 'a list parser =
 let rec introP st = (nilP <|> integerP <|> primP <|> variableP <|> callP <|> listP) st
 
 and callP st =
+  let string_of_var = function
+    | Var v -> v
+    | _ -> failwith "Intro.callP: Expected vars in lambda args"
+  in
   let call_of_list = function
     | [] -> failwith "unreachable: sepBy1 used in listPT"
     | [e] -> e
     | [Var "lambda"; Var v; b] -> Lambda ([v], b)
     | [Var "lambda"; Call (v, vs); b] ->
-        let string_of_var = function
-          | Var v -> v
-          | _ -> failwith "Intro.callP: Expected vars in lambda args"
-        in
-        Lambda (List.map string_of_var (v :: vs), b)  (* TODO: Has to be better solution *)
-    | [Var "if"; c; t; f] -> If (c, t, f)  (* TODO: Has to be better solution *)
+        Lambda (List.map string_of_var (v :: vs), b)
+    | [Var "let"; Var v; bind; body] -> Call (Lambda ([v], body), [bind])
+    | [Var "let"; Call (Var f, args); bind; body] ->
+        let args = List.map string_of_var args in
+        Call (Lambda ([f], body), [Lambda (args, bind)])
+    | [Var "if"; c; t; f] -> If (c, t, f)
     | e :: es -> Call (e, es)
   in
   (call_of_list <$> listPT introP '(' ')') st
