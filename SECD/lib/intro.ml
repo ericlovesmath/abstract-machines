@@ -1,11 +1,15 @@
 open Parser
 
-type prim = Add | Sub | Mul | Div | Cons | Car | Cdr
+type prim =
+  | Atom | Cons | Cdr | Car
+  | Add | Sub | Mul | Div
+  | Eq | Gt | Lt | Ge | Le
 
 type t =
   | Nil
   | Int of int
   | Var of string
+  | If of t * t * t
   | Call of t * t list
   | Prim of prim
 
@@ -16,9 +20,15 @@ let primP =
   <|> (Prim Sub <$ charP '-')
   <|> (Prim Mul <$ charP '*')
   <|> (Prim Div <$ charP '/')
+  <|> (Prim Atom <$ stringP (explode "atom"))
   <|> (Prim Cons <$ stringP (explode "cons"))
   <|> (Prim Car <$ stringP (explode "car"))
   <|> (Prim Cdr <$ stringP (explode "cdr"))
+  <|> (Prim Eq <$ charP '=')
+  <|> (Prim Lt <$ charP '<')
+  <|> (Prim Gt <$ charP '>')
+  <|> (Prim Le <$ stringP (explode "<="))
+  <|> (Prim Ge <$ stringP (explode ">="))
 
 (** alphabetic followed by (possibly multiple) ' *)
 let variableP =
@@ -50,6 +60,7 @@ and callP st =
   let call_of_list = function
     | [] -> failwith "unreachable: sepBy1 used in listPT"
     | [e] -> e
+    | [Var "if"; c; t; f] -> If (c, t, f)  (* TODO: Has to be better solution *)
     | e :: es -> Call (e, es)
   in
   (call_of_list <$> listPT introP) st
@@ -76,11 +87,18 @@ let rec pp = function
   | Nil -> "nil"
   | Int i -> string_of_int i
   | Var v -> v
+  | If (c, t, f) -> "(" ^ pp c ^ " ? " ^ pp t ^ " : " ^ pp f ^ ")"
   | Call (e, es) -> pp e ^ "(" ^ String.concat ", " (List.map pp es) ^ ")"
   | Prim Add -> "#+"
   | Prim Sub -> "#-"
   | Prim Mul -> "#*"
   | Prim Div -> "#/"
+  | Prim Atom -> "#atom"
   | Prim Cons -> "#cons"
   | Prim Car -> "#car"
   | Prim Cdr -> "#cdr"
+  | Prim Eq -> "#="
+  | Prim Lt -> "#<"
+  | Prim Gt -> "#>"
+  | Prim Le -> "#<="
+  | Prim Ge -> "#>="
