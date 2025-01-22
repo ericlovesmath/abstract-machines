@@ -1,1 +1,1 @@
-val flatten : Intro.t -> SECD.instr list
+val flatten : Assign.t -> SECD.instr list

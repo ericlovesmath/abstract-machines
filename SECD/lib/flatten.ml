@@ -1,18 +1,16 @@
-let flatten (ast : Intro.t) : SECD.instr list =
-  let rec aux (acc : SECD.instr list) (ast : Intro.t) : SECD.instr list=
+let flatten (ast : Assign.t) : SECD.instr list =
+  let rec aux (acc : SECD.instr list) (ast : Assign.t) : SECD.instr list=
     match ast with
     | Nil -> NIL :: acc
     | Int i -> LDC :: Int i :: acc
     | If (c, t, f) -> aux (SEL :: List (aux [JOIN] t) :: List (aux [JOIN] f) :: acc) c
     | Call (Prim _ as prim, xs) -> List.fold_left aux (aux acc prim) xs
 
-    (* TODO: For now, assume its all lambda functions applied
-       and that variables aren't ever enclosed. And they have one arg. *)
     | Call (f, xs) ->
         let acc = aux (AP :: acc) f in
         NIL :: List.fold_left (fun acc x -> aux (CONS :: acc) x) acc xs
-    | Lambda (_, b) -> LDF :: List (aux [RTN] b) :: acc
-    | Var _ -> LD :: Int 0 :: Int 0 :: acc
+    | Lambda b -> LDF :: List (aux [RTN] b) :: acc
+    | Loc (x, y) -> LD :: Int x :: Int y :: acc
 
     | Prim Add -> ADD :: acc
     | Prim Sub -> SUB :: acc

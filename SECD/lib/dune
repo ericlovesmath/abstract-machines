@@ -1,5 +1,5 @@
 (library
   (name lib)
   (modules
-    parser intro flatten SECD
+    parser intro assign flatten SECD
     compile sexp))

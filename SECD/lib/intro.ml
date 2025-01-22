@@ -10,7 +10,7 @@ type t =
   | Int of int
   | Var of string
   | If of t * t * t
-  | Lambda of t list * t
+  | Lambda of string list * t
   | Call of t * t list
   | Prim of prim
 
@@ -50,22 +50,28 @@ let integerP =
   in
   (fun v -> Int v) <$> (int_of_string <$> (implode <$> numP))
 
+let listPT (p : 'a parser) (left : char) (right : char) : 'a list parser =
+  let strip p = many (charP ' ') *> p <* many (charP ' ') in
+  let spaces = many1 (charP ' ') in
+  charP left *> (strip (sepBy1 spaces p)) <* charP right
+
 let rec introP st = (nilP <|> integerP <|> primP <|> variableP <|> callP <|> listP) st
 
 and callP st =
-  let listPT p =
-    let strip p = many (charP ' ') *> p <* many (charP ' ') in
-    let spaces = many1 (charP ' ') in
-    charP '(' *> (strip (sepBy1 spaces p)) <* charP ')'
-  in
   let call_of_list = function
     | [] -> failwith "unreachable: sepBy1 used in listPT"
     | [e] -> e
-    | [Var "lambda"; Var v; b] -> Lambda ([Var v], b)  (* TODO: Has to be better solution *)
+    | [Var "lambda"; Var v; b] -> Lambda ([v], b)
+    | [Var "lambda"; Call (v, vs); b] ->
+        let string_of_var = function
+          | Var v -> v
+          | _ -> failwith "Intro.callP: Expected vars in lambda args"
+        in
+        Lambda (List.map string_of_var (v :: vs), b)  (* TODO: Has to be better solution *)
     | [Var "if"; c; t; f] -> If (c, t, f)  (* TODO: Has to be better solution *)
     | e :: es -> Call (e, es)
   in
-  (call_of_list <$> listPT introP) st
+  (call_of_list <$> listPT introP '(' ')') st
 
 (* Syntactic Sugar for Lists *)
 and listP st =
@@ -91,7 +97,7 @@ let rec pp = function
   | Var v -> v
   | If (c, t, f) -> "(" ^ pp c ^ " ? " ^ pp t ^ " : " ^ pp f ^ ")"
   | Call (e, es) -> pp e ^ "(" ^ String.concat ", " (List.map pp es) ^ ")"
-  | Lambda (args, b) -> "(" ^ String.concat ", " (List.map pp args) ^ " -> " ^ pp b ^ ")"
+  | Lambda (args, b) -> "(" ^ String.concat ", " args ^ " -> " ^ pp b ^ ")"
   | Prim Add -> "#+"
   | Prim Sub -> "#-"
   | Prim Mul -> "#*"
