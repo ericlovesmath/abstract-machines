@@ -1,10 +1,17 @@
-type value = List of value list | Int of int | Bool of bool
 type instr =
-  | NIL | LDC | LD | Int of int | List of instr list
+  | NIL | LDC | LD
+  | Int of int | List of instr list
   | SEL | JOIN
+  | LDF | AP | RTN
   | ATOM | CONS | CDR | CAR
   | ADD | SUB | MUL | DIV
   | EQ | GT | LT | GE | LE
+
+type value =
+  | List of value list
+  | Int of int
+  | Bool of bool
+  | Func of instr list * value list list
 
 type dump =
   | Stack of value list
@@ -25,7 +32,8 @@ let is_atomic (value : value) =
   match value with
   | Int _
   | Bool _ -> true
-  | List _ -> false
+  | List _
+  | Func _ -> false
 
 (* TODO: This is slow as it is not an array, I think *)
 let locate (x : int) (y : int) (env : value list list) : value =
@@ -63,6 +71,13 @@ let eval_step (state : t) : t =
   | Bool false :: s', _, SEL :: _ :: List f :: c', _  -> { stack = s'; env; code = f; dump = (Code c') :: dump }
   | _, _, JOIN :: _, Code c' :: d'                    -> { stack; env; code = c'; dump = d' }
 
+  (* Functions *)
+  | _, _, LDF :: List f :: c', _ -> { stack = Func (f, env) :: stack; env; code = c'; dump }
+  | Func (f, _) :: List v :: s', _, AP :: c', _ ->
+      { stack = []; env = v :: env; code = f; dump = Stack s' :: Env env :: Code c' :: dump }
+  | x :: _, _, RTN :: [], Stack s :: Env e :: Code c :: d ->
+      { stack = x :: s; env = e; code = c; dump = d }
+
   | _ -> failwith "SECD.eval_step: Unimplemented or Compiler Error"
 
 
@@ -77,3 +92,4 @@ let rec string_of_value (v : value) : string =
   | List vs -> "[" ^ String.concat " " (List.map string_of_value vs) ^ "]"
   | Int n -> string_of_int n
   | Bool b -> string_of_bool b
+  | Func _ -> "<func>"

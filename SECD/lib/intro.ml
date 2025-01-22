@@ -10,6 +10,7 @@ type t =
   | Int of int
   | Var of string
   | If of t * t * t
+  | Lambda of t list * t
   | Call of t * t list
   | Prim of prim
 
@@ -60,6 +61,7 @@ and callP st =
   let call_of_list = function
     | [] -> failwith "unreachable: sepBy1 used in listPT"
     | [e] -> e
+    | [Var "lambda"; Var v; b] -> Lambda ([Var v], b)  (* TODO: Has to be better solution *)
     | [Var "if"; c; t; f] -> If (c, t, f)  (* TODO: Has to be better solution *)
     | e :: es -> Call (e, es)
   in
@@ -89,6 +91,7 @@ let rec pp = function
   | Var v -> v
   | If (c, t, f) -> "(" ^ pp c ^ " ? " ^ pp t ^ " : " ^ pp f ^ ")"
   | Call (e, es) -> pp e ^ "(" ^ String.concat ", " (List.map pp es) ^ ")"
+  | Lambda (args, b) -> "(" ^ String.concat ", " (List.map pp args) ^ " -> " ^ pp b ^ ")"
   | Prim Add -> "#+"
   | Prim Sub -> "#-"
   | Prim Mul -> "#*"

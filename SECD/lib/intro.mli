@@ -8,6 +8,7 @@ type t =
   | Int of int
   | Var of string
   | If of t * t * t
+  | Lambda of t list * t
   | Call of t * t list
   | Prim of prim
 
