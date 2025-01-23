@@ -2,4 +2,4 @@
   (name lib)
   (modules
     parser intro assign flatten SECD
-    compile sexp))
+    compile))

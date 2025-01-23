@@ -14,46 +14,39 @@ type t =
   | Call of t * t list
   | Prim of prim
 
-let nilP = Nil <$ stringP (explode "nil")
+let nilP = Nil <$ stringP "nil"
 
 let primP =
   (Prim Add <$ charP '+')
   <|> (Prim Sub <$ charP '-')
   <|> (Prim Mul <$ charP '*')
   <|> (Prim Div <$ charP '/')
-  <|> (Prim Atom <$ stringP (explode "atom"))
-  <|> (Prim Cons <$ stringP (explode "cons"))
-  <|> (Prim Car <$ stringP (explode "car"))
-  <|> (Prim Cdr <$ stringP (explode "cdr"))
+  <|> (Prim Atom <$ stringP "atom")
+  <|> (Prim Cons <$ stringP "cons")
+  <|> (Prim Car <$ stringP "car")
+  <|> (Prim Cdr <$ stringP "cdr")
   <|> (Prim Eq <$ charP '=')
   <|> (Prim Lt <$ charP '<')
   <|> (Prim Gt <$ charP '>')
-  <|> (Prim Le <$ stringP (explode "<="))
-  <|> (Prim Ge <$ stringP (explode ">="))
+  <|> (Prim Le <$ stringP "<=")
+  <|> (Prim Ge <$ stringP ">=")
 
 (** alphabetic followed by (possibly multiple) ' *)
 let variableP =
-  let is_alpha c = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') in
-  let alphaP = many1 (satisfy is_alpha) in
-  let primeP = many (charP '\'') in
-  let keywordP = ( @ ) <$> alphaP <*> primeP in
+  let keywordP = ( @ ) <$> alphaP <*> many (charP '\'') in
   (fun v -> Var v) <$> (implode <$> keywordP)
 
 (** numeric, possibly preceeded by +/- *)
 let integerP =
-  let is_numeric c = (c >= '0' && c <= '9') in
-  let unsignedP = many1 (satisfy is_numeric) in
   let numP =
-    unsignedP
-      <|> (List.cons <$> charP '-' <*> unsignedP)
-      <|> (List.cons <$> charP '+' <*> unsignedP)
+    numericP
+      <|> (List.cons <$> charP '-' <*> numericP)
+      <|> (List.cons <$> charP '+' <*> numericP)
   in
   (fun v -> Int v) <$> (int_of_string <$> (implode <$> numP))
 
 let listPT (p : 'a parser) (left : char) (right : char) : 'a list parser =
-  let strip p = many (charP ' ') *> p <* many (charP ' ') in
-  let spaces = many1 (charP ' ') in
-  charP left *> (strip (sepBy1 spaces p)) <* charP right
+  charP left *> strip (sepBy1 spacesP p) <* charP right
 
 let rec introP st = (nilP <|> integerP <|> primP <|> variableP <|> callP <|> listP) st
 
@@ -65,29 +58,29 @@ and callP st =
   let call_of_list = function
     | [] -> failwith "unreachable: sepBy1 used in listPT"
     | [e] -> e
-    | [Var "lambda"; Var v; b] -> Lambda ([v], b)
+
+    | [Var "lambda"; Var v; b] ->
+        Lambda ([v], b)
     | [Var "lambda"; Call (v, vs); b] ->
         Lambda (List.map string_of_var (v :: vs), b)
-    | [Var "let"; Var v; bind; body] -> Call (Lambda ([v], body), [bind])
+
+    | [Var "let"; Var v; bind; body] ->
+        Call (Lambda ([v], body), [bind])
     | [Var "let"; Call (Var f, args); bind; body] ->
-        let args = List.map string_of_var args in
-        Call (Lambda ([f], body), [Lambda (args, bind)])
+        Call (Lambda ([f], body), [Lambda (List.map string_of_var args, bind)])
+
     | [Var "if"; c; t; f] -> If (c, t, f)
+
     | e :: es -> Call (e, es)
   in
   (call_of_list <$> listPT introP '(' ')') st
 
 (* Syntactic Sugar for Lists *)
 and listP st =
-  let strip p = many (charP ' ') *> p <* many (charP ' ') in
-  let brackets p = charP '[' *> strip p <* charP ']' in
-  let spaces = many1 (charP ' ') in
-  let symlistP = brackets (sepBy spaces (introP)) in
-  let rec ast_of_list = function
-    | [] -> Nil
-    | x :: xs -> Call (Prim Cons, [x; ast_of_list xs])
+  let ast_of_list es =
+    List.fold_right (fun x acc -> Call (Prim Cons, [x; acc])) es Nil
   in 
-  (ast_of_list <$> symlistP) st
+  (ast_of_list <$> listPT introP '[' ']') st
 
 let parse s =
   match introP (explode s) with

@@ -64,4 +64,16 @@ let satisfy (pred : char -> bool) : char parser =
     | _ -> None
 
 let charP c = satisfy (( = ) c)
-let stringP st = seq (List.map charP st)
+let stringP st = seq (List.map charP (explode st))
+
+let alphaP =
+  let is_alpha c = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') in
+  many1 (satisfy is_alpha)
+
+let numericP =
+  let is_numeric c = (c >= '0' && c <= '9') in
+  many1 (satisfy is_numeric)
+
+let emptyP = charP ' ' <|> charP '\n' <|> charP '\t'
+let strip p = many emptyP *> p <* many emptyP
+let spacesP = many1 emptyP

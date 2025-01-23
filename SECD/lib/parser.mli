@@ -24,4 +24,9 @@ val sepBy1 : 'a parser -> 'b parser -> 'b list parser
 
 val satisfy : (char -> bool) -> char parser
 val charP : char -> char parser
-val stringP : char list -> char list parser
+val stringP : string -> char list parser
+val alphaP : char list parser
+val numericP : char list parser
+
+val strip : 'a parser -> 'a parser
+val spacesP : char list parser
