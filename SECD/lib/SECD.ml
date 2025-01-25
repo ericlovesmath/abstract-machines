@@ -60,11 +60,11 @@ let eval_step (state : t) : t =
   | Int n :: Int n' :: s', _, SUB :: c', _ -> simpl c' (Int (n - n') :: s')
   | Int n :: Int n' :: s', _, MUL :: c', _ -> simpl c' (Int (n * n') :: s')
   | Int n :: Int n' :: s', _, DIV :: c', _ -> simpl c' (Int (n / n') :: s')
-  | Int n :: Int n' :: s', _, EQ :: c', _  -> simpl c' (Bool (n = n') :: s')
   | Int n :: Int n' :: s', _, LT :: c', _  -> simpl c' (Bool (n < n') :: s')
   | Int n :: Int n' :: s', _, GT :: c', _  -> simpl c' (Bool (n > n') :: s')
   | Int n :: Int n' :: s', _, LE :: c', _  -> simpl c' (Bool (n <= n') :: s')
   | Int n :: Int n' :: s', _, GE :: c', _  -> simpl c' (Bool (n >= n') :: s')
+  | x :: y :: s', _, EQ :: c', _           -> simpl c' (Bool (x = y) :: s')
 
   (* If branching *)
   | Bool true :: s', _, SEL :: List t :: _ :: c', _   -> { stack = s'; env; code = t; dump = (Code c') :: dump }
@@ -73,8 +73,8 @@ let eval_step (state : t) : t =
 
   (* Functions *)
   | _, _, LDF :: List f :: c', _ -> { stack = Func (f, env) :: stack; env; code = c'; dump }
-  | Func (f, _) :: List v :: s', _, AP :: c', _ ->
-      { stack = []; env = v :: env; code = f; dump = Stack s' :: Env env :: Code c' :: dump }
+  | Func (f, e') :: List v :: s', _, AP :: c', _ ->
+      { stack = []; env = v :: e'; code = f; dump = Stack s' :: Env env :: Code c' :: dump }
   | x :: _, _, RTN :: [], Stack s :: Env e :: Code c :: d ->
       { stack = x :: s; env = e; code = c; dump = d }
 
