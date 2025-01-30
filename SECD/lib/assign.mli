@@ -7,4 +7,5 @@ type t =
   | Call of t * t list
   | Prim of Intro.prim
 
+(** Replaces [Var v] with [Loc x y] in the SECD Env stack *)
 val assign_vars : Intro.t -> t

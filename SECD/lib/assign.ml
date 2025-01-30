@@ -7,10 +7,11 @@ type t =
   | Call of t * t list
   | Prim of Intro.prim
 
+(** Searches [locs] env to find indicies of [var] *)
 let locate (locs : string list list) (var : string) : t =
   let rec aux locs x =
     match locs with
-    | [] -> failwith "Flatten.locate: Unassigned variable"
+    | [] -> failwith "Assign.locate: Unassigned variable"
     | loc :: locs' ->
         match List.find_index (( = ) var) loc with
         | None -> aux locs' (x + 1)

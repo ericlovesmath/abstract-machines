@@ -16,6 +16,7 @@ type t =
 
 let nilP = Nil <$ stringP "nil"
 
+(** primitives (reserved keywords) *)
 let primP =
   (Prim Add <$ charP '+')
   <|> (Prim Sub <$ charP '-')
@@ -50,6 +51,7 @@ let listPT (p : 'a parser) (left : char) (right : char) : 'a list parser =
 
 let rec introP st = (nilP <|> integerP <|> primP <|> variableP <|> callP <|> listP) st
 
+(** lambdas, let bindings, and calls *)
 and callP st =
   let string_of_var = function
     | Var v -> v
@@ -63,11 +65,15 @@ and callP st =
         Lambda ([v], b)
     | [Var "lambda"; Call (v, vs); b] ->
         Lambda (List.map string_of_var (v :: vs), b)
+    | Var "lambda" :: _ ->
+        failwith "Intro.parse: `lambda` has incorrect form"
 
     | [Var "let"; Var v; bind; body] ->
         Call (Lambda ([v], body), [bind])
     | [Var "let"; Call (Var f, args); bind; body] ->
         Call (Lambda ([f], body), [Lambda (List.map string_of_var args, bind)])
+    | Var "let" :: _ ->
+        failwith "Intro.parse: `let` has incorrect form"
 
     | [Var "if"; c; t; f] -> If (c, t, f)
 
@@ -75,7 +81,7 @@ and callP st =
   in
   (call_of_list <$> listPT introP '(' ')') st
 
-(* Syntactic Sugar for Lists *)
+(** parses syntactic sugar for lists *)
 and listP st =
   let ast_of_list es =
     List.fold_right (fun x acc -> Call (Prim Cons, [x; acc])) es Nil
@@ -83,7 +89,7 @@ and listP st =
   (ast_of_list <$> listPT introP '[' ']') st
 
 let parse s =
-  match introP (explode s) with
+  match (strip introP) (explode s) with
   | None -> None
   | Some (_, _ :: _) -> None
   | Some (res, []) -> Some res

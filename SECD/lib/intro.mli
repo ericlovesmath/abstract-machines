@@ -12,5 +12,8 @@ type t =
   | Call of t * t list
   | Prim of prim
 
+(** Parses string [s] into [Intro.t] S-exp, assumes one expression only *)
 val parse : string -> t option
+
+(** Converts [Intro.t] to string for pretty printing purposes *)
 val pp : t -> string
