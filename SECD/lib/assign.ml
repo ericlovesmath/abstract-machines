@@ -5,13 +5,15 @@ type t =
   | If of t * t * t
   | Lambda of t
   | Call of t * t list
+  | CallRec of string * t * t list
+  | Rec
   | Prim of Intro.prim
 
 (** Searches [locs] env to find indicies of [var] *)
 let locate (locs : string list list) (var : string) : t =
   let rec aux locs x =
     match locs with
-    | [] -> failwith "Assign.locate: Unassigned variable"
+    | [] -> Rec
     | loc :: locs' ->
         match List.find_index (( = ) var) loc with
         | None -> aux locs' (x + 1)
@@ -29,5 +31,6 @@ let assign_vars (ast : Intro.t) : t =
     | Prim f -> Prim f
     | Lambda (args, b) -> Lambda (aux (args :: locs) b)
     | Call (f, args) -> Call (aux locs f, List.map (aux locs) args)
+    | LetRec (fname, f, args) -> CallRec (fname, aux locs f, List.map (aux locs) args)
   in
   aux [] ast

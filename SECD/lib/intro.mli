@@ -10,6 +10,7 @@ type t =
   | If of t * t * t
   | Lambda of string list * t
   | Call of t * t list
+  | LetRec of string * t * t list
   | Prim of prim
 
 (** Parses string [s] into [Intro.t] S-exp, assumes one expression only *)
