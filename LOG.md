@@ -25,12 +25,12 @@
 
 * Update SECD REPL to support loading files and multiline input
 * Set up README's and LOG
+* Adding Documentation
+* Give up on SECD letrec (partial implementation in branch)
+* Adding `.src` files for testing
 
 ## TODO
 
-* Adding Documentation
-* Adding `.src` files for testing
-* Add `letrec` support / tail call optimization with `DUM`/`RAP`
 * Add top level defines
 * Work on CEK implementation
 
