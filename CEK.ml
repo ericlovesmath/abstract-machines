@@ -94,7 +94,10 @@ let genvar () =
   counter := !counter + 1;
   v
 
+(** Convert [e] to A-Normal Form *)
 let anf (e : t) : t =
+
+  (** CPS Style convert [e] to atomic value, then continue [k] *)
   let rec atomize (e : t) (k : t -> t) : t =
     anf' e (fun e ->
       if is_atomic e
@@ -103,6 +106,9 @@ let anf (e : t) : t =
           let var = genvar () in
           Let (var, e, k (Var var)))
 
+  (** Monadic Binding for Continuation Passing Style *)
+  and ( let* ) e k = atomize e (fun e' -> k e')
+
   and anf' (e : t) (k : t -> t) : t =
     match e with
     | Int _
@@ -110,38 +116,39 @@ let anf (e : t) : t =
     | Var _ -> k e
 
     | Add (e, e') ->
-        atomize e (fun e ->
-          atomize e' (fun e' ->
-            k (Add (e, e'))))
+        let* e = e in
+        let* e' = e' in
+        k (Add (e, e'))
 
     | Let (v, bind, e) ->
-        atomize bind (fun e ->
-          k (Let (v, e, anf' e Fun.id)))
+        let* bind = bind in
+        k (Let (v, bind, anf' e Fun.id))
 
     | Lt (e, e') ->
-        atomize e (fun e ->
-          atomize e' (fun e' ->
-            k (Lt (e, e'))))
+        let* e = e in
+        let* e' = e' in
+        k (Lt (e, e'))
 
     | If (c, t, f) ->
-        atomize c (fun c ->
-          If (c, anf' t k, anf' f k))
+        let* c = c in
+        If (c, anf' t k, anf' f k)
 
     | Fn (params, b) ->
         k (Fn (params, anf' b Fun.id))
 
     | Call (f, args) ->
-        let rec atomize_args args k =
+        (** CPS Binding for [atomize] on list of elements *)
+        let rec ( let+ ) args k =
           match args with
           | [] -> k []
           | h :: t ->
-              atomize h (fun h ->
-                atomize_args t (fun t ->
-                  k (h :: t)))
+              let* h = h in
+              let+ t = t in
+              k (h :: t)
         in
-        atomize f (fun f ->
-          atomize_args args (fun args ->
-            k (Call (f, args))))
+        let* f = f in
+        let+ args = args in
+        k (Call (f, args))
   in
   anf' e Fun.id
 
@@ -159,3 +166,8 @@ let () =
 
   test @@ anf @@
     Let ("x", Int 5, Add (Add (Var "x", Int 3), Var "x"));
+  test @@ anf @@
+    Add (Add (Add (Int 1, Add (Int 5, Int 6)), Add (Int 3, Int 4)), Int 3);
+  test @@ anf @@
+    Call (If (Lt (Int 1, Int 2), Fn (["x"; "y"], Add (Var "x", Add (Var "y", Int 5))), Var "err"),
+        [Add (Add (Int 1, Int 3), Int 6); Int 3]);;
