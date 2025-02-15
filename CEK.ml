@@ -89,53 +89,61 @@ let is_atomic (e : t) : bool =
 
 let counter = ref 0
 
-let make_atomic (e : t) (k : t -> t) : t =
-  if is_atomic e
-    then k e
-    else
-      let var = "$tmp" ^ string_of_int !counter in
-      Let (var, e, k (Var var))
-
-(** TODO: Pull out `atom` so its typed well *)
+let genvar () =
+  let v = "$tmp" ^ string_of_int !counter in
+  counter := !counter + 1;
+  v
 
 let anf (e : t) : t =
-  let rec aux (e : t) (k : t -> t) : t =
+  let rec atomize (e : t) (k : t -> t) : t =
+    anf' e (fun e ->
+      if is_atomic e
+        then k e
+        else
+          let var = genvar () in
+          Let (var, e, k (Var var)))
+
+  and anf' (e : t) (k : t -> t) : t =
     match e with
     | Int _
     | Bool _
-    | Var _ -> e
+    | Var _ -> k e
 
-    | Add (e1, e2) ->
-        aux e1 (fun e1' ->
-          make_atomic e1' (fun v1 ->
-            aux e2 (fun e2' ->
-              make_atomic e2' (fun v2 ->
-                Add (v1, v2)))))
+    | Add (e, e') ->
+        atomize e (fun e ->
+          atomize e' (fun e' ->
+            k (Add (e, e'))))
 
-    | Lt (e1, e2) ->
-        aux e1 (fun e1' ->
-          make_atomic e1' (fun v1 ->
-            aux e2 (fun e2' ->
-              make_atomic e2' (fun v2 ->
-                Lt (v1, v2)))))
+    | Let (v, bind, e) ->
+        atomize bind (fun e ->
+          k (Let (v, e, anf' e Fun.id)))
 
-    | Let (x, e1, e2) ->
-        aux e1 (fun e1' ->
-          Let (x, e1', aux e2 Fun.id))
+    | Lt (e, e') ->
+        atomize e (fun e ->
+          atomize e' (fun e' ->
+            k (Lt (e, e'))))
 
-    | If (cond, then_expr, else_expr) ->
-        aux cond (fun cond' ->
-          make_atomic cond' (fun v ->
-            If (v,
-               aux then_expr Fun.id,
-               aux else_expr Fun.id)))
+    | If (c, t, f) ->
+        atomize c (fun c ->
+          If (c, anf' t k, anf' f k))
 
-    | Fn (params, body) ->
-        Fn (params, aux body Fun.id)
+    | Fn (params, b) ->
+        k (Fn (params, anf' b Fun.id))
 
-    | Call(fn, args) -> failwith "TODO: help me Call ANF"
+    | Call (f, args) ->
+        let rec atomize_args args k =
+          match args with
+          | [] -> k []
+          | h :: t ->
+              atomize h (fun h ->
+                atomize_args t (fun t ->
+                  k (h :: t)))
+        in
+        atomize f (fun f ->
+          atomize_args args (fun args ->
+            k (Call (f, args))))
   in
-  aux e Fun.id
+  anf' e Fun.id
 
 (* TESTING CODE *)
 
