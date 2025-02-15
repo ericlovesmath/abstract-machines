@@ -1,0 +1,4 @@
+(executable
+ (public_name CEK)
+ (name main)
+ (libraries lib))

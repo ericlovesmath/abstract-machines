@@ -1,0 +1,13 @@
+(lang dune 3.17)
+
+(name CEK)
+
+(generate_opam_files true)
+
+(source
+ (github ericlovesmath/abstract-machines))
+
+(package
+ (name CEK)
+ (synopsis "CEK Compiler")
+ (depends ocaml))

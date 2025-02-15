@@ -1,0 +1,10 @@
+21
+
+(let (compose f g)
+    (lambda x (f (g x)))
+
+  (let f (compose
+    (lambda x (+ x 1))
+    (lambda x (* x 2)))
+
+  (f 10)))

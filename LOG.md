@@ -34,13 +34,16 @@
 * CEK Machine Lambda Calculus interpreter
 * Fix `dune test`
 
+# Week 6
+
+* CPS style ANF conversion
+* CEK Minimal front end to compilation pipeline working
+
 ## TODO
 
 * Add top level defines
-* Work on CEK implementation
 * Add `Debug` tool, printing each step when compiled.
 * Fix `letrec` for SECD
-* Integrate CEK, and implement frontend
 
 ## Long Term TODO
 
