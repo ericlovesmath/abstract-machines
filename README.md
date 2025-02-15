@@ -10,4 +10,4 @@ Instructions (execute inside folder for any `<machine>`)
 
 - REPL: `dune exec <machine>` (Suggested to run with [rlwrap](https://github.com/hanslub42/rlwrap) for convenience)
 - Interactive Shell: `dune utop`, then `open Lib;;`
-- Tests: `dune test`
+- Tests: `dune clean && dune build && dune test`
