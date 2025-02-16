@@ -1,14 +1,21 @@
 type t =
   | Int of int
   | Bool of bool
-  | Add of t * t
-  | Lt of t * t
   | Var of string
   | Let of string * t * t
   | If of t * t * t
   | Fn of string list * t
   | Rec of string * string list * t
   | Call of t * t list
+  | Add of t * t
+  | Sub of t * t
+  | Mul of t * t
+  | Div of t * t
+  | Lt of t * t
+  | Gt of t * t
+  | Le of t * t
+  | Ge of t * t
+  | Eq of t * t
 
 type value = Int of int | Bool of bool | Closure of t * env ref
 and env = (string * value) list
@@ -23,11 +30,7 @@ let eval_atomic (e : t) (env : env) : value =
   | Fn _ -> Closure (e, ref env)
   | Rec _ -> Closure (e, ref env)
   | Var v -> List.assoc v env
-  | Add _ -> failwith "eval_atomic: Expected atomic expression, not Add"
-  | Lt _ -> failwith "eval_atomic: Expected atomic expression, not Lt"
-  | Let _ -> failwith "eval_atomic: Expected atomic expression, not Let"
-  | If _ -> failwith "eval_atomic: Expected atomic expression, not If"
-  | Call _ -> failwith "eval_atomic: Expected atomic expression, not Call"
+  | _ -> failwith "eval_atomic: Expected atomic expression"
 
 let apply_kont (k : kont) (v : value) : cek =
   match k with
@@ -35,30 +38,21 @@ let apply_kont (k : kont) (v : value) : cek =
   | LetKont (s, e, c, k) -> Running (c, (s, v) :: e, k)
 
 let eval_step (c : t) (env : env) (k : kont) : cek =
+  let make_int_binop f e e' =
+    (match (eval_atomic e env, eval_atomic e' env) with
+      | Int n, Int m -> apply_kont k (f n m)
+      | _ -> failwith "eval_step: Prim called on non-integer arguments")
+  in
   match c with
   | Int _
   | Bool _
   | Fn _
   | Var _ -> apply_kont k (eval_atomic c env)
-  | Add (e, e') ->
-      begin
-        match (eval_atomic e env, eval_atomic e' env) with
-        | Int n, Int m -> apply_kont k (Int (n + m))
-        | _ -> failwith "eval_step: `Add` called on non-integer arguments"
-      end
-  | Lt (e, e') ->
-      begin
-        match (eval_atomic e env, eval_atomic e' env) with
-        | Int n, Int m -> apply_kont k (Bool (n < m))
-        | _ -> failwith "eval_step: `Lt` called on non-integer arguments"
-      end
   | If (cond, t, f) ->
-      begin
-        match eval_atomic cond env with
+      (match eval_atomic cond env with
         | Bool true -> Running (t, env, k)
         | Bool false -> Running (f, env, k)
-        | _ -> failwith "eval_step: `If` given non-boolean condition"
-      end
+        | _ -> failwith "eval_step: `If` given non-boolean condition")
   | Let (s, bind, e) -> Running (bind, env, LetKont (s, env, e, k))
 
   | Rec (f, es, body) ->
@@ -68,13 +62,22 @@ let eval_step (c : t) (env : env) (k : kont) : cek =
       apply_kont k closure
 
   | Call (f, es) ->
-      begin
-         match eval_atomic f env with
+      (match eval_atomic f env with
         | Closure (Fn (ss, body), envref) ->
             let vs = List.map (fun v -> eval_atomic v env) es in
             Running (body, List.combine ss vs @ !envref, k)
-        | _ -> failwith "eval_step: Attempted to `Call` non-function value"
-      end
+        | _ -> failwith "eval_step: Attempted to `Call` non-function value")
+
+  | Add (e, e') -> make_int_binop (fun x y -> Int (x + y)) e e'
+  | Sub (e, e') -> make_int_binop (fun x y -> Int (x - y)) e e'
+  | Mul (e, e') -> make_int_binop (fun x y -> Int (x * y)) e e'
+  | Div (e, e') -> make_int_binop (fun x y -> Int (x / y)) e e'
+  | Lt (e, e')  -> make_int_binop (fun x y -> Bool (x < y)) e e'
+  | Gt (e, e')  -> make_int_binop (fun x y -> Bool (x > y)) e e'
+  | Le (e, e')  -> make_int_binop (fun x y -> Bool (x <= y)) e e'
+  | Ge (e, e')  -> make_int_binop (fun x y -> Bool (x >= y)) e e'
+  | Eq (e, e')  -> apply_kont k (Bool (eval_atomic e env = eval_atomic e' env))
+
 
 let eval (code : t) : value =
   let rec aux state =

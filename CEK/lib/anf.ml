@@ -10,7 +10,7 @@ let genvar () =
 let is_atomic (e : t) : bool =
   match e with
   | Int _ | Bool _ | Var _ | Fn _ -> true
-  | Add _ | Lt _ | Let _ | If _ | Call _ | Rec _-> false
+  | _ -> false
 
 let anf (e : t) : t =
 
@@ -27,24 +27,19 @@ let anf (e : t) : t =
   and ( let* ) e k = atomize e (fun e' -> k e')
 
   and anf' (e : t) (k : t -> t) : t =
+    let make_binop cons e e' =
+      let* e = e in
+      let* e' = e' in
+      k (cons e e')
+    in
     match e with
     | Int _
     | Bool _
     | Var _ -> k e
 
-    | Add (e, e') ->
-        let* e = e in
-        let* e' = e' in
-        k (Add (e, e'))
-
     | Let (v, bind, e) ->
         let* bind = bind in
         k (Let (v, bind, anf' e Fun.id))
-
-    | Lt (e, e') ->
-        let* e = e in
-        let* e' = e' in
-        k (Lt (e, e'))
 
     | If (c, t, f) ->
         let* c = c in
@@ -69,6 +64,16 @@ let anf (e : t) : t =
         let* f = f in
         let+ args = args in
         k (Call (f, args))
+
+    | Add (e, e') -> make_binop (fun x y -> Add (x, y)) e e'
+    | Sub (e, e') -> make_binop (fun x y -> Sub (x, y)) e e'
+    | Mul (e, e') -> make_binop (fun x y -> Mul (x, y)) e e'
+    | Div (e, e') -> make_binop (fun x y -> Div (x, y)) e e'
+    | Lt (e, e') -> make_binop (fun x y -> Lt (x, y)) e e'
+    | Gt (e, e') -> make_binop (fun x y -> Gt (x, y)) e e'
+    | Le (e, e') -> make_binop (fun x y -> Le (x, y)) e e'
+    | Ge (e, e') -> make_binop (fun x y -> Ge (x, y)) e e'
+    | Eq (e, e') -> make_binop (fun x y -> Eq (x, y)) e e'
   in
   anf' e Fun.id
 

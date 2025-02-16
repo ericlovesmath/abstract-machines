@@ -1,14 +1,21 @@
 type t =
   | Int of int
   | Bool of bool
-  | Add of t * t
-  | Lt of t * t
   | Var of string
   | Let of string * t * t
   | If of t * t * t
   | Fn of string list * t
   | Rec of string * string list * t
   | Call of t * t list
+  | Add of t * t
+  | Sub of t * t
+  | Mul of t * t
+  | Div of t * t
+  | Lt of t * t
+  | Gt of t * t
+  | Le of t * t
+  | Ge of t * t
+  | Eq of t * t
 
 type value
 
