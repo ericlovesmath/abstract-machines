@@ -15,7 +15,7 @@ let make_binop (cons : t -> t -> t) : t =
 
 let rec parse (e : Intro.t) : CEK.t =
   match e with
-  | Nil -> failwith "TODO"
+  | Nil -> Nil
   | Int n -> Int n
   | Var v -> Var v
   | If (c, t, f) -> If (parse c, parse t, parse f)
@@ -26,11 +26,18 @@ let rec parse (e : Intro.t) : CEK.t =
   | Call (Prim Sub, [e; e']) -> Sub (parse e, parse e')
   | Call (Prim Div, [e; e']) -> Div (parse e, parse e')
   | Call (Prim Mul, [e; e']) -> Mul (parse e, parse e')
+
   | Call (Prim Lt, [e; e']) -> Lt (parse e, parse e')
   | Call (Prim Gt, [e; e']) -> Gt (parse e, parse e')
   | Call (Prim Le, [e; e']) -> Le (parse e, parse e')
   | Call (Prim Ge, [e; e']) -> Ge (parse e, parse e')
   | Call (Prim Eq, [e; e']) -> Eq (parse e, parse e')
+
+  | Call (Prim Atom, [e])     -> Atom (parse e)
+  | Call (Prim Cons, [e; e']) -> Cons (parse e, parse e')
+  | Call (Prim Car, [e])      -> Car (parse e)
+  | Call (Prim Cdr, [e])      -> Cdr (parse e)
+
   | Call (Prim _, _) -> failwith "Parse.parse: Unexpected call of Prim"
   | Call (f, es) -> Call (parse f, List.map parse es)
 
@@ -38,6 +45,7 @@ let rec parse (e : Intro.t) : CEK.t =
   | Prim Sub -> make_binop (fun x y -> Sub (x, y))
   | Prim Div -> make_binop (fun x y -> Div (x, y))
   | Prim Mul -> make_binop (fun x y -> Mul (x, y))
+
   | Prim Lt -> make_binop (fun x y -> Lt (x, y))
   | Prim Gt -> make_binop (fun x y -> Gt (x, y))
   | Prim Le -> make_binop (fun x y -> Le (x, y))

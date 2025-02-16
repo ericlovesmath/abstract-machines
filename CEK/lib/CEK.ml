@@ -1,4 +1,5 @@
 type t =
+  | Nil
   | Int of int
   | Bool of bool
   | Var of string
@@ -7,17 +8,28 @@ type t =
   | Fn of string list * t
   | Rec of string * string list * t
   | Call of t * t list
+
+  | Atom of t
+  | Cons of t * t
+  | Cdr of t
+  | Car of t
+
   | Add of t * t
   | Sub of t * t
   | Mul of t * t
   | Div of t * t
+
   | Lt of t * t
   | Gt of t * t
   | Le of t * t
   | Ge of t * t
   | Eq of t * t
 
-type value = Int of int | Bool of bool | Closure of t * env ref
+type value =
+  | Int of int
+  | Bool of bool
+  | List of value list
+  | Closure of t * env ref
 and env = (string * value) list
 
 type kont = LetKont of string * env * t * kont | Halt
@@ -25,6 +37,7 @@ type cek = Running of t * env * kont | Done of value
 
 let eval_atomic (e : t) (env : env) : value =
   match e with
+  | Nil -> List []
   | Int n -> Int n
   | Bool b -> Bool b
   | Fn _ -> Closure (e, ref env)
@@ -44,6 +57,7 @@ let eval_step (c : t) (env : env) (k : kont) : cek =
       | _ -> failwith "eval_step: Prim called on non-integer arguments")
   in
   match c with
+  | Nil
   | Int _
   | Bool _
   | Fn _
@@ -72,11 +86,32 @@ let eval_step (c : t) (env : env) (k : kont) : cek =
   | Sub (e, e') -> make_int_binop (fun x y -> Int (x - y)) e e'
   | Mul (e, e') -> make_int_binop (fun x y -> Int (x * y)) e e'
   | Div (e, e') -> make_int_binop (fun x y -> Int (x / y)) e e'
+
   | Lt (e, e')  -> make_int_binop (fun x y -> Bool (x < y)) e e'
   | Gt (e, e')  -> make_int_binop (fun x y -> Bool (x > y)) e e'
   | Le (e, e')  -> make_int_binop (fun x y -> Bool (x <= y)) e e'
   | Ge (e, e')  -> make_int_binop (fun x y -> Bool (x >= y)) e e'
   | Eq (e, e')  -> apply_kont k (Bool (eval_atomic e env = eval_atomic e' env))
+
+  | Atom e ->
+      let b =
+        match eval_atomic e env with
+        | Int _ | Bool _ -> true
+        | Closure _ | List _ -> false
+      in
+      apply_kont k (Bool b)
+  | Cons (e, e') ->
+    (match (eval_atomic e env, eval_atomic e' env) with
+      | x, List xs -> apply_kont k (List (x :: xs))
+      | _ -> failwith "eval_step: Cons failed")
+  | Car e ->
+    (match eval_atomic e env with
+      | List (h :: _) -> apply_kont k h
+      | _ -> failwith "eval_step: Car failed")
+  | Cdr e ->
+    (match eval_atomic e env with
+      | List (_ :: tl) -> apply_kont k (List tl)
+      | _ -> failwith "eval_step: Cdr failed")
 
 
 let eval (code : t) : value =
@@ -87,9 +122,12 @@ let eval (code : t) : value =
   in
   aux (Running (code, [], Halt))
 
-let string_of_value (v : value) : string =
+let rec string_of_value (v : value) : string =
   match v with
   | Int n -> string_of_int n
   | Bool b -> string_of_bool b
+  | List [] -> "nil"
+  | List vs ->
+      "[" ^ String.concat " " (List.map string_of_value vs) ^ "]"
   | Closure (_, envref) ->
       "Closure in (" ^ String.concat " " (List.map fst !envref) ^ ")"

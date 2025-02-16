@@ -1,4 +1,5 @@
 type t =
+  | Nil
   | Int of int
   | Bool of bool
   | Var of string
@@ -7,10 +8,17 @@ type t =
   | Fn of string list * t
   | Rec of string * string list * t
   | Call of t * t list
+
+  | Atom of t
+  | Cons of t * t
+  | Cdr of t
+  | Car of t
+
   | Add of t * t
   | Sub of t * t
   | Mul of t * t
   | Div of t * t
+
   | Lt of t * t
   | Gt of t * t
   | Le of t * t

@@ -9,7 +9,7 @@ let genvar () =
 
 let is_atomic (e : t) : bool =
   match e with
-  | Int _ | Bool _ | Var _ | Fn _ -> true
+  | Nil | Int _ | Bool _ | Var _ | Fn _ -> true
   | _ -> false
 
 let anf (e : t) : t =
@@ -33,6 +33,7 @@ let anf (e : t) : t =
       k (cons e e')
     in
     match e with
+    | Nil
     | Int _
     | Bool _
     | Var _ -> k e
@@ -69,11 +70,17 @@ let anf (e : t) : t =
     | Sub (e, e') -> make_binop (fun x y -> Sub (x, y)) e e'
     | Mul (e, e') -> make_binop (fun x y -> Mul (x, y)) e e'
     | Div (e, e') -> make_binop (fun x y -> Div (x, y)) e e'
+
     | Lt (e, e') -> make_binop (fun x y -> Lt (x, y)) e e'
     | Gt (e, e') -> make_binop (fun x y -> Gt (x, y)) e e'
     | Le (e, e') -> make_binop (fun x y -> Le (x, y)) e e'
     | Ge (e, e') -> make_binop (fun x y -> Ge (x, y)) e e'
     | Eq (e, e') -> make_binop (fun x y -> Eq (x, y)) e e'
+
+    | Atom e -> let* e = e in k (Atom e)
+    | Cons (e, e') -> make_binop (fun x y -> Cons (x, y)) e e'
+    | Car e -> let* e = e in k (Car e)
+    | Cdr e -> let* e = e in k (Cdr e)
   in
   anf' e Fun.id
 
