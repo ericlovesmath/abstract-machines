@@ -8,6 +8,7 @@ let rec parse (e : Intro.t) : CEK.t =
   | Var v -> Var v
   | If (c, t, f) -> If (parse c, parse t, parse f)
   | Lambda (args, body) -> Fn (args, parse body)
+  | LambdaRec (f, args, body) -> Rec (f, args, parse body)
   | Call (f, es) -> Call (parse f, List.map parse es)
   | Prim Add -> Fn (["!x"; "!y"], Add (Var "!x", Var "!y"))
   | Prim Lt -> Fn (["!x"; "!y"], Lt (Var "!x", Var "!y"))

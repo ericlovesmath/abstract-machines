@@ -9,6 +9,7 @@ type t =
   | Var of string
   | If of t * t * t
   | Lambda of string list * t
+  | LambdaRec of string * string list * t
   | Call of t * t list
   | Prim of prim
 

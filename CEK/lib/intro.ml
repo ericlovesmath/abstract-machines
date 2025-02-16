@@ -11,6 +11,7 @@ type t =
   | Var of string
   | If of t * t * t
   | Lambda of string list * t
+  | LambdaRec of string * string list * t
   | Call of t * t list
   | Prim of prim
 
@@ -75,6 +76,11 @@ and callP st =
     | Var "let" :: _ ->
         failwith "Intro.parse: `let` has incorrect form"
 
+    | [Var "letrec"; Call (Var f, args); bind; body] ->
+        Call (Lambda ([f], body), [LambdaRec (f, List.map string_of_var args, bind)])
+    | Var "letrec" :: _ ->
+        failwith "Intro.parse: `letrec` has incorrect form"
+
     | [Var "if"; c; t; f] -> If (c, t, f)
 
     | e :: es -> Call (e, es)
@@ -101,6 +107,7 @@ let rec pp = function
   | If (c, t, f) -> "(" ^ pp c ^ " ? " ^ pp t ^ " : " ^ pp f ^ ")"
   | Call (e, es) -> pp e ^ "(" ^ String.concat ", " (List.map pp es) ^ ")"
   | Lambda (args, b) -> "(" ^ String.concat ", " args ^ " -> " ^ pp b ^ ")"
+  | LambdaRec (_, args, b) -> "(" ^ String.concat ", " args ^ " -> " ^ pp b ^ ")"
   | Prim Add -> "#+"
   | Prim Sub -> "#-"
   | Prim Mul -> "#*"

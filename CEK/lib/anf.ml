@@ -10,7 +10,7 @@ let genvar () =
 let is_atomic (e : t) : bool =
   match e with
   | Int _ | Bool _ | Var _ | Fn _ -> true
-  | Add _ | Lt _ | Let _ | If _ | Call _ -> false
+  | Add _ | Lt _ | Let _ | If _ | Call _ | Rec _-> false
 
 let anf (e : t) : t =
 
@@ -52,6 +52,9 @@ let anf (e : t) : t =
 
     | Fn (params, b) ->
         k (Fn (params, anf' b Fun.id))
+
+    | Rec (f, params, b) ->
+        k (Rec (f, params, anf' b Fun.id))
 
     | Call (f, args) ->
         (* CPS Binding for [atomize] on list of elements *)
