@@ -38,12 +38,21 @@
 
 * CPS style ANF conversion
 * CEK Minimal front end to compilation pipeline working
+* Native `letrec` for CEK Machine
+* Support for first-class primitives avoiding slow abstractions
+* Add debug printing script for CEK
 
 ## TODO
+
+* Fix bad code and ADT names
+* Add comments (lambda-sigma calculus)
+* Add comment parser
+* Add more tests (like nested letrec or mutual recursion)
 
 * Add top level defines
 * Add `Debug` tool, printing each step when compiled.
 * Fix `letrec` for SECD
+* Integrate CEK and SECD as modules together to one file
 
 ## Long Term TODO
 
