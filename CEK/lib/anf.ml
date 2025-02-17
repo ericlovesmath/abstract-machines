@@ -48,7 +48,6 @@ let anf (e : t) : t =
 
     | Fn (params, b) ->
         k (Fn (params, anf' b Fun.id))
-
     | Rec (f, params, b) ->
         k (Rec (f, params, anf' b Fun.id))
 
@@ -83,25 +82,3 @@ let anf (e : t) : t =
     | Cdr e -> let* e = e in k (Cdr e)
   in
   anf' e Fun.id
-
-(* TESTING CODE *)
-
-(*
-let () =
-  let test code = print_endline (string_of_val (eval code)) in
-  test @@ Lt (Int 3, Int 4);
-  test @@ If (Bool true, Int 5, Int 5);
-  test @@ Call (Fn (["x"; "y"], Add (Var "x", Var "y")), [Int 2; Int 3]);
-
-  (** A-Normal Form assumed *)
-  test @@ Let ("x", Lt (Int 8, Int 4), If (Var "x", Int 5, Int 6));
-  test @@ Let ("x", Int 5, Let ("tmp", Add (Var "x", Int 3), Add (Var "tmp", Var "x")));
-
-  test @@ anf @@
-    Let ("x", Int 5, Add (Add (Var "x", Int 3), Var "x"));
-  test @@ anf @@
-    Add (Add (Add (Int 1, Add (Int 5, Int 6)), Add (Int 3, Int 4)), Int 3);
-  test @@ anf @@
-    Call (If (Lt (Int 1, Int 2), Fn (["x"; "y"], Add (Var "x", Add (Var "y", Int 5))), Var "err"),
-        [Add (Add (Int 1, Int 3), Int 6); Int 3]);;
-*)

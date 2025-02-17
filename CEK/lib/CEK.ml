@@ -96,7 +96,7 @@ let eval_step (c : t) (env : env) (k : kont) : cek =
   | Atom e ->
       let b =
         match eval_atomic e env with
-        | Int _ | Bool _ -> true
+        | Int _ | Bool _ | List [] -> true
         | Closure _ | List _ -> false
       in
       apply_kont k (Bool b)

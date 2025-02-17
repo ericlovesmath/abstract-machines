@@ -1,4 +1,13 @@
-[6 10 14]
+[3628800 [6 10 14] [4 23 840]]
+
+[
+
+(letrec (f x)
+    (if (< x 1)
+        1
+        (* (f (- x 1)) x))
+    (f 10))
+
 
 (letrec (map f xs)
  (if (= xs nil)
@@ -8,3 +17,19 @@
 (let (double x) (* x 2)
 
 (map double [3 5 7])))
+
+
+(letrec (fold f init xs)
+ (if (= xs nil)
+   init
+   (f (car xs) (fold f init (cdr xs))))
+
+(let (len xs) (fold (lambda (x acc) (+ acc 1)) 0 xs)
+(let (sum xs) (fold (lambda (x acc) (+ acc x)) 0 xs)
+(let (prod xs) (fold (lambda (x acc) (* acc x)) 1 xs)
+
+(let list [3 5 7 8]
+
+[(len list) (sum list) (prod list)] )))))
+
+]

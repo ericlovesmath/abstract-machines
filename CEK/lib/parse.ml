@@ -52,4 +52,7 @@ let rec parse (e : Intro.t) : CEK.t =
   | Prim Ge -> make_binop (fun x y -> Ge (x, y))
   | Prim Eq -> make_binop (fun x y -> Eq (x, y))
 
-  | Prim _ -> failwith "TODO"
+  | Prim Atom -> let x = genvar () in Fn ([x], Atom (Var x))
+  | Prim Cons -> make_binop (fun x y -> Cons (x, y))
+  | Prim Car  -> let x = genvar () in Fn ([x], Car (Var x))
+  | Prim Cdr  -> let x = genvar () in Fn ([x], Cdr (Var x))
