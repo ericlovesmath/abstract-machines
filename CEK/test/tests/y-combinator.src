@@ -1,4 +1,4 @@
-120
+// OUTPUT: 120
 
 (let Y
   (lambda (f)

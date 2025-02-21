@@ -1,7 +1,4 @@
-[3628800 [6 10 14] [4 23 840]]
-
-[
-
+// OUTPUT: 3628800
 (letrec (f x)
     (if (< x 1)
         1
@@ -9,6 +6,7 @@
     (f 10))
 
 
+// OUTPUT: [6 10 14]
 (letrec (map f xs)
  (if (= xs nil)
    nil
@@ -19,6 +17,7 @@
 (map double [3 5 7])))
 
 
+// OUTPUT: [4 23 840]
 (letrec (fold f init xs)
  (if (= xs nil)
    init
@@ -31,5 +30,3 @@
 (let list [3 5 7 8]
 
 [(len list) (sum list) (prod list)] )))))
-
-]

@@ -4,4 +4,4 @@
 
 (tests
   (names compile_test)
-  (libraries lib))
+  (libraries lib str))

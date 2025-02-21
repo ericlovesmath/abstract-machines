@@ -1,9 +1,10 @@
-[11 13 10]
+// OUTPUT: 11
+((lambda x (+ x 1)) 10)
 
-[
-  ((lambda x (+ x 1)) 10)
-  (let x (+ (let x 3 (+ x x)) 7) x)
-  (let (add x y)
-        (+ x y)
-        (add 7 3))
-]
+// OUTPUT: 13
+(let x (+ (let x 3 (+ x x)) 7) x)
+
+// OUTPUT: 10
+(let (add x y)
+    (+ x y)
+    (add 7 3))

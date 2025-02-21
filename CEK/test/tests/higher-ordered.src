@@ -1,18 +1,16 @@
-[21 [8 2]]
+// OUTPUT: 21
+(let (compose f g)
+    (lambda x (f (g x)))
 
-[
-    (let (compose f g)
-        (lambda x (f (g x)))
+  (let f (compose
+    (lambda x (+ x 1))
+    (lambda x (* x 2)))
 
-      (let f (compose
-        (lambda x (+ x 1))
-        (lambda x (* x 2)))
-
-      (f 10)))
+  (f 10)))
 
 
-    (let (dual switch)
-        (if (= switch 0) + -)
+// OUTPUT: [8 2]
+(let (dual switch)
+    (if (= switch 0) + -)
 
-    [((dual 0) 5 3) ((dual 1) 5 3)])
-]
+[((dual 0) 5 3) ((dual 1) 5 3)])
