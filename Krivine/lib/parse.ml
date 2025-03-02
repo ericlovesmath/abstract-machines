@@ -1,6 +1,13 @@
 open Intro
 open Krivine
 
+let y_combinator =
+  Lambda
+    ( "f",
+      App
+        ( Lambda ("x", App (Var "f", App (Var "x", Var "x"))),
+          Lambda ("x", App (Var "f", App (Var "x", Var "x"))) ) )
+
 let rec parse (e : Intro.t) : Krivine.t =
   match e with
   | Nil -> Nil
@@ -9,12 +16,12 @@ let rec parse (e : Intro.t) : Krivine.t =
   | If (c, t, f) -> If (parse c, parse t, parse f)
 
   | Lambda (args, body) -> List.fold_right (fun arg acc -> Lambda (arg, acc)) args (parse body)
-  (* | Lambda (args, body) -> Lambda (List.nth args 0, parse body)  (* TODO *) *)
 
-  | LambdaRec _ -> failwith "TODO"
+  (* TODO: Native binding isn't working for some reason *)
+  | LambdaRec (f, args, body) ->
+      App (y_combinator, Lambda (f, parse (Lambda (args, body))))
 
   | Call (f, es) -> List.fold_left (fun acc arg -> App (acc, parse arg)) (parse f) es
-  (* | Call (f, es) -> App (parse f, parse (List.nth es 0))  (* TODO *) *)
 
   | Prim Add -> Add
   | Prim Sub -> Sub
@@ -22,9 +29,9 @@ let rec parse (e : Intro.t) : Krivine.t =
   | Prim Mul -> Mul
 
   | Prim Lt -> Lt
-  | Prim Gt -> failwith "TODO"
-  | Prim Le -> failwith "TODO"
-  | Prim Ge -> failwith "TODO"
+  | Prim Gt -> Gt
+  | Prim Le -> Le
+  | Prim Ge -> Ge
   | Prim Eq -> Eq
 
   | Prim Atom -> IsEmpty

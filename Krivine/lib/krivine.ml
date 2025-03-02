@@ -6,7 +6,7 @@ type t =
   | Bool of bool
   | If of t * t * t
   | Add | Sub | Mul | Div
-  | Eq | Lt
+  | Eq | Lt | Gt | Le | Ge
   | Nil | Cons | Head | Tail | IsEmpty
 
 type closure =
@@ -18,7 +18,8 @@ type closure =
   | PrimOp of prim_op
 
 and prim_op =
-  | PAdd | PSub | PMul | PDiv | PEq | PLt
+  | PAdd | PSub | PMul | PDiv
+  | PEq | PLt | PGt | PLe | PGe
   | PCons | PHead | PTail | PIsEmpty
 
 let rec eval clos stack =
@@ -51,6 +52,9 @@ let rec eval clos stack =
       | Div -> eval (PrimOp PDiv) stack
       | Eq -> eval (PrimOp PEq) stack
       | Lt -> eval (PrimOp PLt) stack
+      | Gt -> eval (PrimOp PGt) stack
+      | Le -> eval (PrimOp PLe) stack
+      | Ge -> eval (PrimOp PGe) stack
       | If (cond, t1, t2) ->
           (match eval (Closure (cond, env)) [] with
           | BoolVal true -> eval (Closure (t1, env)) stack
@@ -77,7 +81,7 @@ let rec eval clos stack =
       | PCons, [a; b] -> ListCons (a, b)
       | PHead, [lst] ->
           force_list lst
-            (fun car _ -> car)
+            (fun car _ -> force car)
             (fun () -> failwith "Head of empty list")
       | PTail, [lst] ->
           force_list lst
@@ -92,6 +96,9 @@ let rec eval clos stack =
       | PMul, [a; b] -> IntVal (force_int a * force_int b)
       | PDiv, [a; b] -> IntVal (force_int a / force_int b)
       | PLt, [a; b] -> BoolVal (force_int a < force_int b)
+      | PGt, [a; b] -> BoolVal (force_int a > force_int b)
+      | PLe, [a; b] -> BoolVal (force_int a <= force_int b)
+      | PGe, [a; b] -> BoolVal (force_int a >= force_int b)
       | PEq, [a; b] ->
           (match force a, force b with
            | IntVal a, IntVal b -> BoolVal (a = b)
