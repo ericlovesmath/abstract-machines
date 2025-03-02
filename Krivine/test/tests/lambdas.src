@@ -1,0 +1,10 @@
+// OUTPUT: 11
+((lambda x (+ x 1)) 10)
+
+// OUTPUT: 13
+(let x (+ (let x 3 (+ x x)) 7) x)
+
+// OUTPUT: 10
+(let (add x y)
+    (+ x y)
+    (add 7 3))
