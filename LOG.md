@@ -42,20 +42,29 @@
 * Support for first-class primitives avoiding slow abstractions
 * Add debug printing script for CEK
 
+# Week 7
+
+* Refactor testing error messages, adding tests that expect failure
+* Krivine Minimal Implementation
+* TODO SECD
+
 ## TODO
+
+* SECD Debug and Fix
+* Refactor everything
+* Read Krivine
 
 * Fix bad code and ADT names
 * Add comments (lambda-sigma calculus)
-* Add comment parser
 * Add more tests (like nested letrec or mutual recursion)
 
 * Add top level defines
-* Add `Debug` tool, printing each step when compiled.
 * Fix `letrec` for SECD
 * Integrate CEK and SECD as modules together to one file
 
 ## Long Term TODO
 
 * Add more syntactic sugar
+* Add comment parser
 * Typechecking and Error handling
 * Generalize tests for different machines
