@@ -46,13 +46,16 @@
 
 * Refactor testing error messages, adding tests that expect failure
 * Krivine Minimal Implementation
-* TODO SECD
+* Sanity testing Krivine machine is lazy and handles infinite lists
+* Write Krivine Frontend
+* Write tests for infinite lists!
+* Recursion (with Y-combinator, but tail recursive)
 
 ## TODO
 
 * SECD Debug and Fix
 * Refactor everything
-* Read Krivine
+* Refactor Krivine
 
 * Fix bad code and ADT names
 * Add comments (lambda-sigma calculus)

@@ -76,6 +76,8 @@ and callP st =
     | Var "let" :: _ ->
         failwith "Intro.parse: `let` has incorrect form"
 
+    | [Var "letrec"; Var v; bind; body] ->
+        Call (Lambda ([v], body), [LambdaRec (v, [], bind)])
     | [Var "letrec"; Call (Var f, args); bind; body] ->
         Call (Lambda ([f], body), [LambdaRec (f, List.map string_of_var args, bind)])
     | Var "letrec" :: _ ->
