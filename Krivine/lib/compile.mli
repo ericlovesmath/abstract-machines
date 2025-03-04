@@ -1,2 +1,2 @@
-(** Reads program as string, runs compiler and simulates using CEK *)
-val execute : string -> Krivine.closure
+(** Reads program as string, runs compiler and simulates using Krivine *)
+val execute : string -> Krivine.value

@@ -2,127 +2,115 @@ type t =
   | Var of string
   | Lambda of string * t
   | App of t * t
+  | Nil
   | Int of int
   | Bool of bool
   | If of t * t * t
-  | Add | Sub | Mul | Div
-  | Eq | Lt | Gt | Le | Ge
-  | Nil | Cons | Head | Tail | IsEmpty
+  | Prim of Intro.prim
 
-type closure =
-  | Closure of t * (string * closure) list
+type value =
+  | Closure of t * (string * value) list
   | IntVal of int
   | BoolVal of bool
   | ListNil
-  | ListCons of closure * closure
-  | PrimOp of prim_op
+  | ListCons of value * value
+  | PrimOp of Intro.prim
 
-and prim_op =
-  | PAdd | PSub | PMul | PDiv
-  | PEq | PLt | PGt | PLe | PGe
-  | PCons | PHead | PTail | PIsEmpty
-
-let rec eval clos stack =
-  match clos with
+let rec reduce value args =
+  match value with
   | IntVal _
   | BoolVal _
   | ListNil
   | ListCons _ ->
-      if stack = [] then clos else failwith "Value used as function"
+      if args = [] then value
+      else failwith "Krivine.reduce: Attempted to reduce normal form term"
 
   | Closure (t, env) ->
       (match t with
-      | Var x -> eval (List.assoc x env) stack
-      | Lambda (x, t_body) ->
-          (match stack with
-           | arg :: stack' -> eval (Closure (t_body, (x, arg) :: env)) stack'
-           | [] -> clos)
-      | App (t1, t2) ->
-          eval (Closure (t1, env)) (Closure (t2, env) :: stack)
-      | Int n -> eval (IntVal n) stack
-      | Bool b -> eval (BoolVal b) stack
-      | Nil -> eval ListNil stack
-      | Cons -> eval (PrimOp PCons) stack
-      | Head -> eval (PrimOp PHead) stack
-      | Tail -> eval (PrimOp PTail) stack
-      | IsEmpty -> eval (PrimOp PIsEmpty) stack
-      | Add -> eval (PrimOp PAdd) stack
-      | Sub -> eval (PrimOp PSub) stack
-      | Mul -> eval (PrimOp PMul) stack
-      | Div -> eval (PrimOp PDiv) stack
-      | Eq -> eval (PrimOp PEq) stack
-      | Lt -> eval (PrimOp PLt) stack
-      | Gt -> eval (PrimOp PGt) stack
-      | Le -> eval (PrimOp PLe) stack
-      | Ge -> eval (PrimOp PGe) stack
-      | If (cond, t1, t2) ->
-          (match eval (Closure (cond, env)) [] with
-          | BoolVal true -> eval (Closure (t1, env)) stack
-          | BoolVal false -> eval (Closure (t2, env)) stack
-          | _ -> failwith "Non-boolean in if condition"))
+      | Nil    -> reduce ListNil args
+      | Int n  -> reduce (IntVal n) args
+      | Bool b -> reduce (BoolVal b) args
+      | Prim p -> reduce (PrimOp p) args
+      | Var v  ->
+          (match List.assoc_opt v env with
+          | Some v' -> reduce v' args
+          | None -> failwith ("Krivine.reduce: `" ^ v ^ "` missing binding"))
+      | Lambda (x, b) ->
+          (match args with
+           | [] -> value
+           | arg :: args' -> reduce (Closure (b, (x, arg) :: env)) args')
+      | App (f, x) ->
+          reduce (Closure (f, env)) (Closure (x, env) :: args)
+      | If (c, t, f) ->
+          (match reduce (Closure (c, env)) [] with
+          | BoolVal true -> reduce (Closure (t, env)) args
+          | BoolVal false -> reduce (Closure (f, env)) args
+          | _ -> failwith "Krivine.reduce: Non-boolean in `if` condition"))
 
   | PrimOp op ->
-      let force closure = eval closure [] in
+      let force closure = reduce closure [] in
 
       let force_int n =
         match force n with
         | IntVal n -> n
-        | _ -> failwith "Expected integer"
+        | _ -> failwith "Krivine.reduce: Expected list in HNF"
       in
 
       let force_list xs kcons knil =
         match force xs with
         | ListCons (car, cdr) -> kcons car cdr
         | ListNil -> knil ()
-        | _ -> failwith "Expected list"
+        | _ -> failwith "Krivine.reduce: Expected list in HNF"
       in
 
-      (match op, stack with
-      | PCons, [a; b] -> ListCons (a, b)
-      | PHead, [lst] ->
-          force_list lst
+      (match op, args with
+      | Add, [x; y] -> IntVal (force_int x + force_int y)
+      | Sub, [x; y] -> IntVal (force_int x - force_int y)
+      | Mul, [x; y] -> IntVal (force_int x * force_int y)
+      | Div, [x; y] -> IntVal (force_int x / force_int y)
+
+      | Lt,  [x; y] -> BoolVal (force_int x < force_int y)
+      | Gt,  [x; y] -> BoolVal (force_int x > force_int y)
+      | Le,  [x; y] -> BoolVal (force_int x <= force_int y)
+      | Ge,  [x; y] -> BoolVal (force_int x >= force_int y)
+      | Eq,  [x; y] ->
+          (match force x, force y with
+           | IntVal x, IntVal y   -> BoolVal (x = y)
+           | BoolVal x, BoolVal y -> BoolVal (x = y)
+           | _ -> failwith "Krivine.reduce: `=` expects integers or bools")
+
+      | Cons, [h; t] -> ListCons (h, t)
+      | Car, [l] ->
+          force_list l
             (fun car _ -> force car)
-            (fun () -> failwith "Head of empty list")
-      | PTail, [lst] ->
-          force_list lst
+            (fun () -> failwith "Krivine.reduce: Called `car` of `nil`")
+      | Cdr, [l] ->
+          force_list l
             (fun _ cdr -> force cdr)
-            (fun () -> failwith "Tail of empty list")
-      | PIsEmpty, [lst] ->
-          force_list lst
+            (fun () -> failwith "Krivine.reduce: Called `cdr` of `nil`")
+      | Atom, [l] ->
+          force_list l
             (fun _ _ -> BoolVal false)
             (fun () -> BoolVal true)
-      | PAdd, [a; b] -> IntVal (force_int a + force_int b)
-      | PSub, [a; b] -> IntVal (force_int a - force_int b)
-      | PMul, [a; b] -> IntVal (force_int a * force_int b)
-      | PDiv, [a; b] -> IntVal (force_int a / force_int b)
-      | PLt, [a; b] -> BoolVal (force_int a < force_int b)
-      | PGt, [a; b] -> BoolVal (force_int a > force_int b)
-      | PLe, [a; b] -> BoolVal (force_int a <= force_int b)
-      | PGe, [a; b] -> BoolVal (force_int a >= force_int b)
-      | PEq, [a; b] ->
-          (match force a, force b with
-           | IntVal a, IntVal b -> BoolVal (a = b)
-           | BoolVal a, BoolVal b -> BoolVal (a = b)
-           | _ -> failwith "Eq expects two integers or bools")
-      | _ -> failwith @@ "Invalid primitive operation" ^
-          string_of_int (List.length stack))
 
-let result term = eval (Closure (term, [])) []
+      | _ -> failwith "Krivine.reduce: Invalid primitive operation usage")
 
-let rec force closure =
-  match closure with
+let eval code = reduce (Closure (code, [])) []
+
+let rec force value =
+  match value with
   | IntVal _
   | BoolVal _
   | PrimOp _
-  | ListNil -> closure
-  | ListCons (hd, tl) -> ListCons (force hd, force tl)
-  | Closure (t, env) -> force (eval (Closure (t, env)) [])
+  | ListNil -> value
+  | ListCons (h, t) -> ListCons (force h, force t)
+  | Closure (t, env) -> force (reduce (Closure (t, env)) [])
 
-let rec string_of_value closure =
-  match closure with
+let rec string_of_value value =
+  match value with
   | IntVal i -> string_of_int i
   | BoolVal b -> string_of_bool b
   | PrimOp _ -> "Primitive Function"
   | ListNil -> "nil"
-  | ListCons (hd, tl) -> string_of_value (force hd) ^ " :: " ^ string_of_value (force tl)
+  | ListCons (h, t) -> string_of_value h ^ " :: " ^ string_of_value t
   | Closure _ -> "Closure"

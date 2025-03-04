@@ -2,31 +2,25 @@ type t =
   | Var of string
   | Lambda of string * t
   | App of t * t
+  | Nil
   | Int of int
   | Bool of bool
   | If of t * t * t
-  | Add | Sub | Mul | Div
-  | Eq | Lt | Gt | Le | Ge
-  | Nil | Cons | Head | Tail | IsEmpty
+  | Prim of Intro.prim
 
-type closure =
-  | Closure of t * (string * closure) list
+type value =
+  | Closure of t * (string * value) list
   | IntVal of int
   | BoolVal of bool
   | ListNil
-  | ListCons of closure * closure
-  | PrimOp of prim_op
-
-and prim_op =
-  | PAdd | PSub | PMul | PDiv
-  | PEq | PLt | PGt | PLe | PGe
-  | PCons | PHead | PTail | PIsEmpty
+  | ListCons of value * value
+  | PrimOp of Intro.prim
 
 (** Evaluate using Krivine Machine, result in WHNF *)
-val result : t -> closure
+val eval : t -> value
 
-(** Force WHNF to HNF *)
-val force : closure -> closure
+(** Forces evaluation of WHNF to Normal Form *)
+val force : value -> value
 
 (** Converts output of [force . result] to string *)
-val string_of_value : closure -> string
+val string_of_value : value -> string

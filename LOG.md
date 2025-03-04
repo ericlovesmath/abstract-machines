@@ -50,6 +50,7 @@
 * Write Krivine Frontend
 * Write tests for infinite lists!
 * Recursion (with Y-combinator, but tail recursive)
+* Cleaning up Krivine codebase
 
 ## TODO
 

@@ -5,9 +5,9 @@ let unwrap (err : string) (opt : 'a option)  : 'a =
 
 let parse program = unwrap "Error: Parser fail" (Intro.parse program)
 
-let execute (program : string) : Krivine.closure =
+let execute (program : string) : Krivine.value =
   program
   |> parse
   |> Parse.parse
-  |> Krivine.result
+  |> Krivine.eval
   |> Krivine.force
