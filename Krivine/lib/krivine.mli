@@ -1,26 +1,24 @@
 type t =
-  | Var of string
-  | Lambda of string * t
-  | App of t * t
+  | Access of string
+  | Grab of string * t
+  | Push of t * t
+  | If of t * t * t
+  | Cst of constant
+
+and constant =
   | Nil
+  | Cons of t * t
   | Int of int
   | Bool of bool
-  | If of t * t * t
   | Prim of Intro.prim
 
-type value =
-  | Closure of t * (string * value) list
-  | IntVal of int
-  | BoolVal of bool
-  | ListNil
-  | ListCons of value * value
-  | PrimOp of Intro.prim
+and value
 
 (** Evaluate using Krivine Machine, result in WHNF *)
 val eval : t -> value
 
 (** Forces evaluation of WHNF to Normal Form *)
-val force : value -> value
+val force : value -> constant
 
 (** Converts output of [force . result] to string *)
-val string_of_value : value -> string
+val string_of_value : constant -> string

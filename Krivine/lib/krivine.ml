@@ -1,116 +1,125 @@
+(* Term language *)
 type t =
-  | Var of string
-  | Lambda of string * t
-  | App of t * t
+  | Access of string
+  | Grab of string * t
+  | Push of t * t
+  | If of t * t * t      (* TODO: If is a Prim when Lazy *)
+  | Cst of constant
+
+and constant =
   | Nil
+  | Cons of t * t  (* TODO: Needs to be value * value to be lazy *)
   | Int of int
   | Bool of bool
-  | If of t * t * t
   | Prim of Intro.prim
 
-type value =
-  | Closure of t * (string * value) list
-  | IntVal of int
-  | BoolVal of bool
-  | ListNil
-  | ListCons of value * value
-  | PrimOp of Intro.prim
+(* Machine components *)
+(* TODO: Rename value to closure *)
+type value = Cl of t * env
+and env = (string * value) list
 
-let rec reduce value args =
-  match value with
-  | IntVal _
-  | BoolVal _
-  | ListNil
-  | ListCons _ ->
-      if args = [] then value
-      else failwith "Krivine.reduce: Attempted to reduce normal form term"
+(* Transition rules *)
+let rec evaluate (Cl(t, e)) s =
+  match t with
+  | Access x -> 
+      (match List.assoc_opt x e with
+      | Some cl -> evaluate cl s
+      | None -> failwith ("Unbound variable: " ^ x))
 
-  | Closure (t, env) ->
-      (match t with
-      | Nil    -> reduce ListNil args
-      | Int n  -> reduce (IntVal n) args
-      | Bool b -> reduce (BoolVal b) args
-      | Prim p -> reduce (PrimOp p) args
-      | Var v  ->
-          (match List.assoc_opt v env with
-          | Some v' -> reduce v' args
-          | None -> failwith ("Krivine.reduce: `" ^ v ^ "` missing binding"))
-      | Lambda (x, b) ->
-          (match args with
-           | [] -> value
-           | arg :: args' -> reduce (Closure (b, (x, arg) :: env)) args')
-      | App (f, x) ->
-          reduce (Closure (f, env)) (Closure (x, env) :: args)
-      | If (c, t, f) ->
-          (match reduce (Closure (c, env)) [] with
-          | BoolVal true -> reduce (Closure (t, env)) args
-          | BoolVal false -> reduce (Closure (f, env)) args
-          | _ -> failwith "Krivine.reduce: Non-boolean in `if` condition"))
+  | Grab(x, t') ->
+      (match s with
+      | [] -> Cl(Grab(x, t'), e)
+      | cl :: s' -> evaluate (Cl(t', (x, cl) :: e)) s')
 
-  | PrimOp op ->
-      let force closure = reduce closure [] in
+  | Push(t1, t2) ->
+      evaluate (Cl(t1, e)) (Cl(t2, e) :: s)
 
-      let force_int n =
-        match force n with
-        | IntVal n -> n
-        | _ -> failwith "Krivine.reduce: Expected list in HNF"
-      in
+  (* Constants *)
+  | Cst c ->
+      (match c with
+      | Nil
+      | Cons _
+      | Int _
+      | Bool _ -> if s = [] then Cl (Cst c, [])
+                  else failwith "Applying constant as function"
+      | Prim p -> reduce_prim p s)
 
-      let force_list xs kcons knil =
-        match force xs with
-        | ListCons (car, cdr) -> kcons car cdr
-        | ListNil -> knil ()
-        | _ -> failwith "Krivine.reduce: Expected list in HNF"
-      in
 
-      (match op, args with
-      | Add, [x; y] -> IntVal (force_int x + force_int y)
-      | Sub, [x; y] -> IntVal (force_int x - force_int y)
-      | Mul, [x; y] -> IntVal (force_int x * force_int y)
-      | Div, [x; y] -> IntVal (force_int x / force_int y)
+  | If(c, t, f) ->
+      match evaluate (Cl(c, e)) [] with
+      | Cl (Cst (Bool true), _) -> evaluate (Cl(t, e)) s
+      | Cl (Cst (Bool false), _) -> evaluate (Cl(f, e)) s
+      | _ -> failwith "Non-boolean in if condition"
 
-      | Lt,  [x; y] -> BoolVal (force_int x < force_int y)
-      | Gt,  [x; y] -> BoolVal (force_int x > force_int y)
-      | Le,  [x; y] -> BoolVal (force_int x <= force_int y)
-      | Ge,  [x; y] -> BoolVal (force_int x >= force_int y)
-      | Eq,  [x; y] ->
-          (match force x, force y with
-           | IntVal x, IntVal y   -> BoolVal (x = y)
-           | BoolVal x, BoolVal y -> BoolVal (x = y)
-           | _ -> failwith "Krivine.reduce: `=` expects integers or bools")
+and reduce_prim prim stack =
+  let force cl = match evaluate cl [] with
+    | Cl(Cst c, []) -> c
+    | _ -> failwith "Unexpected forced value is non constant"
+  in
 
-      | Cons, [h; t] -> ListCons (h, t)
-      | Car, [l] ->
-          force_list l
-            (fun car _ -> force car)
-            (fun () -> failwith "Krivine.reduce: Called `car` of `nil`")
-      | Cdr, [l] ->
-          force_list l
-            (fun _ cdr -> force cdr)
-            (fun () -> failwith "Krivine.reduce: Called `cdr` of `nil`")
-      | Atom, [l] ->
-          force_list l
-            (fun _ _ -> BoolVal false)
-            (fun () -> BoolVal true)
+  let get_int cl = match force cl with
+    | Int n -> n
+    | _ -> failwith "Expected integer argument" in
 
-      | _ -> failwith "Krivine.reduce: Invalid primitive operation usage")
+  let get_list cl = match force cl with
+    | Cons (hd, tl) -> (Cl (hd, []), Cl (tl, []))
+    | Nil -> failwith "Expected non-nil list argument"
+    | _ -> failwith "Expected list argument" in
 
-let eval code = reduce (Closure (code, [])) []
+  match prim, stack with
+  (* Arithmetic operations *)
+  | Add, [a; b] -> Cl(Cst(Int (get_int a + get_int b)), [])
+  | Sub, [a; b] -> Cl(Cst(Int (get_int a - get_int b)), [])
+  | Mul, [a; b] -> Cl(Cst(Int (get_int a * get_int b)), [])
+  | Div, [a; b] -> Cl(Cst(Int (get_int a / get_int b)), [])
 
-let rec force value =
-  match value with
-  | IntVal _
-  | BoolVal _
-  | PrimOp _
-  | ListNil -> value
-  | ListCons (h, t) -> ListCons (force h, force t)
-  | Closure (t, env) -> force (reduce (Closure (t, env)) [])
+  (* Comparisons *)
+  | Lt, [a; b] -> Cl(Cst(Bool (get_int a < get_int b)), [])
+  | Gt, [a; b] -> Cl(Cst(Bool (get_int a > get_int b)), [])
+  | Le, [a; b] -> Cl(Cst(Bool (get_int a <= get_int b)), [])
+  | Ge, [a; b] -> Cl(Cst(Bool (get_int a >= get_int b)), [])
+  | Eq, [a; b] ->
+      (match force a, force b with
+      | Int x, Int y -> Cl(Cst(Bool (x = y)), [])
+      | Bool x, Bool y -> Cl(Cst(Bool (x = y)), [])
+      | _ -> failwith "Type error in equality comparison")
 
-let rec string_of_value value =
-  match value with
-  | IntVal i -> string_of_int i
-  | BoolVal b -> string_of_bool b
-  | PrimOp _ -> "Primitive Function"
-  | ListNil -> "nil"
-  | ListCons (h, t) -> string_of_value h ^ " :: " ^ string_of_value t
-  | Closure _ -> "Closure"
+  (* List operations *)
+  | Cons, [hd; tl] -> Cl(Cst(Cons (Cst (force hd), Cst (force tl))), [])
+  | Car, [lst] -> fst (get_list lst)
+  | Cdr, [lst] -> snd (get_list lst)
+  | Atom, [lst] ->
+      (match force lst with
+      | Nil -> Cl(Cst(Bool true), [])
+      | Cons _ -> Cl(Cst(Bool false), [])
+      | _ -> failwith "Type error in atom check")
+
+  | _ -> failwith "Malformed primitive application"
+
+(* Recursively evaluate to base constant *)
+let rec force cl =
+  match evaluate cl [] with
+  | Cl(Cst c, []) ->
+      (match c with
+      | Cons(hd, tl) -> Cons (Cst (force (Cl(hd, []))), Cst (force (Cl(tl, []))))
+      | _ -> c)
+  | Cl(Grab _, _) -> failwith "Cannot force lambda abstraction"
+  | Cl(If(c, t, f), env) ->
+      (match force (Cl(c, env)) with
+      | Bool true -> force (Cl(t, env))
+      | Bool false -> force (Cl(f, env))
+      | _ -> failwith "Non-boolean in if condition")
+  | _ -> failwith "Unexpected closure during forcing"
+
+(* Initial evaluation *)
+let eval t = evaluate (Cl(t, [])) []
+
+(* String conversion with proper list formatting *)
+let rec string_of_value c =
+  match c with
+  | Int i -> string_of_int i
+  | Bool b -> string_of_bool b
+  | Cons(Cst hd, Cst tl) -> string_of_value hd ^ " :: " ^ string_of_value tl
+  | Cons _ -> failwith "Unforced Cons converted to string"
+  | Nil -> "nil"
+  | Prim _ -> "PRIM"

@@ -4,7 +4,9 @@ type t =
   | Loc of int * int
   | If of t * t * t
   | Lambda of t
+  | LambdaRec of t
   | Call of t * t list
+  | CallRec of t * t list
   | Prim of Intro.prim
 
 (** Searches [locs] env to find indicies of [var] *)
@@ -28,6 +30,12 @@ let assign_vars (ast : Intro.t) : t =
     | Var v -> locate locs v
     | Prim f -> Prim f
     | Lambda (args, b) -> Lambda (aux (args :: locs) b)
+    | LambdaRec (name, args, b) ->
+        (* Add function name to environment before processing args *)
+        let new_locs = (name :: args) :: locs in
+        LambdaRec (aux new_locs b)
+    | CallRec (f, args) ->
+        CallRec (aux locs f, List.map (aux locs) args)
     | Call (f, args) -> Call (aux locs f, List.map (aux locs) args)
   in
   aux [] ast

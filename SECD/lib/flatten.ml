@@ -9,7 +9,11 @@ let flatten (ast : Assign.t) : SECD.instr list =
     | Call (f, xs) ->
         let acc = aux (AP :: acc) f in
         NIL :: List.fold_left (fun acc x -> aux (CONS :: acc) x) acc xs
+    | CallRec (f, xs) ->
+        let acc = aux (RAP :: acc) f in
+        NIL :: List.fold_left (fun acc x -> aux (CONS :: acc) x) acc xs
     | Lambda b -> LDF :: List (aux [RTN] b) :: acc
+    | LambdaRec b -> DUM :: LDF :: List (aux [RTN] b) :: acc
     | Loc (x, y) -> LD :: Int x :: Int y :: acc
 
     | Prim Add -> ADD :: acc

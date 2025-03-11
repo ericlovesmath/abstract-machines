@@ -1,2 +1,2 @@
 (** Reads program as string, runs compiler and simulates using Krivine *)
-val execute : string -> Krivine.value
+val execute : string -> Krivine.constant
