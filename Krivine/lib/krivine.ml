@@ -1,125 +1,129 @@
-(* Term language *)
 type t =
   | Access of string
   | Grab of string * t
   | Push of t * t
-  | If of t * t * t      (* TODO: If is a Prim when Lazy *)
+    (* TODO: If is a Prim when Lazy *)
+  | If of t * t * t
   | Cst of constant
 
 and constant =
   | Nil
-  | Cons of t * t  (* TODO: Needs to be value * value to be lazy *)
+    (* NOTE: Can use Closures repr instead, but feels hacky *)
+  | Cons of t * t Lazy.t
   | Int of int
   | Bool of bool
   | Prim of Intro.prim
 
-(* Machine components *)
-(* TODO: Rename value to closure *)
 type value = Cl of t * env
 and env = (string * value) list
 
+
 (* Transition rules *)
-let rec evaluate (Cl(t, e)) s =
+let rec evaluate (Cl (t, env)) s =
   match t with
-  | Access x -> 
-      (match List.assoc_opt x e with
+  | Access x -> (
+      match List.assoc_opt x env with
       | Some cl -> evaluate cl s
       | None -> failwith ("Unbound variable: " ^ x))
 
-  | Grab(x, t') ->
-      (match s with
-      | [] -> Cl(Grab(x, t'), e)
-      | cl :: s' -> evaluate (Cl(t', (x, cl) :: e)) s')
+  | Grab (x, t) -> (
+      match s with
+      | [] -> Cl (Grab (x, t), env)
+      | cl :: s' -> evaluate (Cl (t, (x, cl) :: env)) s')
 
-  | Push(t1, t2) ->
-      evaluate (Cl(t1, e)) (Cl(t2, e) :: s)
+  | Push (t, t') -> evaluate (Cl (t, env)) (Cl (t', env) :: s)
 
-  (* Constants *)
+  | Cst (Prim p) -> reduce_prim p s
   | Cst c ->
-      (match c with
-      | Nil
-      | Cons _
-      | Int _
-      | Bool _ -> if s = [] then Cl (Cst c, [])
-                  else failwith "Applying constant as function"
-      | Prim p -> reduce_prim p s)
+      if s = [] then Cl (Cst c, [])
+      else failwith "Applying constant as function"
 
-
-  | If(c, t, f) ->
-      match evaluate (Cl(c, e)) [] with
-      | Cl (Cst (Bool true), _) -> evaluate (Cl(t, e)) s
-      | Cl (Cst (Bool false), _) -> evaluate (Cl(f, e)) s
+  | If (c, t, f) ->
+      match evaluate (Cl(c, env)) [] with
+      | Cl (Cst (Bool true), _) -> evaluate (Cl (t, env)) s
+      | Cl (Cst (Bool false), _) -> evaluate (Cl (f, env)) s
       | _ -> failwith "Non-boolean in if condition"
+
 
 and reduce_prim prim stack =
   let force cl = match evaluate cl [] with
-    | Cl(Cst c, []) -> c
+    | Cl (Cst c, []) -> c
     | _ -> failwith "Unexpected forced value is non constant"
   in
 
-  let get_int cl = match force cl with
+  let force_int cl = match force cl with
     | Int n -> n
-    | _ -> failwith "Expected integer argument" in
+    | _ -> failwith "Expected integer argument"
+  in
 
-  let get_list cl = match force cl with
-    | Cons (hd, tl) -> (Cl (hd, []), Cl (tl, []))
+  let force_list cl = match force cl with
+    | Cons (hd, tl) -> (Cl (hd, []), Lazy.map (fun t -> Cl (t, [])) tl)
     | Nil -> failwith "Expected non-nil list argument"
-    | _ -> failwith "Expected list argument" in
+    | _ -> failwith "Expected list argument"
+  in
+
+  let enclose const = Cl (Cst const, []) in
 
   match prim, stack with
   (* Arithmetic operations *)
-  | Add, [a; b] -> Cl(Cst(Int (get_int a + get_int b)), [])
-  | Sub, [a; b] -> Cl(Cst(Int (get_int a - get_int b)), [])
-  | Mul, [a; b] -> Cl(Cst(Int (get_int a * get_int b)), [])
-  | Div, [a; b] -> Cl(Cst(Int (get_int a / get_int b)), [])
+  | Add, [a; b] -> enclose (Int (force_int a + force_int b))
+  | Sub, [a; b] -> enclose (Int (force_int a - force_int b))
+  | Mul, [a; b] -> enclose (Int (force_int a * force_int b))
+  | Div, [a; b] -> enclose (Int (force_int a / force_int b))
 
   (* Comparisons *)
-  | Lt, [a; b] -> Cl(Cst(Bool (get_int a < get_int b)), [])
-  | Gt, [a; b] -> Cl(Cst(Bool (get_int a > get_int b)), [])
-  | Le, [a; b] -> Cl(Cst(Bool (get_int a <= get_int b)), [])
-  | Ge, [a; b] -> Cl(Cst(Bool (get_int a >= get_int b)), [])
+  | Lt, [a; b] -> enclose (Bool (force_int a < force_int b))
+  | Gt, [a; b] -> enclose (Bool (force_int a > force_int b))
+  | Le, [a; b] -> enclose (Bool (force_int a <= force_int b))
+  | Ge, [a; b] -> enclose (Bool (force_int a >= force_int b))
   | Eq, [a; b] ->
       (match force a, force b with
-      | Int x, Int y -> Cl(Cst(Bool (x = y)), [])
-      | Bool x, Bool y -> Cl(Cst(Bool (x = y)), [])
+      | Int x, Int y   -> enclose (Bool (x = y))
+      | Bool x, Bool y -> enclose (Bool (x = y))
       | _ -> failwith "Type error in equality comparison")
 
   (* List operations *)
-  | Cons, [hd; tl] -> Cl(Cst(Cons (Cst (force hd), Cst (force tl))), [])
-  | Car, [lst] -> fst (get_list lst)
-  | Cdr, [lst] -> snd (get_list lst)
-  | Atom, [lst] ->
-      (match force lst with
-      | Nil -> Cl(Cst(Bool true), [])
-      | Cons _ -> Cl(Cst(Bool false), [])
+  | Car, [lst] -> fst (force_list lst)
+  | Cdr, [lst] -> Lazy.force (snd (force_list lst))
+  | Cons, [hd; tl] ->
+      let tl' = Lazy.map (fun tl -> Cst (force tl)) (lazy tl) in
+      enclose (Cons (Cst (force hd), tl'))
+  | Atom, [lst] -> (
+      match force lst with
+      | Nil -> enclose (Bool true)
+      | Cons _ -> enclose (Bool false)
       | _ -> failwith "Type error in atom check")
 
   | _ -> failwith "Malformed primitive application"
 
+
 (* Recursively evaluate to base constant *)
 let rec force cl =
   match evaluate cl [] with
-  | Cl(Cst c, []) ->
-      (match c with
-      | Cons(hd, tl) -> Cons (Cst (force (Cl(hd, []))), Cst (force (Cl(tl, []))))
+  | Cl (Cst c, []) -> (
+      match c with
+      | Cons (hd, tl) ->
+          let reduce t = Cst (force (Cl (t, []))) in
+          Cons (reduce hd, Lazy.map reduce tl)
       | _ -> c)
-  | Cl(Grab _, _) -> failwith "Cannot force lambda abstraction"
-  | Cl(If(c, t, f), env) ->
-      (match force (Cl(c, env)) with
-      | Bool true -> force (Cl(t, env))
-      | Bool false -> force (Cl(f, env))
+  | Cl (If (c, t, f), env) -> (
+      match force (Cl (c, env)) with
+      | Bool true -> force (Cl (t, env))
+      | Bool false -> force (Cl (f, env))
       | _ -> failwith "Non-boolean in if condition")
   | _ -> failwith "Unexpected closure during forcing"
 
-(* Initial evaluation *)
-let eval t = evaluate (Cl(t, [])) []
 
-(* String conversion with proper list formatting *)
+let eval t = evaluate (Cl (t, [])) []
+
+
 let rec string_of_value c =
   match c with
   | Int i -> string_of_int i
   | Bool b -> string_of_bool b
-  | Cons(Cst hd, Cst tl) -> string_of_value hd ^ " :: " ^ string_of_value tl
-  | Cons _ -> failwith "Unforced Cons converted to string"
   | Nil -> "nil"
-  | Prim _ -> "PRIM"
+  | Prim _ -> "<primitive>"
+  | Cons (hd, tl) ->
+      (match hd, Lazy.force tl with
+      | Cst hd, Cst tl -> string_of_value hd ^ " :: " ^ string_of_value tl
+      | _ -> failwith "Unforced Cons converted to string")

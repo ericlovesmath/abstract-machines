@@ -1,12 +1,10 @@
 // OUTPUT: 1 :: 1 :: 2 :: 3 :: 5 :: 8 :: 13 :: 21 :: 34 :: 55 :: nil
 (letrec (fib a b)
     (cons a (fib b (+ a b)))
-
 (letrec (take n xs)
     (if (= n 0)
         nil
         (cons (car xs) (take (- n 1) (cdr xs))))
-
 (take 10 (fib 1 1))))
 
 

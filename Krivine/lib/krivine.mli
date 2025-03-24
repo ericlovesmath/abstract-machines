@@ -7,7 +7,7 @@ type t =
 
 and constant =
   | Nil
-  | Cons of t * t
+  | Cons of t * t Lazy.t
   | Int of int
   | Bool of bool
   | Prim of Intro.prim

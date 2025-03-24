@@ -52,21 +52,32 @@
 * Recursion (with Y-combinator, but tail recursive)
 * Cleaning up Krivine codebase
 
+# Week 8
+
+* Rewrite Krivine to follow original paper more
+* Refactoring and Final Report
+
+
+
+
+# Week 9
+
+* Refactor Krivine to by Lazy on Cons (on new version)
+* Cleaning up Krivine codebase
+
 ## TODO
 
-* SECD Debug and Fix
-* Refactor everything
-* Refactor Krivine
-
+* GADT implementation for ANF conversion
+* Add examples to README
 * Fix bad code and ADT names
-* Add comments (lambda-sigma calculus)
-* Add more tests (like nested letrec or mutual recursion)
-
+* Add comments
+* Mutual Recursion
 * Add top level defines
 * Fix `letrec` for SECD
-* Integrate CEK and SECD as modules together to one file
+* Integrate different compilers as modules together to one file
 
-## Long Term TODO
+* Refactor everything
+* Consider CESK Machine, Forth, P-System, Smalltalk-80, etc.
 
 * Add more syntactic sugar
 * Add comment parser
