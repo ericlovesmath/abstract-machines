@@ -1,4 +1,4 @@
 (library
   (name lib)
   (modules
-    parser intro parse anf CEK compile))
+    parser intro parse anf CEK compiler))

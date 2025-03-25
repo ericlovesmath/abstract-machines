@@ -113,7 +113,6 @@ let eval_step (c : t) (env : env) (k : kont) : cek =
       | List (_ :: tl) -> apply_kont k (List tl)
       | _ -> failwith "eval_step: Cdr failed")
 
-
 let eval (code : t) : value =
   let rec aux state =
     match state with
