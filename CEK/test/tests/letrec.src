@@ -6,9 +6,9 @@
     (f 10))
 
 
-// OUTPUT: [6 10 14]
+// OUTPUT: 6 :: 10 :: 14 :: nil
 (letrec (map f xs)
- (if (= xs nil)
+ (if (atom xs)
    nil
    (cons (f (car xs)) (map f (cdr xs))))
 
@@ -17,9 +17,9 @@
 (map double [3 5 7])))
 
 
-// OUTPUT: [4 23 840]
+// OUTPUT: 4 :: 23 :: 840 :: nil
 (letrec (fold f init xs)
- (if (= xs nil)
+ (if (atom xs)
    init
    (f (car xs) (fold f init (cdr xs))))
 

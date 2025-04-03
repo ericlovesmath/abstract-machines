@@ -36,7 +36,7 @@ module Make (T : Testable) : Tester = struct
     print_char '#'
 
   let run_file path =
-    Printf.printf "Testing %s: " path;
+    Printf.printf "> Testing %s: " path;
     try
       let file = In_channel.open_text path in
       let source = In_channel.input_all file in
@@ -48,6 +48,7 @@ module Make (T : Testable) : Tester = struct
       raise e
 
   let test () =
+    print_endline ("Running " ^ T.C.name ^ " tests...\n");
     List.iter (fun f -> run_file ("tests/" ^ f ^ ".src")) T.files;
-    print_endline "\nAll tests pass!"
+    print_endline "\nAll tests pass!\n"
 end

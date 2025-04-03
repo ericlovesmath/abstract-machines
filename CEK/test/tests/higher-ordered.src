@@ -9,7 +9,7 @@
   (f 10)))
 
 
-// OUTPUT: [8 2]
+// OUTPUT: 8 :: 2 :: nil
 (let (dual switch)
     (if (= switch 0) + -)
 

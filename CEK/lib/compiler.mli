@@ -7,3 +7,4 @@ module type Compiler = sig
 end
 
 module CEK : Compiler
+module Krivine : Compiler

@@ -64,6 +64,7 @@
 
 * Refactor Krivine to by Lazy on Cons (on new version)
 * Cleaning up Krivine codebase
+* Merge CEK and Krivine codebases together with shiny functors
 
 ## TODO
 
@@ -75,6 +76,9 @@
 * Add top level defines
 * Fix `letrec` for SECD
 * Integrate different compilers as modules together to one file
+* Cleaning up Krivine codebase (renaming needed)
+* Use `(include_subdirs qualified)`
+* Fix `dune test` to test each backend
 
 * Refactor everything
 * Consider CESK Machine, Forth, P-System, Smalltalk-80, etc.

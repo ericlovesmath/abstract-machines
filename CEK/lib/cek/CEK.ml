@@ -126,7 +126,6 @@ let rec string_of_value (v : value) : string =
   | Int n -> string_of_int n
   | Bool b -> string_of_bool b
   | List [] -> "nil"
-  | List vs ->
-      "[" ^ String.concat " " (List.map string_of_value vs) ^ "]"
+  | List (v :: vs) -> string_of_value v ^ " :: " ^ string_of_value (List vs)
   | Closure (_, envref) ->
       "Closure in (" ^ String.concat " " (List.map fst !envref) ^ ")"

@@ -34,3 +34,11 @@ module CEK = Make (struct
   let execute program = CEK.eval (Anf.anf (Parse_cek.parse program))
   let string_of_value = CEK.string_of_value
 end)
+
+module Krivine = Make (struct
+  type value = Krivine.constant
+
+  let name = "Krivine"
+  let execute program = Krivine.force (Krivine.eval (Parse_krivine.parse program))
+  let string_of_value = Krivine.string_of_value
+end)
