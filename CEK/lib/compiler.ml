@@ -31,6 +31,6 @@ module CEK = Make (struct
   type value = CEK.value
 
   let name = "CEK"
-  let execute program = CEK.eval (Anf.anf (Parse.parse program))
+  let execute program = CEK.eval (Anf.anf (Parse_cek.parse program))
   let string_of_value = CEK.string_of_value
 end)

@@ -1,5 +1,7 @@
 open Lib
 
+module C = Compiler.CEK
+
 let run_test source =
   let lines = String.split_on_char '\n' source in
   (match lines with
@@ -9,13 +11,13 @@ let run_test source =
       if String.starts_with ~prefix:"OUTPUT: " output
       then
         let output = String.sub output 8 (String.length output - 8) in
-        let res = CEK.string_of_value (Compile.execute expr) in
+        let res = C.string_of_value (C.execute expr) in
         (if res <> output
           then failwith (Printf.sprintf "Error: Expected %s, got %s" output res))
       else if output = "FAIL"
       then
         let failed =
-          try (ignore (Compile.execute expr); false)
+          try (ignore (C.execute expr); false)
           with _ -> true
         in
         (if not failed
