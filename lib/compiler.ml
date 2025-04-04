@@ -17,17 +17,19 @@ end
 module Make(C : Compilable) : Compiler = struct
   type value = C.value
 
-  let parse program =
-    match (Intro.parse program) with
-    | None -> failwith "Error: Parser fail"
-    | Some ast -> ast
-
   let name = C.name
 
+  let unwrap msg opt =
+    match opt with
+    | Some ast -> ast
+    | None -> failwith msg
+
   let execute program =
-    let ast = parse program in
-    Debug.debug_print "parse" (Intro.sexp_of_t ast);
-    C.execute ast
+    program
+    |> Intro.parse
+    |> unwrap "Error: Failed to [Intro.parse]"
+    |> Debug.trace "parse" Intro.sexp_of_t
+    |> C.execute
 
   let string_of_value = C.string_of_value
 end
@@ -37,13 +39,17 @@ module SECD = Make (struct
 
   let name = "SECD"
 
+  let sexp_of_instrs instrs =
+    Sexplib.Sexp.List (List.map SECD.sexp_of_instr instrs)
+
   let execute program =
-    let assigned = Assign.assign_vars program in
-    Debug.debug_print "assign homes" (Assign.sexp_of_t assigned);
-    let instrs = Flatten.flatten assigned in
-    Debug.debug_print "flatten"
-      (Sexplib.Sexp.List (List.map SECD.sexp_of_instr instrs));
-    SECD.eval (SECD.init instrs)
+    program
+    |> Assign.assign_vars
+    |> Debug.trace "assign homes" Assign.sexp_of_t
+    |> Flatten.flatten
+    |> Debug.trace "flatten" sexp_of_instrs
+    |> SECD.init
+    |> SECD.eval
 
   let string_of_value = SECD.string_of_value
 end)
@@ -54,26 +60,28 @@ module CEK = Make (struct
   let name = "CEK"
 
   let execute program =
-    let ast = Parse_cek.parse program in
-    Debug.debug_print "parse cek" (CEK.sexp_of_t ast);
-    let anf = Anf.anf ast in
-    Debug.debug_print "anf" (CEK.sexp_of_t anf);
-    CEK.eval anf
+    program
+    |> Parse_cek.parse
+    |> Debug.trace "parse cek" CEK.sexp_of_t
+    |> Anf.anf
+    |> Debug.trace "anf" CEK.sexp_of_t
+    |> CEK.eval
 
   let string_of_value = CEK.string_of_value
 end)
 
 module Krivine = Make (struct
-  type value = Krivine.constant
+  type value = Krivine.const
 
   let name = "Krivine"
 
   let execute program =
-    let ast = Parse_krivine.parse program in
-    Debug.debug_print "parse krivine" (Krivine.sexp_of_t ast);
-    let closure = Krivine.eval ast in
-    Debug.debug_print "final closure" (Krivine.sexp_of_value closure);
-    Krivine.force closure
+    program
+    |> Parse_krivine.parse
+    |> Debug.trace "parse krivine" Krivine.sexp_of_t
+    |> Krivine.eval
+    |> Debug.trace "final closure" Krivine.sexp_of_closure
+    |> Krivine.force
 
-  let string_of_value = Krivine.string_of_value
+  let string_of_value = Krivine.string_of_const
 end)

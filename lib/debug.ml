@@ -78,9 +78,12 @@ let render_lines lines =
 let pretty_print sexp =
   render_lines (sexp_format 0 sexp)
 
-(* I want a Writer monad to debug print instead but this isn't Haskell :/ *)
-let debug_print label sexp =
+let print_pass label sexp =
   if !debug then begin
     Printf.printf "=== PASS: %s ===\n\n" label;
     Printf.printf "%s\n\n%!" (pretty_print sexp);
   end
+
+let trace pass sexp_of v =
+  print_pass pass (sexp_of v);
+  v

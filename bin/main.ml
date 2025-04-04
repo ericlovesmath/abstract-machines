@@ -1,6 +1,6 @@
 open Lib
 
-let help = "Usage: dune exec CEK -- [-machine MACHINE] [-file FILENAME|-code CODE] [-debug]"
+let help = "Usage: dune exec abstract_machines -- [-machine MACHINE] [-file FILENAME|-code CODE] [-debug]"
 
 module SECDRepl = Repl.Make(Compiler.SECD)
 module CEKRepl = Repl.Make(Compiler.CEK)

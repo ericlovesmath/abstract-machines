@@ -1,5 +1,8 @@
-(** Enables/Disables [debug_print] *)
+(** Enables/Disables [print_pass] and [trace] debug printing *)
 val debug : bool ref
 
 (** Prints [label] and [sexp] if [debug] is on *)
-val debug_print : string -> Sexplib.Sexp.t -> unit
+val print_pass : string -> Sexplib.Sexp.t -> unit
+
+(** Utility function, pipable [print_pass] *)
+val trace : string -> ('a -> Sexplib.Sexp.t) -> 'a -> 'a

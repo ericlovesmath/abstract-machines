@@ -3,26 +3,25 @@ type t =
   | Grab of string * t
   | Push of t * t
   | If of t * t * t
-  | Cst of constant
+  | Cst of const
   [@@deriving sexp]
 
-and constant =
+and const =
   | Nil
   | Cons of t * t Lazy.t
   | Int of int
   | Bool of bool
   | Prim of Intro.prim
-  [@@deriving sexp]
 
-type value = Cl of t * env
+type closure = Cl of t * env
   [@@deriving sexp]
-and env = (string * value) list
+and env = (string * closure) list
 
 (** Evaluate using Krivine Machine, result in WHNF *)
-val eval : t -> value
+val eval : t -> closure
 
 (** Forces evaluation of WHNF to Normal Form *)
-val force : value -> constant
+val force : closure -> const
 
 (** Converts output of [force . result] to string *)
-val string_of_value : constant -> string
+val string_of_const : const -> string

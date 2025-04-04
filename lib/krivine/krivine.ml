@@ -6,21 +6,19 @@ type t =
   | Push of t * t
     (* TODO: If is a Prim when Lazy *)
   | If of t * t * t
-  | Cst of constant
+  | Cst of const
   [@@deriving sexp]
 
-and constant =
-  | Nil
-    (* NOTE: Can use Closures repr instead, but feels hacky *)
+and const =
+  | Nil (* NOTE: Can use Closures repr instead, but feels hacky *)
   | Cons of t * t Lazy.t
   | Int of int
   | Bool of bool
   | Prim of Intro.prim
-  [@@deriving sexp]
 
-type value = Cl of t * env
+type closure = Cl of t * env
   [@@deriving sexp]
-and env = (string * value) list
+and env = (string * closure) list
 
 
 (* Transition rules *)
@@ -120,7 +118,7 @@ let rec force cl =
 
 let eval t = evaluate (Cl (t, [])) []
 
-let rec string_of_value c =
+let rec string_of_const c =
   match c with
   | Int i -> string_of_int i
   | Bool b -> string_of_bool b
@@ -128,5 +126,5 @@ let rec string_of_value c =
   | Prim _ -> "<primitive>"
   | Cons (hd, tl) ->
       (match hd, Lazy.force tl with
-      | Cst hd, Cst tl -> string_of_value hd ^ " :: " ^ string_of_value tl
+      | Cst hd, Cst tl -> string_of_const hd ^ " :: " ^ string_of_const tl
       | _ -> failwith "Unforced Cons converted to string")
