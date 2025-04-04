@@ -32,6 +32,22 @@ module Make(C : Compilable) : Compiler = struct
   let string_of_value = C.string_of_value
 end
 
+module SECD = Make (struct
+  type value = SECD.value
+
+  let name = "SECD"
+
+  let execute program =
+    let assigned = Assign.assign_vars program in
+    Debug.debug_print "assign homes" (Assign.sexp_of_t assigned);
+    let instrs = Flatten.flatten assigned in
+    Debug.debug_print "flatten"
+      (Sexplib.Sexp.List (List.map SECD.sexp_of_instr instrs));
+    SECD.eval (SECD.init instrs)
+
+  let string_of_value = SECD.string_of_value
+end)
+
 module CEK = Make (struct
   type value = CEK.value
 

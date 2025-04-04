@@ -1,3 +1,5 @@
+open Sexplib.Std
+
 type t =
   | Nil
   | Int of int
@@ -6,8 +8,9 @@ type t =
   | Lambda of t
   | LambdaRec of t
   | Call of t * t list
-  | CallRec of t * t list
+  | CallRec of t * t list  (* TODO *)
   | Prim of Intro.prim
+  [@@deriving sexp]
 
 (** Searches [locs] env to find indicies of [var] *)
 let locate (locs : string list list) (var : string) : t =
@@ -34,8 +37,6 @@ let assign_vars (ast : Intro.t) : t =
         (* Add function name to environment before processing args *)
         let new_locs = (name :: args) :: locs in
         LambdaRec (aux new_locs b)
-    | CallRec (f, args) ->
-        CallRec (aux locs f, List.map (aux locs) args)
     | Call (f, args) -> Call (aux locs f, List.map (aux locs) args)
   in
   aux [] ast

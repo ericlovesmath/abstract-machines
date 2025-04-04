@@ -2,6 +2,7 @@ open Lib
 
 let help = "Usage: dune exec CEK -- [-machine MACHINE] [-file FILENAME|-code CODE] [-debug]"
 
+module SECDRepl = Repl.Make(Compiler.SECD)
 module CEKRepl = Repl.Make(Compiler.CEK)
 module KrivineRepl = Repl.Make(Compiler.Krivine)
 
@@ -22,9 +23,10 @@ let () =
 
   let backend =
     match !machine with
+    | "secd" | "SECD" -> (module SECDRepl : Repl.S)
     | "cek" | "CEK" -> (module CEKRepl : Repl.S)
     | "krivine" | "Krivine" -> (module KrivineRepl : Repl.S)
-    | _ -> failwith "Invalid compiler specified. Use 'cek' or 'krivine'."
+    | _ -> failwith "Invalid compiler specified. Use 'secd', 'cek', or 'krivine'."
   in
 
   let module REPL = (val backend : Repl.S) in

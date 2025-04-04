@@ -57,15 +57,14 @@
 * Rewrite Krivine to follow original paper more
 * Refactoring and Final Report
 
-
-
-
-# Week 9
+# Week 11 (Following Term!)
 
 * Refactor Krivine to by Lazy on Cons (on new version)
 * Cleaning up Krivine codebase
 * Merge CEK and Krivine codebases together with shiny functors
+* Shiny testing per compiler
 * Debug passes using `ppx_sexp_conv` in CEK and Krivine
+* Merge SECD code as well (testing and debug)
 
 ## TODO
 

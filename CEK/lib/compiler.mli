@@ -6,5 +6,6 @@ module type Compiler = sig
   val string_of_value : value -> string
 end
 
+module SECD : Compiler
 module CEK : Compiler
 module Krivine : Compiler

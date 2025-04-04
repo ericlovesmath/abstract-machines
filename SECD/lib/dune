@@ -1,5 +1,0 @@
-(library
-  (name lib)
-  (modules
-    parser intro assign flatten SECD
-    compile))

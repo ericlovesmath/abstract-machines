@@ -3,9 +3,10 @@
 (library
   (name lib)
   (modules
-    compiler debug
-    intro parser
-    parse_cek anf CEK
-    parse_krivine krivine)
+    intro parser          ; Frontend
+    assign flatten SECD   ; SECD
+    parse_cek anf CEK     ; CEK
+    parse_krivine krivine ; Krivine
+    compiler debug)
   (libraries sexplib)
   (preprocess (pps ppx_sexp_conv)))

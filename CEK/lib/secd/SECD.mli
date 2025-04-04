@@ -8,12 +8,14 @@ type instr =
   | ATOM | CONS | CDR | CAR
   | ADD | SUB | MUL | DIV
   | EQ | GT | LT | GE | LE
+  [@@deriving sexp]
 
 type value =
   | List of value list
   | Int of int
   | Bool of bool
   | Func of instr list * value list list
+  [@@deriving sexp]
 
 (** Creates SECD Machine from SECD code *)
 val init : instr list -> t

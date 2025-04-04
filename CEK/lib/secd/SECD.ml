@@ -1,3 +1,5 @@
+open Sexplib.Std
+
 type instr =
   | NIL | LDC | LD
   | Int of int | List of instr list
@@ -6,12 +8,14 @@ type instr =
   | ATOM | CONS | CDR | CAR
   | ADD | SUB | MUL | DIV
   | EQ | GT | LT | GE | LE
+  [@@deriving sexp]
 
 type value =
   | List of value list
   | Int of int
   | Bool of bool
   | Func of instr list * value list list
+  [@@deriving sexp]
 
 type dump =
   | Stack of value list
@@ -95,7 +99,7 @@ let rec eval (state : t) : value =
 let rec string_of_value (v : value) : string =
   match v with
   | List [] -> "nil"
-  | List vs -> "[" ^ String.concat " " (List.map string_of_value vs) ^ "]"
+  | List (v :: vs) -> string_of_value v ^ " :: " ^ string_of_value (List vs)
   | Int n -> string_of_int n
   | Bool b -> string_of_bool b
   | Func _ -> "<func>"

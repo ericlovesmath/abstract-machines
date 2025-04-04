@@ -1,7 +1,0 @@
-(install
- (section share)
- (files (glob_files tests/*.src)))
-
-(tests
-  (names compile_test)
-  (libraries lib))
