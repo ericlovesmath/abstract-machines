@@ -70,6 +70,7 @@
 
 * Native booleans
 * Desugaring and, or, not, neq
+* Add `base` option with small standard lib
 
 ## TODO
 
