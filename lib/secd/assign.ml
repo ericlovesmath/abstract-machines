@@ -10,7 +10,7 @@ type t =
   | LambdaRec of t
   | Call of t * t list
   | CallRec of t * t list  (* TODO *)
-  | Prim of Intro.prim
+  | Prim of Ast.prim
   [@@deriving sexp]
 
 (** Searches [locs] env to find indicies of [var] *)
@@ -25,8 +25,8 @@ let locate (locs : string list list) (var : string) : t =
   in
   aux locs 0
 
-let assign_vars (ast : Intro.t) : t =
-  let rec aux (locs : string list list) (ast : Intro.t) : t =
+let assign_vars (ast : Ast.t) : t =
+  let rec aux (locs : string list list) (ast : Ast.t) : t =
     match ast with
     | Nil -> Nil
     | Int i -> Int i

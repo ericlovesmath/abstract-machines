@@ -1,3 +1,5 @@
+open Sexplib.Std
+
 type prim =
   | Atom | Cons | Cdr | Car
   | Add | Sub | Mul | Div
@@ -16,7 +18,7 @@ type t =
   | Prim of prim
   [@@deriving sexp]
 
-let rec desugar t =
+let rec desugar (t : Intro.t) : t =
   match t with
   | Nil -> Nil
   | Int i -> Int i

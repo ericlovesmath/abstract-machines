@@ -8,8 +8,8 @@ type t =
   | LambdaRec of t
   | Call of t * t list
   | CallRec of t * t list
-  | Prim of Intro.prim
+  | Prim of Ast.prim
   [@@deriving sexp]
 
 (** Replaces [Var v] with [Loc x y] in the SECD Env stack *)
-val assign_vars : Intro.t -> t
+val assign_vars : Ast.t -> t

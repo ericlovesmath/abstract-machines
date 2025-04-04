@@ -10,7 +10,7 @@ module type Compilable = sig
   type value
 
   val name : string
-  val execute : Intro.t -> value
+  val execute : Ast.t -> value
   val string_of_value : value -> string
 end
 
@@ -19,16 +19,12 @@ module Make(C : Compilable) : Compiler = struct
 
   let name = C.name
 
-  let unwrap msg opt =
-    match opt with
-    | Some ast -> ast
-    | None -> failwith msg
-
   let execute program =
     program
     |> Intro.parse
-    |> unwrap "Error: Failed to [Intro.parse]"
-    |> Debug.trace "parse" Intro.sexp_of_t
+    |> Debug.trace "parse frontend" Intro.sexp_of_t
+    |> Ast.desugar
+    |> Debug.trace "desugaring" Ast.sexp_of_t
     |> C.execute
 
   let string_of_value = C.string_of_value

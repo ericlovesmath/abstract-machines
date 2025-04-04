@@ -1,4 +1,3 @@
-open Intro
 open CEK
 
 let counter = ref 0
@@ -13,10 +12,11 @@ let make_binop (cons : t -> t -> t) : t =
     let y = genvar () in
     Fn ([x; y], cons (Var x) (Var y))
 
-let rec parse (e : Intro.t) : CEK.t =
+let rec parse (e : Ast.t) : CEK.t =
   match e with
   | Nil -> Nil
   | Int n -> Int n
+  | Bool b -> Bool b
   | Var v -> Var v
   | If (c, t, f) -> If (parse c, parse t, parse f)
   | Lambda (args, body) -> Fn (args, parse body)

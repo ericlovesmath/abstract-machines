@@ -3,7 +3,7 @@
 (library
   (name lib)
   (modules
-    intro parser          ; Frontend
+    parser intro ast      ; Frontend
     assign flatten SECD   ; SECD
     parse_cek anf CEK     ; CEK
     parse_krivine krivine ; Krivine

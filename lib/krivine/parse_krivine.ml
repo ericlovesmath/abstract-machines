@@ -1,4 +1,3 @@
-open Intro
 open Krivine
 
 let y_combinator =
@@ -8,7 +7,7 @@ let y_combinator =
         ( Grab ("x", Push (Access "f", Push (Access "x", Access "x"))),
           Grab ("x", Push (Access "f", Push (Access "x", Access "x"))) ) )
 
-let rec parse (e : Intro.t) : Krivine.t =
+let rec parse (e : Ast.t) : Krivine.t =
   match e with
   | Nil -> Cst Nil
   | Int n -> Cst (Int n)
