@@ -3,6 +3,7 @@ open Sexplib.Std
 type t =
   | Nil
   | Int of int
+  | Bool of bool
   | Loc of int * int
   | If of t * t * t
   | Lambda of t
@@ -29,6 +30,7 @@ let assign_vars (ast : Intro.t) : t =
     match ast with
     | Nil -> Nil
     | Int i -> Int i
+    | Bool b -> Bool b
     | If (c, t, f) -> If (aux locs c, aux locs t, aux locs f)
     | Var v -> locate locs v
     | Prim f -> Prim f

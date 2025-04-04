@@ -16,5 +16,5 @@ type t =
   | Prim of prim
   [@@deriving sexp]
 
-(** Parses string [s] into [Intro.t] S-exp, assumes one expression only *)
-val parse : string -> t
+(** Parses [Intro.t] into the shared frontend AST that all backends expect *)
+val desugar : Intro.t -> t

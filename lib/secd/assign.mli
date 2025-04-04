@@ -1,6 +1,7 @@
 type t =
   | Nil
   | Int of int
+  | Bool of bool
   | Loc of int * int
   | If of t * t * t
   | Lambda of t

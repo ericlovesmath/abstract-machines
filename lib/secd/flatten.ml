@@ -3,6 +3,7 @@ let flatten (ast : Assign.t) : SECD.instr list =
     match ast with
     | Nil -> NIL :: acc
     | Int i -> LDC :: Int i :: acc
+    | Bool b -> LDC :: Bool b :: acc
     | If (c, t, f) -> aux (SEL :: List (aux [JOIN] t) :: List (aux [JOIN] f) :: acc) c
     | Call (Prim _ as prim, xs) -> List.fold_left aux (aux acc prim) xs
 

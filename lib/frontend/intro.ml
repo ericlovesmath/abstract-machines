@@ -10,6 +10,7 @@ type prim =
 type t =
   | Nil
   | Int of int
+  | Bool of bool
   | Var of string
   | If of t * t * t
   | Lambda of string list * t
@@ -50,10 +51,12 @@ let integerP =
   in
   (fun v -> Int v) <$> (int_of_string <$> (implode <$> numP))
 
+let boolP = (Bool true <$ stringP "#t") <|> (Bool false <$ stringP "#f")
+
 let listPT (p : 'a parser) (left : char) (right : char) : 'a list parser =
   charP left *> strip (sepBy1 spacesP p) <* charP right
 
-let rec introP st = (nilP <|> integerP <|> primP <|> variableP <|> callP <|> listP) st
+let rec introP st = (nilP <|> integerP <|> boolP <|> primP <|> variableP <|> callP <|> listP) st
 
 (** lambdas, let bindings, and calls *)
 and callP st =
@@ -101,28 +104,6 @@ and listP st =
 
 let parse s =
   match (strip introP) (explode s) with
-  | None -> None
-  | Some (_, _ :: _) -> None
-  | Some (res, []) -> Some res
-
-let rec pp = function
-  | Nil -> "nil"
-  | Int i -> string_of_int i
-  | Var v -> v
-  | If (c, t, f) -> "(" ^ pp c ^ " ? " ^ pp t ^ " : " ^ pp f ^ ")"
-  | Call (e, es) -> pp e ^ "(" ^ String.concat ", " (List.map pp es) ^ ")"
-  | Lambda (args, b) -> "(" ^ String.concat ", " args ^ " -> " ^ pp b ^ ")"
-  | LambdaRec (_, args, b) -> "(" ^ String.concat ", " args ^ " -> " ^ pp b ^ ")"
-  | Prim Add -> "#+"
-  | Prim Sub -> "#-"
-  | Prim Mul -> "#*"
-  | Prim Div -> "#/"
-  | Prim Atom -> "#atom"
-  | Prim Cons -> "#cons"
-  | Prim Car -> "#car"
-  | Prim Cdr -> "#cdr"
-  | Prim Eq -> "#="
-  | Prim Lt -> "#<"
-  | Prim Gt -> "#>"
-  | Prim Le -> "#<="
-  | Prim Ge -> "#>="
+  | Some (res, []) -> res
+  | Some _ -> failwith "Intro.parse: Parsed stream incomplete"
+  | None -> failwith "Intro.parse: Parser failed"

@@ -1,5 +1,3 @@
-let debug = ref false
-
 (* ---------------------------------------------------------------------- 
  * S-expression pretty-printer
  * Stolen from Professor Michael Vanier (Caltech)
@@ -19,6 +17,9 @@ The overall approach is the following:
   - If the list starts with an atom,
     indent the rest of the list elements an extra `pp_indent` spaces.
 *)
+
+(* Seting [debug] to false disables all logs below *)
+let debug = ref false
 
 (* Beyond this length limit, lists have to be formatted on multiple lines. *)
 let pp_line_limit = ref 60
@@ -80,8 +81,8 @@ let pretty_print sexp =
 
 let print_pass label sexp =
   if !debug then begin
-    Printf.printf "=== PASS: %s ===\n\n" label;
-    Printf.printf "%s\n\n%!" (pretty_print sexp);
+    Printf.eprintf "=== PASS: %s ===\n\n" label;
+    Printf.eprintf "%s\n\n%!" (pretty_print sexp);
   end
 
 let trace pass sexp_of v =

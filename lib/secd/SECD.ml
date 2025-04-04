@@ -2,7 +2,7 @@ open Sexplib.Std
 
 type instr =
   | NIL | LDC | LD
-  | Int of int | List of instr list
+  | Int of int | Bool of bool | List of instr list
   | SEL | JOIN
   | LDF | AP | RTN | DUM | RAP
   | ATOM | CONS | CDR | CAR
@@ -48,6 +48,7 @@ let eval_step (state : t) : t =
 
   | _, _, NIL :: c', _                     -> push c' (List [] :: stack)
   | _, _, LDC :: Int n :: c', _            -> push c' (Int n :: stack)
+  | _, _, LDC :: Bool b :: c', _           -> push c' (Bool b :: stack)
   | _, _, LD :: Int y :: Int x :: c', _    -> push c' (List.nth (List.nth env y) x :: stack)
 
   (* Builtin Unary Operations *)

@@ -2,7 +2,7 @@ type t
 
 type instr =
   | NIL | LDC | LD
-  | Int of int | List of instr list
+  | Int of int | Bool of bool | List of instr list
   | SEL | JOIN
   | LDF | AP | RTN | DUM | RAP
   | ATOM | CONS | CDR | CAR
