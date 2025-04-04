@@ -1,3 +1,5 @@
+open Sexplib.Std
+
 type t =
   | Nil
   | Int of int
@@ -24,6 +26,7 @@ type t =
   | Le of t * t
   | Ge of t * t
   | Eq of t * t
+  [@@deriving sexp]
 
 type value =
   | Int of int

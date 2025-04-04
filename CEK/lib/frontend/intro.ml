@@ -1,9 +1,11 @@
 open Parser
+open Sexplib.Std
 
 type prim =
   | Atom | Cons | Cdr | Car
   | Add | Sub | Mul | Div
   | Eq | Gt | Lt | Ge | Le
+  [@@deriving sexp]
 
 type t =
   | Nil
@@ -14,6 +16,7 @@ type t =
   | LambdaRec of string * string list * t
   | Call of t * t list
   | Prim of prim
+  [@@deriving sexp]
 
 let nilP = Nil <$ stringP "nil"
 

@@ -1,6 +1,6 @@
 open Lib
 
-let help = "Usage: dune exec CEK -- [-file FILENAME] [-repl]"
+let help = "Usage: dune exec CEK -- [-machine MACHINE] [-file FILENAME|-code CODE] [-debug]"
 
 module CEKRepl = Repl.Make(Compiler.CEK)
 module KrivineRepl = Repl.Make(Compiler.Krivine)
@@ -11,9 +11,10 @@ let () =
   let code = ref "" in
   let speclist =
     [
-      ("-machine", Arg.Set_string machine, "Target Machine");
+      ("-machine", Arg.Set_string machine, "Target Backend");
       ("-file", Arg.Set_string filename, "File to Execute");
       ("-code", Arg.Set_string code, "String to Execute");
+      ("-debug", Arg.Set Debug.debug, "Print Compiler Passes");
     ]
   in
 

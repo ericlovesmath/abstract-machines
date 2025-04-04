@@ -4,6 +4,7 @@ type t =
   | Push of t * t
   | If of t * t * t
   | Cst of constant
+  [@@deriving sexp]
 
 and constant =
   | Nil
@@ -11,8 +12,11 @@ and constant =
   | Int of int
   | Bool of bool
   | Prim of Intro.prim
+  [@@deriving sexp]
 
-and value
+type value = Cl of t * env
+  [@@deriving sexp]
+and env = (string * value) list
 
 (** Evaluate using Krivine Machine, result in WHNF *)
 val eval : t -> value

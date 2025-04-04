@@ -65,6 +65,7 @@
 * Refactor Krivine to by Lazy on Cons (on new version)
 * Cleaning up Krivine codebase
 * Merge CEK and Krivine codebases together with shiny functors
+* Debug passes using `ppx_sexp_conv` in CEK and Krivine
 
 ## TODO
 

@@ -1,3 +1,5 @@
+open Sexplib.Std
+
 type t =
   | Access of string
   | Grab of string * t
@@ -5,6 +7,7 @@ type t =
     (* TODO: If is a Prim when Lazy *)
   | If of t * t * t
   | Cst of constant
+  [@@deriving sexp]
 
 and constant =
   | Nil
@@ -13,8 +16,10 @@ and constant =
   | Int of int
   | Bool of bool
   | Prim of Intro.prim
+  [@@deriving sexp]
 
 type value = Cl of t * env
+  [@@deriving sexp]
 and env = (string * value) list
 
 
@@ -113,9 +118,7 @@ let rec force cl =
       | _ -> failwith "Non-boolean in if condition")
   | _ -> failwith "Unexpected closure during forcing"
 
-
 let eval t = evaluate (Cl (t, [])) []
-
 
 let rec string_of_value c =
   match c with

@@ -3,6 +3,9 @@
 (library
   (name lib)
   (modules
-    intro parser compiler
+    compiler debug
+    intro parser
     parse_cek anf CEK
-    parse_krivine krivine))
+    parse_krivine krivine)
+  (libraries sexplib)
+  (preprocess (pps ppx_sexp_conv)))
