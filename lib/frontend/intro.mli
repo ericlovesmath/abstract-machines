@@ -2,6 +2,7 @@ type prim =
   | Atom | Cons | Cdr | Car
   | Add | Sub | Mul | Div
   | Eq | Gt | Lt | Ge | Le
+  | And | Or | Not | Neq
   [@@deriving sexp]
 
 type t =

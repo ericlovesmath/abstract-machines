@@ -127,7 +127,8 @@ let eval (code : t) : value =
 let rec string_of_value (v : value) : string =
   match v with
   | Int n -> string_of_int n
-  | Bool b -> string_of_bool b
+  | Bool true -> "#t"
+  | Bool false -> "#f"
   | List [] -> "nil"
   | List (v :: vs) -> string_of_value v ^ " :: " ^ string_of_value (List vs)
   | Closure (_, envref) ->

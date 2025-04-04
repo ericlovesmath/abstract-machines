@@ -18,6 +18,13 @@ type t =
   | Prim of prim
   [@@deriving sexp]
 
+let counter = ref 0
+
+let genvar () =
+  let v = "$sugar" ^ string_of_int !counter in
+  counter := !counter + 1;
+  v
+
 let rec desugar (t : Intro.t) : t =
   match t with
   | Nil -> Nil
@@ -28,18 +35,32 @@ let rec desugar (t : Intro.t) : t =
   | Lambda (args, b) -> Lambda (args, desugar b)
   | LambdaRec (f, args, b) -> LambdaRec (f, args, desugar b)
   | Call (f, args) -> Call (desugar f, List.map desugar args)
-  | Prim p ->
-      (match p with
-      | Atom -> Prim Atom
-      | Cons -> Prim Cons
-      | Cdr -> Prim Cdr
-      | Car -> Prim Car
-      | Add -> Prim Add
-      | Sub -> Prim Sub
-      | Mul -> Prim Mul
-      | Div -> Prim Div
-      | Eq -> Prim Eq
-      | Gt -> Prim Gt
-      | Lt -> Prim Lt
-      | Ge -> Prim Ge
-      | Le -> Prim Le)
+  | Prim p -> desugar_prim p
+
+and desugar_prim (p : Intro.prim) =
+  match p with
+  | And ->
+      let (l, r) = (genvar (), genvar ()) in
+      Lambda ([ l; r ], If (Var l, If (Var r, Bool true, Bool false), Bool false))
+  | Or ->
+      let (l, r) = (genvar (), genvar ()) in
+      Lambda ([ l; r ], If (Var l, Bool true, If (Var r, Bool true, Bool false)))
+  | Not ->
+      let x = genvar () in
+      Lambda ([ x ], If (Var x, Bool false, Bool true))
+  | Neq ->
+      let (l, r) = (genvar (), genvar ()) in
+      Lambda ([ l; r ], If (Call (Prim Eq, [Var l; Var r]), Bool false, Bool true))
+  | Atom -> Prim Atom
+  | Cons -> Prim Cons
+  | Cdr -> Prim Cdr
+  | Car -> Prim Car
+  | Add -> Prim Add
+  | Sub -> Prim Sub
+  | Mul -> Prim Mul
+  | Div -> Prim Div
+  | Eq -> Prim Eq
+  | Gt -> Prim Gt
+  | Lt -> Prim Lt
+  | Ge -> Prim Ge
+  | Le -> Prim Le

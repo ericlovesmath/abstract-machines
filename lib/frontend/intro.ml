@@ -5,6 +5,7 @@ type prim =
   | Atom | Cons | Cdr | Car
   | Add | Sub | Mul | Div
   | Eq | Gt | Lt | Ge | Le
+  | And | Or | Not | Neq
   [@@deriving sexp]
 
 type t =
@@ -36,6 +37,10 @@ let primP =
   <|> (Prim Gt <$ charP '>')
   <|> (Prim Le <$ stringP "<=")
   <|> (Prim Ge <$ stringP ">=")
+  <|> (Prim And <$ stringP "and")
+  <|> (Prim Or <$ stringP "or")
+  <|> (Prim Not <$ stringP "not")
+  <|> (Prim Neq <$ stringP "!=")
 
 (** alphabetic followed by (possibly multiple) ' *)
 let variableP =

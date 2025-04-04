@@ -15,3 +15,6 @@
 
 // OUTPUT: 8
 (if (if #f (< 1 2) (< 2 1)) 7 8)
+
+// OUTPUT: #f
+(!= (and #t #f) (or #f #f))

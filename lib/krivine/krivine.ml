@@ -121,7 +121,8 @@ let eval t = evaluate (Cl (t, [])) []
 let rec string_of_const c =
   match c with
   | Int i -> string_of_int i
-  | Bool b -> string_of_bool b
+  | Bool true -> "#t"
+  | Bool false -> "#f"
   | Nil -> "nil"
   | Prim _ -> "<primitive>"
   | Cons (hd, tl) ->

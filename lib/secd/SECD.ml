@@ -102,5 +102,6 @@ let rec string_of_value (v : value) : string =
   | List [] -> "nil"
   | List (v :: vs) -> string_of_value v ^ " :: " ^ string_of_value (List vs)
   | Int n -> string_of_int n
-  | Bool b -> string_of_bool b
+  | Bool true -> "#t"
+  | Bool false -> "#f"
   | Func _ -> "<func>"
