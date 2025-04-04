@@ -68,6 +68,9 @@
     - Merge SECD code as well (testing and debug)
     - Rename and move everything to one folder!
 
+* Native booleans
+* Desugaring and, or, not, neq
+
 ## TODO
 
 * GADT implementation for ANF conversion
@@ -77,8 +80,6 @@
 * Mutual Recursion
 * Add top level defines
 * Fix `letrec` for SECD
-* Integrate different compilers as modules together to one file
-* Cleaning up Krivine codebase (renaming needed)
 * Use `(include_subdirs qualified)`
 * Fix `dune test` to test each backend
 
