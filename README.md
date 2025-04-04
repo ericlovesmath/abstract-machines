@@ -1,7 +1,5 @@
 # Abstract Machine Exploration
 
-NOTE: Krivine is currently merged with CEK, usage not up to date. Run `dune exec CEK -- -help` for details.
-
 Implementing Abstract machines targeted by functional compilers:
 
 - **SECD Machine**: Described in [The Mechanical Evaluation of Expressions](https://jhc.sjtu.edu.cn/~yutingwang/files/fp/landin-1964.pdf) by P. J. Ladin, the SECD Machine is designed to evaluate the lambda calculus. It uses a Stack (S) to store intermediary values, an Environment (E) to store mappings from variables to values, a Control (C) to identify the code currently being executed, and a Dump (D) to store previous contexts of the machine to jump back later.
@@ -12,8 +10,8 @@ Implementing Abstract machines targeted by functional compilers:
 
 Instructions (execute inside folder for any `<machine>`)
 
-- REPL: `dune exec <machine>` (Suggested to run with [rlwrap](https://github.com/hanslub42/rlwrap) for convenience)
-- Interactive Shell: `dune utop`, then `open Lib;;`
-- Tests: `dune clean && dune build && dune test`
+- REPL: `dune exec abstract_machines -- -machine <machine>` (Suggested to run with [rlwrap](https://github.com/hanslub42/rlwrap) for convenience)
+- Debug: `dune exec abstract_machines -- -machine <machine> -debug`
+- Tests: `dune test` (need to `dune clean && dune build` when modifying `tests/*.src` files)
 
-See `<machine>/test/tests/*.src` files for examples
+See `test/tests/*.src` files for examples!

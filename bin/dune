@@ -1,4 +1,4 @@
 (executable
- (public_name CEK)
+ (public_name abstract_machines)
  (name main)
  (libraries lib))

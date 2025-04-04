@@ -1,6 +1,6 @@
 (lang dune 3.17)
 
-(name CEK)
+(name abstract_machines)
 
 (generate_opam_files true)
 
@@ -8,6 +8,6 @@
  (github ericlovesmath/abstract-machines))
 
 (package
- (name CEK)
- (synopsis "CEK Compiler")
+ (name abstract_machines)
+ (synopsis "SECD, CEK, and Krivine backed compilers with shared frontend")
  (depends ocaml))
