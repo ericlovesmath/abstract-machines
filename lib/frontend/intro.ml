@@ -50,6 +50,9 @@ let trimP =
   in
   (() <$ many1 commentP) <|> (() <$ spacesP)
 
+(** [let*], but trims comments and whitespace off end *)
+let ( let- ) p f = (p <* trimP) >>= f
+
 let parensPT left right p =
   charP left *> strip p <* charP right
 
@@ -78,29 +81,27 @@ let rec introP st =
   (nilP <|> integerP <|> boolP <|> primP <|> ifP <|> lambdaP <|> letP <|> callP <|> listP <|> variableP) st
 
 and ifP st =
-  begin
-    let* _ = charP '(' <* many emptyP <* stringP "if" <* trimP in
-    let* c = introP <* trimP in
-    let* t = introP <* trimP in
-    let* f = introP <* many emptyP <* charP ')' in
+  parensPT '(' ')' (
+    let- _ = stringP "if" in
+    let- c = introP in
+    let- t = introP in
+    let* f = introP in
     pure (If (c, t, f))
-  end st
+  ) st
 
 and lambdaP st =
-  begin
-    parensPT '(' ')' (
-      let* _ = stringP "lambda" <* trimP in
-      let* args = varlistP <* trimP in
-      let* body = introP in
-      pure (Lambda (args, body))
-    )
-  end st
+  parensPT '(' ')' (
+    let- _ = stringP "lambda" in
+    let- args = varlistP in
+    let* body = introP in
+    pure (Lambda (args, body))
+  ) st
 
 and letP st =
   parensPT '(' ')' (
-    let* letkind = (`LetRec <$ stringP "letrec") <|> (`Let <$ stringP "let") in
-    let* args = spacesP *> varlistP <* trimP in
-    let* bind = introP <* trimP in
+    let- letkind = (`LetRec <$ stringP "letrec") <|> (`Let <$ stringP "let") in
+    let- args = varlistP in
+    let- bind = introP in
     let* body = introP in
     match args with
     | [] -> fail
@@ -111,13 +112,13 @@ and letP st =
   ) st
 
 and callP st =
-  begin
-    let* exprs = parensPT '(' ')' (sepBy1 trimP introP) in
+  parensPT '(' ')' (
+    let* exprs = sepBy1 trimP introP in
     match exprs with
     | [] -> fail
     | [e] -> pure e  (* Make single parens optional *)
     | e :: es -> pure (Call (e, es))
-  end st
+  ) st
 
 (** parses syntactic sugar for lists *)
 and listP st =
