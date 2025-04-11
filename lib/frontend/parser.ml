@@ -6,12 +6,15 @@ type 'a parser = char list -> ('a * char list) option
 
 (* TODO: Document these Haskell-like functions *)
 let pure (x : 'a) : 'a parser = fun st -> Some (x, st)
+let fail : 'a parser = fun _ -> None
 
 let ( >>= ) (p : 'a parser) (f : 'a -> 'b parser) : 'b parser =
   fun st ->
     match p st with
     | None -> None
     | Some (a, st') -> f a st'
+
+let ( let* ) = ( >>= )
 
 let ( <*> ) (pf : ('a -> 'b) parser) (px : 'a parser) : 'b parser =
   let (let*) = Option.bind in

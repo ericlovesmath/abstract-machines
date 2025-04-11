@@ -12,10 +12,12 @@ type t =
   | Nil
   | Int of int
   | Bool of bool
+  | List of t list
   | Var of string
   | If of t * t * t
   | Lambda of string list * t
-  | LambdaRec of string * string list * t
+  | Let of string * string list * t * t
+  | LetRec of string * string list * t * t
   | Call of t * t list
   | Prim of prim
   [@@deriving sexp]
@@ -42,70 +44,84 @@ let primP =
   <|> (Prim Not <$ stringP "not")
   <|> (Prim Neq <$ stringP "!=")
 
+let trimP = 
+  let commentP =
+    strip (charP ';' <* many (satisfy (fun c -> c <> '\n')))
+  in
+  (() <$ many1 commentP) <|> (() <$ spacesP)
+
+let parensPT left right p =
+  charP left *> strip p <* charP right
+
 (** alphabetic followed by (possibly multiple) ' *)
-let variableP =
-  let keywordP = ( @ ) <$> alphaP <*> many (charP '\'') in
-  (fun v -> Var v) <$> (implode <$> keywordP)
+let varstrP =
+  let* keyword = ( @ ) <$> alphaP <*> many (charP '\'') in
+  pure (implode keyword)
+
+let varlistP =
+  parensPT '(' ')' (sepBy1 trimP varstrP) <|> ((fun x -> [x]) <$> varstrP)
+
+let variableP = (fun v -> Var v) <$> varstrP
 
 (** numeric, possibly preceeded by +/- *)
 let integerP =
-  let numP =
+  let* num =
     numericP
       <|> (List.cons <$> charP '-' <*> numericP)
       <|> (List.cons <$> charP '+' <*> numericP)
   in
-  (fun v -> Int v) <$> (int_of_string <$> (implode <$> numP))
+  pure (Int (int_of_string (implode num)))
 
 let boolP = (Bool true <$ stringP "#t") <|> (Bool false <$ stringP "#f")
 
-let listPT (p : 'a parser) (left : char) (right : char) : 'a list parser =
-  charP left *> strip (sepBy1 spacesP p) <* charP right
+let rec introP st =
+  (nilP <|> integerP <|> boolP <|> primP <|> ifP <|> lambdaP <|> letP <|> callP <|> listP <|> variableP) st
 
-let rec introP st = (nilP <|> integerP <|> boolP <|> primP <|> variableP <|> callP <|> listP) st
+and ifP st =
+  begin
+    let* _ = charP '(' <* many emptyP <* stringP "if" <* trimP in
+    let* c = introP <* trimP in
+    let* t = introP <* trimP in
+    let* f = introP <* many emptyP <* charP ')' in
+    pure (If (c, t, f))
+  end st
 
-(** lambdas, let bindings, and calls *)
+and lambdaP st =
+  begin
+    parensPT '(' ')' (
+      let* _ = stringP "lambda" <* trimP in
+      let* args = varlistP <* trimP in
+      let* body = introP in
+      pure (Lambda (args, body))
+    )
+  end st
+
+and letP st =
+  parensPT '(' ')' (
+    let* letkind = (`LetRec <$ stringP "letrec") <|> (`Let <$ stringP "let") in
+    let* args = spacesP *> varlistP <* trimP in
+    let* bind = introP <* trimP in
+    let* body = introP in
+    match args with
+    | [] -> fail
+    | value :: args ->
+        match letkind with
+        | `Let -> pure (Let (value, args, bind, body))
+        | `LetRec -> pure (LetRec (value, args, bind, body))
+  ) st
+
 and callP st =
-  let string_of_var = function
-    | Var v -> v
-    | _ -> failwith "Intro.callP: Expected vars in lambda args"
-  in
-  let call_of_list = function
-    | [] -> failwith "unreachable: sepBy1 used in listPT"
-    | [e] -> e
-
-    | [Var "lambda"; Var v; b] ->
-        Lambda ([v], b)
-    | [Var "lambda"; Call (v, vs); b] ->
-        Lambda (List.map string_of_var (v :: vs), b)
-    | Var "lambda" :: _ ->
-        failwith "Intro.parse: `lambda` has incorrect form"
-
-    | [Var "let"; Var v; bind; body] ->
-        Call (Lambda ([v], body), [bind])
-    | [Var "let"; Call (Var f, args); bind; body] ->
-        Call (Lambda ([f], body), [Lambda (List.map string_of_var args, bind)])
-    | Var "let" :: _ ->
-        failwith "Intro.parse: `let` has incorrect form"
-
-    | [Var "letrec"; Var v; bind; body] ->
-        Call (Lambda ([v], body), [LambdaRec (v, [], bind)])
-    | [Var "letrec"; Call (Var f, args); bind; body] ->
-        Call (Lambda ([f], body), [LambdaRec (f, List.map string_of_var args, bind)])
-    | Var "letrec" :: _ ->
-        failwith "Intro.parse: `letrec` has incorrect form"
-
-    | [Var "if"; c; t; f] -> If (c, t, f)
-
-    | e :: es -> Call (e, es)
-  in
-  (call_of_list <$> listPT introP '(' ')') st
+  begin
+    let* exprs = parensPT '(' ')' (sepBy1 trimP introP) in
+    match exprs with
+    | [] -> fail
+    | [e] -> pure e  (* Make single parens optional *)
+    | e :: es -> pure (Call (e, es))
+  end st
 
 (** parses syntactic sugar for lists *)
 and listP st =
-  let ast_of_list es =
-    List.fold_right (fun x acc -> Call (Prim Cons, [x; acc])) es Nil
-  in 
-  (ast_of_list <$> listPT introP '[' ']') st
+  ((fun l -> List l) <$> parensPT '[' ']' (sepBy trimP introP)) st
 
 let parse s =
   match (strip introP) (explode s) with

@@ -1,6 +1,6 @@
 // OUTPUT: 21
 (let (compose f g)
-    (lambda x (f (g x)))
+  (lambda x (f (g x)))
 
   (let f (compose
     (lambda x (+ x 1))

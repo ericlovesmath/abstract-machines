@@ -18,3 +18,10 @@
 
 // OUTPUT: #f
 (!= (and #t #f) (or #f #f))
+
+// OUTPUT: 3
+(+ ; Comments can be inlines
+    ; Or in newlines
+    1 ; And ignores all expressions after the semicolon
+    2
+)

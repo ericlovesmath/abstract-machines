@@ -9,10 +9,12 @@ type t =
   | Nil
   | Int of int
   | Bool of bool
+  | List of t list
   | Var of string
   | If of t * t * t
   | Lambda of string list * t
-  | LambdaRec of string * string list * t
+  | Let of string * string list * t * t
+  | LetRec of string * string list * t * t
   | Call of t * t list
   | Prim of prim
   [@@deriving sexp]

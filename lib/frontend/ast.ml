@@ -29,11 +29,22 @@ let rec desugar (t : Intro.t) : t =
   match t with
   | Nil -> Nil
   | Int i -> Int i
+  | List es ->
+      List.fold_right
+        (fun x acc -> Call (Prim Cons, [x; acc]))
+        (List.map desugar es) Nil
   | Bool b -> Bool b
   | Var v -> Var v
   | If (c, t, f) -> If (desugar c, desugar t, desugar f)
   | Lambda (args, b) -> Lambda (args, desugar b)
-  | LambdaRec (f, args, b) -> LambdaRec (f, args, desugar b)
+  | Let (v, [], bind, body) ->
+      Call (Lambda ([v], desugar body), [desugar bind])
+  | Let (f, args, bind, body) ->
+      Call (Lambda ([f], desugar body), [Lambda (args, desugar bind)])
+  | LetRec (v, [], bind, body) ->
+      Call (Lambda ([v], desugar body), [LambdaRec (v, [], desugar bind)])
+  | LetRec (f, args, bind, body) ->
+      Call (Lambda ([f], desugar body), [LambdaRec (f, args, desugar bind)])
   | Call (f, args) -> Call (desugar f, List.map desugar args)
   | Prim p -> desugar_prim p
 

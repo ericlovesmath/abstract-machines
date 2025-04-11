@@ -6,7 +6,9 @@ val implode : char list -> string
 type 'a parser = char list -> ('a * char list) option
 
 val pure : 'a -> 'a parser
+val fail : 'a parser
 val ( >>= ) : 'a parser -> ('a -> 'b parser) -> 'b parser
+val ( let* ) : 'a parser -> ('a -> 'b parser) -> 'b parser
 val ( <*> ) : ('a -> 'b) parser -> 'a parser -> 'b parser
 val ( <$> ) : ('a -> 'b) -> 'a parser -> 'b parser
 val ( <|> ) : 'a parser -> 'a parser -> 'a parser
@@ -30,5 +32,6 @@ val stringP : string -> char list parser
 val alphaP : char list parser
 val numericP : char list parser
 
+val emptyP : char parser
 val strip : 'a parser -> 'a parser
 val spacesP : char list parser
