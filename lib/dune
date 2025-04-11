@@ -1,12 +1,6 @@
-(include_subdirs unqualified)
+(include_subdirs qualified)
 
 (library
   (name lib)
-  (modules
-    parser intro ast      ; Frontend
-    assign flatten SECD   ; SECD
-    parse_cek anf CEK     ; CEK
-    parse_krivine krivine ; Krivine
-    compiler debug)
   (libraries sexplib)
   (preprocess (pps ppx_sexp_conv)))

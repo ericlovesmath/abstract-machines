@@ -77,21 +77,17 @@
 * Rewrite parser combinators to use monadic form instead
 * Add comment parser
 * Add desugaring for `let*` and `letrec*`, add tests
+* Use `(include_subdirs qualified)` (this took too long)
 
 ## TODO
 
-* Fix SECD Issue with minimal examples
+* Fix `letrec` SECD Issue with minimal examples
 * Read Turner Paper
 * Try CESK Implementation
-* Actual Base implementation with real repl
+* Actual Base implementation with real REPL
 * Add examples to README
 * Mutual Recursion
-* Add top level defines
-* Fix `letrec` for SECD
-* Use `(include_subdirs qualified)`
-* Fix `dune test` to test each backend separately
+* Add top level defines (environment/machine passing)
 
-* Refactor everything
 * Consider CESK Machine, Forth, P-System, Smalltalk-80, etc.
-
 * Typechecking and Error handling

@@ -2,9 +2,9 @@ open Lib
 
 let help = "Usage: dune exec abstract_machines -- [-machine MACHINE] [-file FILENAME|-code CODE] [-debug]"
 
-module SECDRepl = Repl.Make(Compiler.SECD)
-module CEKRepl = Repl.Make(Compiler.CEK)
-module KrivineRepl = Repl.Make(Compiler.Krivine)
+module SECDRepl = Repl.Make(SECD)
+module CEKRepl = Repl.Make(CEK)
+module KrivineRepl = Repl.Make(Krivine)
 
 let () =
   let machine = ref "" in

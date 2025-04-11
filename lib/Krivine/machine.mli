@@ -11,7 +11,7 @@ and const =
   | Cons of t * t Lazy.t
   | Int of int
   | Bool of bool
-  | Prim of Ast.prim
+  | Prim of Frontend.Ast.prim
 
 type closure = Cl of t * env
   [@@deriving sexp]

@@ -1,5 +1,5 @@
-let flatten (ast : Assign.t) : SECD.instr list =
-  let rec aux (acc : SECD.instr list) (ast : Assign.t) : SECD.instr list=
+let flatten (ast : Assign.t) : Machine.instr list =
+  let rec aux (acc : Machine.instr list) (ast : Assign.t) : Machine.instr list=
     match ast with
     | Nil -> NIL :: acc
     | Int i -> LDC :: Int i :: acc

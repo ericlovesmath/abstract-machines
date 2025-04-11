@@ -1,2 +1,2 @@
 (** Converts General AST to Krivine-specific AST *)
-val parse : Ast.t -> Krivine.t
+val parse : Frontend.Ast.t -> Machine.t

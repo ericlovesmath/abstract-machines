@@ -6,6 +6,12 @@ module type Compiler = sig
   val string_of_value : value -> string
 end
 
-module SECD : Compiler
-module CEK : Compiler
-module Krivine : Compiler
+module type Compilable = sig
+  type value
+
+  val name : string
+  val execute : Frontend.Ast.t -> value
+  val string_of_value : value -> string
+end
+
+module Make : functor (_ : Compilable) -> Compiler

@@ -1,4 +1,4 @@
-open CEK
+open Machine
 
 let counter = ref 0
 
@@ -12,7 +12,7 @@ let make_binop (cons : t -> t -> t) : t =
     let y = genvar () in
     Fn ([x; y], cons (Var x) (Var y))
 
-let rec parse (e : Ast.t) : CEK.t =
+let rec parse (e : Frontend.Ast.t) : Machine.t =
   match e with
   | Nil -> Nil
   | Int n -> Int n

@@ -1,4 +1,4 @@
-open Lib.Compiler
+open Lib
 
 let base =
   ["basics"; "fails"; "higher-ordered"; "lambdas"; "letrec"; "y-combinator"]

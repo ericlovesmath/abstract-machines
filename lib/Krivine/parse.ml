@@ -1,4 +1,4 @@
-open Krivine
+open Machine
 
 let y_combinator =
   Grab
@@ -7,7 +7,7 @@ let y_combinator =
         ( Grab ("x", Push (Access "f", Push (Access "x", Access "x"))),
           Grab ("x", Push (Access "f", Push (Access "x", Access "x"))) ) )
 
-let rec parse (e : Ast.t) : Krivine.t =
+let rec parse (e : Frontend.Ast.t) : Machine.t =
   match e with
   | Nil -> Cst Nil
   | Int n -> Cst (Int n)
