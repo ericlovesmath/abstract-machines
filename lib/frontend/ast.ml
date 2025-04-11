@@ -45,6 +45,14 @@ let rec desugar (t : Intro.t) : t =
       Call (Lambda ([v], desugar body), [LambdaRec (v, [], desugar bind)])
   | LetRec (f, args, bind, body) ->
       Call (Lambda ([f], desugar body), [LambdaRec (f, args, desugar bind)])
+  | LetStar ((f, args, bind) :: rem, body) ->
+      desugar (Let (f, args, bind, LetStar (rem, body)))
+  | LetStar ([], body) ->
+      desugar body
+  | LetRecStar ((f, args, bind) :: rem, body) ->
+      desugar (LetRec (f, args, bind, LetRecStar (rem, body)))
+  | LetRecStar ([], body) ->
+      desugar body
   | Call (f, args) -> Call (desugar f, List.map desugar args)
   | Prim p -> desugar_prim p
 

@@ -8,3 +8,8 @@
 (let (add x y)
     (+ x y)
     (add 7 3))
+
+// OUTPUT: 30
+(let* (add x y) (+ x y)
+      (times x y) (* x y)
+(times (add 7 3) (add 1 2)))

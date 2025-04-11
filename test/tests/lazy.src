@@ -1,63 +1,69 @@
 // OUTPUT: 1 :: 1 :: 2 :: 3 :: 5 :: 8 :: 13 :: 21 :: 34 :: 55 :: nil
 (letrec (fib a b)
     (cons a (fib b (+ a b)))
+
 (letrec (take n xs)
     (if (= n 0)
         nil
         (cons (car xs) (take (- n 1) (cdr xs))))
+
 (take 10 (fib 1 1))))
 
 
 
 // OUTPUT: 1 :: 1 :: 2 :: 3 :: 5 :: 8 :: 13 :: 21 :: 34 :: 55 :: nil
-(letrec (zipwith f xs ys)
-    (cons (f (car xs) (car ys))
-          (zipwith f (cdr xs) (cdr ys)))
-(letrec fibs
-    (cons 1 (cons 1 (zipwith + fibs (cdr fibs))))
-(letrec (take n xs)
-    (if (= n 0)
-        nil
-        (cons (car xs) (take (- n 1) (cdr xs))))
-(take 10 fibs))))
+(letrec*
+    (zipwith f xs ys)
+        (cons (f (car xs) (car ys))
+              (zipwith f (cdr xs) (cdr ys)))
+
+    fibs
+        (cons 1 (cons 1 (zipwith + fibs (cdr fibs))))
+
+    (take n xs)
+        (if (= n 0)
+            nil
+            (cons (car xs) (take (- n 1) (cdr xs))))
+
+(take 10 fibs))
 
 
 
 // OUTPUT: 0 :: 2 :: 4 :: 6 :: 8 :: nil
-(letrec (filter f xs)
- (if (atom xs)
-   nil
-   (if (f (car xs))
-        (cons (car xs) (filter f (cdr xs)))
+(letrec*
+    (filter f xs)
+        (if (atom xs)
+            nil
+        (if (f (car xs))
+            (cons (car xs) (filter f (cdr xs)))
         (filter f (cdr xs))))
 
-(letrec (take n xs)
-    (if (= n 0)
-        nil
-        (cons (car xs) (take (- n 1) (cdr xs))))
+    (take n xs)
+        (if (= n 0)
+            nil
+            (cons (car xs) (take (- n 1) (cdr xs))))
 
-(letrec (natsfrom n)
-    (cons n (natsfrom (+ n 1)))
+    (natsfrom n)
+        (cons n (natsfrom (+ n 1)))
 
 (let (even x) (= (* 2 (/ x 2)) x)
 
-(take 5 (filter even (natsfrom 0)))))))
+(take 5 (filter even (natsfrom 0)))))
 
 
 
 
 // OUTPUT: 0 :: 2 :: 4 :: 6 :: 8 :: nil
-(letrec (take n xs)
-    (if (= n 0)
-        nil
-        (cons (car xs) (take (- n 1) (cdr xs))))
+(letrec*
+    (take n xs)
+        (if (= n 0)
+            nil
+            (cons (car xs) (take (- n 1) (cdr xs))))
+    (map f xs)
+        (if (atom xs)
+            nil
+            (cons (f (car xs)) (map f (cdr xs))))
+    nats
+        (cons 0 (map (lambda x (+ x 1)) nats))
 
-(letrec (map f xs)
- (if (atom xs)
-   nil
-   (cons (f (car xs)) (map f (cdr xs))))
-
-(letrec nats
-    (cons 0 (map (lambda x (+ x 1)) nats))
-
-(take 5 (map (lambda x (* x 2)) nats)))))
+(take 5 (map (lambda x (* x 2)) nats)))

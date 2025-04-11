@@ -69,25 +69,29 @@
     - Rename and move everything to one folder!
 
 * Native booleans
-* Desugaring and, or, not, neq
+* Desugaring list, and, or, not, neq
 * Add `base` option with small standard lib
+
+# Week 12
+
+* Rewrite parser combinators to use monadic form instead
+* Add comment parser
+* Add desugaring for `let*` and `letrec*`, add tests
 
 ## TODO
 
-* GADT implementation for ANF conversion
+* Fix SECD Issue with minimal examples
+* Read Turner Paper
+* Try CESK Implementation
+* Actual Base implementation with real repl
 * Add examples to README
-* Fix bad code and ADT names
-* Add comments
 * Mutual Recursion
 * Add top level defines
 * Fix `letrec` for SECD
 * Use `(include_subdirs qualified)`
-* Fix `dune test` to test each backend
+* Fix `dune test` to test each backend separately
 
 * Refactor everything
 * Consider CESK Machine, Forth, P-System, Smalltalk-80, etc.
 
-* Add more syntactic sugar
-* Add comment parser
 * Typechecking and Error handling
-* Generalize tests for different machines

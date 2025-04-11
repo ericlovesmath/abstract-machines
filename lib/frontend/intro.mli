@@ -15,6 +15,8 @@ type t =
   | Lambda of string list * t
   | Let of string * string list * t * t
   | LetRec of string * string list * t * t
+  | LetStar of (string * string list * t) list * t
+  | LetRecStar of (string * string list * t) list * t
   | Call of t * t list
   | Prim of prim
   [@@deriving sexp]

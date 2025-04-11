@@ -18,6 +18,8 @@ type t =
   | Lambda of string list * t
   | Let of string * string list * t * t
   | LetRec of string * string list * t * t
+  | LetStar of (string * string list * t) list * t
+  | LetRecStar of (string * string list * t) list * t
   | Call of t * t list
   | Prim of prim
   [@@deriving sexp]
@@ -78,7 +80,7 @@ let integerP =
 let boolP = (Bool true <$ stringP "#t") <|> (Bool false <$ stringP "#f")
 
 let rec introP st =
-  (nilP <|> integerP <|> boolP <|> primP <|> ifP <|> lambdaP <|> letP <|> callP <|> listP <|> variableP) st
+  (nilP <|> integerP <|> boolP <|> primP <|> ifP <|> lambdaP <|> letP <|> letstarP <|> callP <|> listP <|> variableP) st
 
 and ifP st =
   parensPT '(' ')' (
@@ -109,6 +111,24 @@ and letP st =
         match letkind with
         | `Let -> pure (Let (value, args, bind, body))
         | `LetRec -> pure (LetRec (value, args, bind, body))
+  ) st
+
+and letstarP st =
+  parensPT '(' ')' (
+    let- letkind = (`LetRec <$ stringP "letrec*") <|> (`Let <$ stringP "let*") in
+    let* val_and_binds =
+      many (
+        let- args = varlistP in
+        let- bind = introP in
+        match args with
+        | [] -> fail
+        | value :: args' -> pure (value, args', bind)
+      )
+    in
+    let* body = introP in
+    match letkind with
+    | `Let -> pure (LetStar (val_and_binds, body))
+    | `LetRec -> pure (LetRecStar (val_and_binds, body))
   ) st
 
 and callP st =

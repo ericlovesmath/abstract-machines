@@ -23,10 +23,9 @@
    init
    (f (car xs) (fold f init (cdr xs))))
 
-(let (len xs) (fold (lambda (x acc) (+ acc 1)) 0 xs)
-(let (sum xs) (fold (lambda (x acc) (+ acc x)) 0 xs)
-(let (prod xs) (fold (lambda (x acc) (* acc x)) 1 xs)
+(let* (len xs)  (fold (lambda (x acc) (+ acc 1)) 0 xs)
+      (sum xs)  (fold (lambda (x acc) (+ acc x)) 0 xs)
+      (prod xs) (fold (lambda (x acc) (* acc x)) 1 xs)
+      list      [3 5 7 8]
 
-(let list [3 5 7 8]
-
-[(len list) (sum list) (prod list)] )))))
+[(len list) (sum list) (prod list)] ))
