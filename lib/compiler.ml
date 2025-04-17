@@ -16,7 +16,7 @@ module type Compilable = sig
   val string_of_value : value -> string
 end
 
-module Make(C : Compilable) : Compiler = struct
+module Make (C : Compilable) : Compiler = struct
   type value = C.value
 
   let name = C.name

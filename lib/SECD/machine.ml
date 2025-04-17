@@ -30,8 +30,8 @@ type t = {
 }
 
 let init (instrs : instr list) : t =
-  ignore (instrs);
-  let instrs =
+  (* ignore (instrs); *)
+  (* let instrs = *)
   (*   [NIL; *)
   (*     DUM; *)
   (*     LDF; *)
@@ -40,25 +40,62 @@ let init (instrs : instr list) : t =
   (*     LDF; *)
   (*     List [NIL; LDC; (Int 10); CONS; LD; (Int 0); (Int 0); RAP; RTN]; (* Notice the RAP *) *)
   (*   AP] *)
-    [NIL;
-    DUM;
-    LDF;
-    List
-      [LDC;
-        (Int 0);
-        LD;
-        (Int 0);
-        (Int 1);
-        EQ;
-        SEL;
-        (List [LDC; (Int 5); JOIN]);
-        (List [NIL; LDC; (Int 0); CONS; LD; (Int 0); (Int 0); RAP; JOIN]);
-        RTN];
-      CONS;
-    LDF;
-    List [NIL; LDC; (Int 10); CONS; LD; (Int 0); (Int 0); RAP; RTN];
-    AP]
-  in
+
+    (* [NIL; *)
+    (* DUM; *)
+    (* LDF; *)
+    (* List *)
+    (*   [LDC; *)
+    (*     (Int 0); *)
+    (*     LD; *)
+    (*     (Int 0); *)
+    (*     (Int 1); *)
+    (*     EQ; *)
+    (*     SEL; *)
+    (*     (List [LDC; (Int 5); JOIN]); *)
+    (*     (List [NIL; LDC; (Int 0); CONS; LD; (Int 0); (Int 0); RAP; JOIN]); *)
+    (*     RTN]; *)
+    (*   CONS; *)
+    (* LDF; *)
+    (* List [NIL; LDC; (Int 10); CONS; LD; (Int 0); (Int 0); RAP; RTN]; *)
+    (* AP] *)
+
+    (* [NIL; *)
+    (* DUM; *)
+    (* LDF; *)
+    (* (List *)
+    (* [LDC; *)
+    (*   (Int 1); *)
+    (*   LD; *)
+    (*   (Int 0); *)
+    (*   (Int 1); *)
+    (*   LT; *)
+    (*   SEL; *)
+    (*   (List [LDC; (Int 1); JOIN]); *)
+    (*   (List *)
+    (*     [LD; *)
+    (*       (Int 0); *)
+    (*       (Int 1); *)
+    (*       NIL; *)
+    (*       LDC; *)
+    (*       (Int 1); *)
+    (*       LD; *)
+    (*       (Int 0); *)
+    (*       (Int 1); *)
+    (*       SUB; *)
+    (*       CONS; *)
+    (*       LD; *)
+    (*       (Int 0); *)
+    (*       (Int 0); *)
+    (*       RAP; *)
+    (*       MUL; *)
+    (*       JOIN]); *)
+    (*   RTN]); *)
+    (* CONS; *)
+    (* LDF; *)
+    (* (List [NIL; LDC; (Int 10); CONS; LD; (Int 0); (Int 0); RAP; RTN]); (* Notice this change *) *)
+    (* AP] *)
+  (* in *)
   { stack = []; env = []; code = instrs; dump = [] }
 
 let is_atomic (value : value) =
@@ -109,30 +146,38 @@ let eval_step (state : t) : t =
   | _, _, LDF :: List f :: c', _ ->
       { stack = Func (f, env) :: stack; env; code = c'; dump }
   | Func (f, e') :: List v :: s', _, AP :: c', _ ->
-      let sexp_of_values instrs =
-        Sexplib.Sexp.List (List.map sexp_of_value instrs)
-      in
-      Debug.print_pass "SECD AP GOOD" (sexp_of_values stack);
+      (* let sexp_of_values instrs = *)
+      (*   Sexplib.Sexp.List (List.map sexp_of_value instrs) *)
+      (* in *)
+      (* Debug.print_pass "SECD AP GOOD" (sexp_of_values stack); *)
       { stack = []; env = v :: e'; code = f; dump = Stack s' :: Env env :: Code c' :: dump }
+  | _ , _ , AP :: _, _ ->
+      (* let sexp_of_values instrs = *)
+      (*   Sexplib.Sexp.List (List.map sexp_of_value instrs) *)
+      (* in *)
+      (* Debug.print_pass "SECD AP FAIL" (sexp_of_values stack); *)
+      failwith "SECD AP called without function"
   | x :: _, _, RTN :: [], Stack s :: Env e :: Code c :: d ->
       { stack = x :: s; env = e; code = c; dump = d }
 
   (* Recursive Functions *)
   | _, _, DUM :: c', _ -> { stack; env = [] :: env; code = c'; dump }
   | (Func (f, _ :: e') as func) :: List v :: s', _ :: e, RAP :: c', _ ->
-      let sexp_of_values instrs =
-        Sexplib.Sexp.List (List.map sexp_of_value instrs)
-      in
-      Debug.print_pass "SECD RAP GOOD" (sexp_of_values stack);
+      (* let sexp_of_values instrs = *)
+      (*   Sexplib.Sexp.List (List.map sexp_of_value instrs) *)
+      (* in *)
+      (* Debug.print_pass "SECD RAP GOOD" (sexp_of_values stack); *)
       { stack = []; env = (func :: v) :: e'; code = f; dump = Stack s' :: Env e :: Code c' :: dump }
   | _ , _ , RAP :: _, _ ->
-      let sexp_of_values instrs =
-        Sexplib.Sexp.List (List.map sexp_of_value instrs)
-      in
-      Debug.print_pass "SECD RAP FAIL" (sexp_of_values stack);
+      (* let sexp_of_values instrs = *)
+      (*   Sexplib.Sexp.List (List.map sexp_of_value instrs) *)
+      (* in *)
+      (* Debug.print_pass "SECD RAP FAIL" (sexp_of_values stack); *)
       failwith "SECD RAP called without function"
 
-  | _ -> failwith "SECD.eval_step: Encountered invalid state"
+  | _, _, instr :: _, _ ->
+      let instr_s = string_of_sexp (sexp_of_instr instr) in
+      failwith ("SECD.eval_step: Encountered invalid instr " ^ instr_s)
 
 
 let rec eval (state : t) : value =

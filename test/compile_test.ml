@@ -1,12 +1,11 @@
 open Lib
 
 let base =
-  ["basics"; "fails"; "higher-ordered"; "lambdas"; "letrec"; "y-combinator"]
+  [ "basics"; "fails"; "higher-ordered"; "lambdas"; "y-combinator"; "letrec" ]
 
 module SECDTester = Tester.Make (struct
   module C = SECD
-  (* TODO: Missing some passes, SECD not working *)
-  let files = ["basics"; "fails"; "lambdas"; "y-combinator"]
+  let files = base
 end)
 
 module CEKTester = Tester.Make (struct
