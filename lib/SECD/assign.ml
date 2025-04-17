@@ -26,19 +26,25 @@ let locate (locs : string list list) (var : string) : t =
   aux locs 0
 
 let assign_vars (ast : Frontend.Ast.t) : t =
-  let rec aux (locs : string list list) (ast : Frontend.Ast.t) : t =
+  let rec aux (locs : string list list) (recs : string list) (ast : Frontend.Ast.t) : t =
     match ast with
     | Nil -> Nil
     | Int i -> Int i
     | Bool b -> Bool b
-    | If (c, t, f) -> If (aux locs c, aux locs t, aux locs f)
+    | If (c, t, f) -> If (aux locs recs c, aux locs recs t, aux locs recs f)
     | Var v -> locate locs v
     | Prim f -> Prim f
-    | Lambda (args, b) -> Lambda (aux (args :: locs) b)
+    | Lambda (args, b) -> Lambda (aux (args :: locs) recs b)
     | LambdaRec (name, args, b) ->
         (* Add function name to environment before processing args *)
         let new_locs = (name :: args) :: locs in
-        LambdaRec (aux new_locs b)
-    | Call (f, args) -> Call (aux locs f, List.map (aux locs) args)
+        LambdaRec (aux new_locs (name :: recs) b)
+    | Call (f, args) ->
+        (* TEMP *)
+        match f with
+        | Var fname when List.mem fname recs -> 
+            CallRec (aux locs recs f, List.map (aux locs recs) args)
+        | _ ->
+            Call (aux locs recs f, List.map (aux locs recs) args)
   in
-  aux [] ast
+  aux [] [] ast
