@@ -3,6 +3,7 @@ open Sexplib.Std
 type t =
   | Var of string (* TODO: rm *)
   | S | K | Y | C | B | I | U | P
+  | If
   | Int of int
   | Bool of bool
   | Nil
@@ -13,11 +14,9 @@ type t =
 
 (* TODO: This is terrible but it works for now *)
 let remove_var (ast : t) : Combinator.t =
-  Debug.print_pass "RES" (sexp_of_t ast);
   Combinator.t_of_sexp (sexp_of_t ast)
 
 let rec abstract' (ast : Simplify.t) : t =
-  Debug.print_pass "ABS" (Simplify.sexp_of_t ast);
   match ast with
   (* TODO: rm *)
   | S -> S
@@ -28,6 +27,7 @@ let rec abstract' (ast : Simplify.t) : t =
   | I -> I
   | U -> U
   | P -> P
+  | If -> If
 
   | Nil -> Nil
   | Int i -> Int i

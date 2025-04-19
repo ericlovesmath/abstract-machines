@@ -6,6 +6,8 @@ type t =
   | Bool of bool
   | Var of string
   | Lambda of string list * t
+  | Y
+  | If
   | App of t * t
   | Prim of Frontend.Ast.prim
   [@@deriving sexp]
@@ -30,8 +32,7 @@ let uniquify (ast : Frontend.Ast.t) : t =
     | Bool b -> Bool b
     | Prim p -> Prim p
     | Var v -> Var (VarMap.find v m)
-    | If _ -> failwith "TODO"
-    | LambdaRec _ -> failwith "TODO"
+    | If (c, t, f) -> App (App (App (If, aux m c), aux m t), aux m f)
     | Call (f, args) ->
         List.fold_left (fun acc arg -> App (acc, (aux m arg))) (aux m f) args
     | Lambda (args, body) ->
@@ -41,5 +42,7 @@ let uniquify (ast : Frontend.Ast.t) : t =
         in
         let m' = List.fold_right add_arg args m in
         Lambda (List.map (Fun.flip VarMap.find m') args, aux m' body)
+    | LambdaRec (f, args, body) ->
+        App (Y, (aux m (Lambda (f :: args, body))))
   in
   aux VarMap.empty ast

@@ -2,6 +2,7 @@ open Sexplib.Std
 
 type t =
   | S | K | Y | C | B | I | U | P (* TODO: rm *)
+  | If
   | Nil
   | Int of int
   | Bool of bool
@@ -13,6 +14,8 @@ type t =
 
 let rec simplify (ast : Uniquify.t) : t =
   match ast with
+  | Y -> Y
+  | If -> If
   | Nil -> Nil
   | Int i -> Int i
   | Bool b -> Bool b
@@ -20,7 +23,10 @@ let rec simplify (ast : Uniquify.t) : t =
   | Prim p -> Prim p
 
   | App (f, x) -> App (simplify f, simplify x)
-  | Lambda ([], _) -> failwith "TODO"
+
+  (* Unreachable *)
+  | Lambda ([], body) -> Lam ("$thunk", simplify body)
+
   | Lambda ([arg], body) -> Lam (arg, simplify body)
 
   (* TODO: Use U/P/K *)

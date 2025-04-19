@@ -1,9 +1,11 @@
 open Sexplib.Std
 
 (* TODO: VERY TEMPORARY Combinator evalutor, to be replaced in C *)
+(* TODO: Make `If` lazy *)
 
 type t =
   | S | K | Y | C | B | I | U | P
+  | If
   | Int of int
   | Bool of bool
   | Nil
@@ -45,6 +47,9 @@ let rec eval c =
   | App (App (Prim Ge, Bool b), Bool b') -> Bool (b > b')
   | App (App (Prim Le, Bool b), Bool b') -> Bool (b < b')
 
+  | App (App (App (If, Bool true), t), _) -> t
+  | App (App (App (If, Bool false), _), f) -> f
+
   | App (x, y) ->
       let x' = eval x in
       let y' = eval y in
@@ -54,7 +59,7 @@ let rec eval c =
 
   | S | K | Y | C | B | I | U | P
   | Int _ | Bool _ | Nil | Cons _
-  | Prim _ -> c
+  | Prim _ | If -> c
 
 (*
 REPL Tests
