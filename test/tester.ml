@@ -52,7 +52,8 @@ module Make (T : Testable) : Tester = struct
       raise e
 
   let test () =
+    print_endline "===================\n";
     print_endline ("Running " ^ T.C.name ^ " tests...\n");
     List.iter (fun f -> run_file ("tests/" ^ f ^ ".src")) T.files;
-    print_endline "\nAll tests pass!\n"
+    print_endline "";
 end
