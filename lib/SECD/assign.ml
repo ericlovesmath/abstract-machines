@@ -25,23 +25,8 @@ let locate (locs : string list list) (var : string) : t =
   in
   aux locs 0
 
-(* TEMP *)
-let rec find_recs (ast : Frontend.Ast.t) : string list =
-  match ast with
-    | Nil
-    | Int _
-    | Bool _
-    | Prim _
-    | Var _ -> []
-    | If (c, t, f) -> find_recs c @ find_recs t @ find_recs f
-    | Lambda (_, b) -> find_recs b
-    | LambdaRec (name, _, b) ->
-        name :: find_recs b
-    | Call (_, args) -> List.concat_map find_recs args
-
-let assign_vars (ast : Frontend.Ast.t) : t =
-  let recs = find_recs ast in
-  let rec aux (locs : string list list) (ast : Frontend.Ast.t) : t =
+let assign_vars (ast : Recursion.t) : t =
+  let rec aux (locs : string list list) (ast : Recursion.t) : t =
     match ast with
     | Nil -> Nil
     | Int i -> Int i
@@ -54,12 +39,7 @@ let assign_vars (ast : Frontend.Ast.t) : t =
         (* Add function name to environment before processing args *)
         let new_locs = (name :: args) :: locs in
         LambdaRec (aux new_locs b)
-    | Call (f, args) ->
-        (* TEMP *)
-        match f with
-        | Var fname when List.mem fname recs -> 
-            CallRec (aux locs f, List.map (aux locs) args)
-        | _ ->
-            Call (aux locs f, List.map (aux locs) args)
+    | Call (f, args) -> Call (aux locs f, List.map (aux locs) args)
+    | CallRec (f, args) -> CallRec (aux locs f, List.map (aux locs) args)
   in
   aux [] ast

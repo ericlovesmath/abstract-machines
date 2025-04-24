@@ -12,4 +12,4 @@ type t =
   [@@deriving sexp]
 
 (** Replaces [Var v] with [Loc x y] in the SECD Env stack *)
-val assign_vars : Frontend.Ast.t -> t
+val assign_vars : Recursion.t -> t

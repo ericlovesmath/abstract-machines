@@ -8,6 +8,10 @@ include Compiler.Make (struct
 
   let execute program =
     program
+    |> Uniquify.uniquify
+    |> Debug.trace "uniquify" Frontend.Ast.sexp_of_t
+    |> Recursion.tag
+    |> Debug.trace "tag lambdarec" Recursion.sexp_of_t
     |> Assign.assign_vars
     |> Debug.trace "assign homes" Assign.sexp_of_t
     |> Flatten.flatten
