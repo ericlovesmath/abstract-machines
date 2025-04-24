@@ -10,12 +10,12 @@ end)
 
 module CEKTester = Tester.Make (struct
   module C = CEK
-  let files = base
+  let files = base @ ["fancy"]
 end)
 
 module KrivineTester = Tester.Make (struct
   module C = Krivine
-  let files = base @ ["lazy"]
+  let files = base @ ["fancy"; "lazy"]
 end)
 
 let () =

@@ -1,3 +1,16 @@
+// OUTPUT: 10
+(letrec (f x) 10 (f 5))
+
+// OUTPUT: 10
+(letrec (f x) (f x) 10)
+
+// OUTPUT: 89
+(letrec (fib a b n)
+    (if (= n 0)
+        a
+        (fib b (+ a b) (- n 1)))
+    (fib 1 1 10))
+
 // OUTPUT: 3628800
 (letrec (f x)
     (if (< x 1)
@@ -5,27 +18,16 @@
         (* (f (- x 1)) x))
     (f 10))
 
-
-// OUTPUT: 6 :: 10 :: 14 :: nil
-(letrec (map f xs)
- (if (atom xs)
+// OUTPUT: 0 :: 0 :: 0 :: 0 :: nil
+(letrec (empty xs)
+ (if (= xs nil)
    nil
-   (cons (f (car xs)) (map f (cdr xs))))
+   (cons 0 (empty (cdr xs))))
+(empty [1 2 3 4]))
 
-(let (double x) (* x 2)
-
-(map double [3 5 7])))
-
-
-// OUTPUT: 4 :: 23 :: 840 :: nil
-(letrec (fold f init xs)
- (if (atom xs)
-   init
-   (f (car xs) (fold f init (cdr xs))))
-
-(let* (len xs)  (fold (lambda (x acc) (+ acc 1)) 0 xs)
-      (sum xs)  (fold (lambda (x acc) (+ acc x)) 0 xs)
-      (prod xs) (fold (lambda (x acc) (* acc x)) 1 xs)
-      list      [3 5 7 8]
-
-[(len list) (sum list) (prod list)] ))
+// OUTPUT: 4
+(letrec (length xs)
+ (if (= xs nil)
+   0
+   (+ 1 (length (cdr xs))))
+(length [1 2 3 4]))

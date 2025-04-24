@@ -64,6 +64,7 @@
             nil
             (cons (f (car xs)) (map f (cdr xs))))
     nats
-        (cons 0 (map (lambda x (+ x 1)) nats))
+        (cons 0 (map (+ 1) nats))
 
-(take 5 (map (lambda x (* x 2)) nats)))
+; Wow we have currying too
+(take 5 (map (* 2) nats)))

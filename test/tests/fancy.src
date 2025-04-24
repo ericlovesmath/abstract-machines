@@ -1,0 +1,23 @@
+// OUTPUT: 6 :: 10 :: 14 :: nil
+(letrec (map f xs)
+ (if (atom xs)
+   nil
+   (cons (f (car xs)) (map f (cdr xs))))
+
+(let (double x) (* x 2)
+
+(map double [3 5 7])))
+
+
+// OUTPUT: 4 :: 23 :: 840 :: nil
+(letrec (fold f init xs)
+ (if (atom xs)
+   init
+   (f (car xs) (fold f init (cdr xs))))
+
+(let* (len xs)  (fold (lambda (x acc) (+ acc 1)) 0 xs)
+      (sum xs)  (fold (lambda (x acc) (+ acc x)) 0 xs)
+      (prod xs) (fold (lambda (x acc) (* acc x)) 1 xs)
+      list      [3 5 7 8]
+
+[(len list) (sum list) (prod list)] ))

@@ -1,10 +1,10 @@
-// OUTPUT: 3
+// OUTPUT: 4
 (+ 1 2)
 
 // OUTPUT: 1 :: nil
 (cons 1 nil)
 
-// OUTPUT: 52
+// OUTPUT: 51
 (* (/ (+ 5 7) 3) (- 14 1))
 
 // OUTPUT: nil
