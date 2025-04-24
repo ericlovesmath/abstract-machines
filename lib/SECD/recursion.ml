@@ -23,6 +23,8 @@ let rec find_recs (ast : Frontend.Ast.t) : string list =
   | If (c, t, f) -> List.concat_map find_recs [c; t; f]
   | Lambda (_, b) -> find_recs b
   | LambdaRec (name, _, b) -> name :: find_recs b
+
+  (** Recursive functions need to be explicitly called with `RAP` *)
   | Call (Lambda ([f], body), [LambdaRec _ as arg]) ->
       f :: find_recs body @ find_recs arg
   | Call (f, args) -> List.concat_map find_recs (f :: args)

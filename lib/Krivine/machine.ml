@@ -83,6 +83,10 @@ and reduce_prim prim stack =
       (match force a, force b with
       | Int x, Int y   -> enclose (Bool (x = y))
       | Bool x, Bool y -> enclose (Bool (x = y))
+      | Nil, Nil       -> enclose (Bool true)
+      | Cons _, Nil    -> enclose (Bool false)
+      | Nil, Cons _    -> enclose (Bool false)
+      | Cons (l, r), Cons (l', r') -> enclose (Bool (l = l' && r = r'))
       | _ -> failwith "Type error in equality comparison")
 
   (* List operations *)
