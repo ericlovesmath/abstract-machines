@@ -2,5 +2,5 @@
 
 (library
   (name lib)
-  (libraries sexplib)
+  (libraries sexplib ocamlgraph)
   (preprocess (pps ppx_sexp_conv)))
