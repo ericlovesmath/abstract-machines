@@ -8,11 +8,8 @@ repl:
 debug:
 	rlwrap dune exec abstract_machines -- -machine $(MACHINE) -debug
 
-build:
-	dune build ./bin/main.exe
-
 web:
-	dune build ./bin/main.bc.js
+	dune build ./bin/web.bc.js
 	xdg-open ./bin/index.html
 
 test: clean build
@@ -20,3 +17,6 @@ test: clean build
 
 clean:
 	dune clean
+
+build:
+	dune build ./bin/main.exe

@@ -1,3 +1,5 @@
+## Log
+
 # Week 1
 
 * Research into SECD Machine
@@ -78,16 +80,42 @@
 * Add comment parser
 * Add desugaring for `let*` and `letrec*`, add tests
 * Use `(include_subdirs qualified)` (this took too long)
+* Read Turner Paper on SK Machine and Graph Reduction
+* Implement mini GADT version of SK Machine
 
-## TODO
+# Week 13
+
+* Rudimentary SK-Machine (not using graph reduction) made
+* Full (poorly written) Frontend -> SK pipeline written
+* Fix SECD `letrec`
+* Fix and add more tests
+
+# Week 14
+
+* Record failure and continue tests
+* Rename SKI to SK
+* Web frontend to REPL using Bonsai
+* Add Nix and Makefile
+
+## Working Notes
 
 * Fix `letrec` SECD Issue with minimal examples
-* Read Turner Paper
-* Try CESK Implementation
-* Actual Base implementation with real REPL
+
+    - Fails: Factorial, switching order of multiplication
+    - Fails: Fib, but recursive with 2 arguments
+    - Fails: Letrec in Let binding
+    - Fails: Map
+
+* Update README to use Makefile
+
+## Todo
+
+* CESK Implementation
 * Add examples to README
 * Mutual Recursion
 * Add top level defines (environment/machine passing)
+
+    * Actual Base implementation with real REPL
 
 * Consider CESK Machine, Forth, P-System, Smalltalk-80, etc.
 * Typechecking and Error handling

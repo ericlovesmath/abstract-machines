@@ -15,7 +15,8 @@
         in
         pkgs.mkShell {
           packages = with pkgs; [
-            # Required packages to build Bonsai?
+            # Required packages to build Bonsai? Just comment out the
+            # web build in `./bin/dune` if async_ssl fails to build
             gmp pkg-config openssl_legacy zlib
             libffi pcre zstd
 
