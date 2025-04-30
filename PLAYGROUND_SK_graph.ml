@@ -9,6 +9,9 @@ type label =
   | Bool of bool
   | If
   | Lt
+  | Nil
+  | Cons of vertex * vertex
+  | ConsPrim
   | App of vertex * vertex
 
 let label_tbl : (vertex, label) Hashtbl.t = Hashtbl.create 32
@@ -28,6 +31,9 @@ let mk_add () = fresh_vertex Add
 let mk_bool b = fresh_vertex (Bool b)
 let mk_if () = fresh_vertex If
 let mk_lt () = fresh_vertex Lt
+let mk_nil () = fresh_vertex Nil
+let mk_cons h t = fresh_vertex (Cons (h, t))
+let mk_consprim () = fresh_vertex ConsPrim
 let mk_app l r = fresh_vertex (App (l, r))
 
 let rec to_string v =
@@ -41,6 +47,9 @@ let rec to_string v =
   | Bool false -> "#f"
   | If -> "if"
   | Lt -> "<"
+  | Nil -> "nil"
+  | Cons (l, r) -> to_string l ^ " :: " ^ to_string r
+  | ConsPrim -> "cons"
   | App (l, r) -> "(" ^ to_string l ^ " " ^ to_string r ^ ")"
 
 let rec reduce v =
@@ -86,6 +95,9 @@ let rec reduce v =
                     reduce v
                 | _ -> reduce f; reduce z
               end
+          | ConsPrim ->
+              Hashtbl.replace label_tbl v (Cons (y, z));
+              reduce v
           | _ -> reduce f; reduce z
       end
       | I ->
@@ -93,6 +105,7 @@ let rec reduce v =
           reduce v
       | _ -> reduce f; reduce z
   end
+  | Cons (h, t) -> reduce h; reduce t
   | _ -> ()
 
 let rec normalize v =
@@ -196,3 +209,11 @@ let () =
   test (cond $ b false $ n 1 $ n 2) (n 2);
   test (cond $ b true $ (add $ n 1 $ n 3) $ n 2) (n 4);
   test (cond $ (lt $ (add $ n 1 $ n 3) $ (n 10)) $ n 1 $ n 2) (n 1);
+
+  (* Lists *)
+  let list_expr =
+    mk_cons (add $ n 1 $ n 2)
+    (mk_cons (cond $ b true $ n 3 $ n 4)
+    (mk_nil ()))
+  in
+  test list_expr (mk_cons (n 3) (mk_cons (n 3) (mk_nil ())))
