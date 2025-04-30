@@ -49,5 +49,5 @@ let rec abstract' (ast : Simplify.t) : t =
       | _ -> App (K, abstract' body)
 
 (* TODO: This is terrible but it works for now *)
-let abstract = Fun.compose remove_var abstract'
+let abstract e = remove_var (abstract' e)
 

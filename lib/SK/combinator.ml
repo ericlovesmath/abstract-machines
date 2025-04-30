@@ -1,8 +1,5 @@
 open Sexplib.Std
 
-(* TODO: VERY TEMPORARY Combinator evalutor, to be replaced in C *)
-(* TODO: Make `If` lazy *)
-
 type t =
   | S | K | Y | C | B | I | U | P
   | If
@@ -14,6 +11,9 @@ type t =
   | App of t * t
   [@@deriving sexp]
 
+(* TODO: VERY TEMPORARY Combinator evalutor, to be replaced in C *)
+(* TODO: Make `If` lazy *)
+
 let rec eval c =
   match c with
   | App (App (App (S, f), g), x) -> eval (App (App (f, x), App (g, x)))
@@ -24,13 +24,11 @@ let rec eval c =
   | App (Y, h) -> eval (App (h, App (Y, h)))
   | App (I, x) -> eval x
 
-  (* TODO: Untested, may not work *)
   | App (Prim Atom, Int _)
   | App (Prim Atom, Bool _)
   | App (Prim Atom, Nil)    -> Bool true
   | App (Prim Atom, Cons _) -> Bool false
 
-  (* TODO: Untested, may not work *)
   | App (App (Prim Cons, e), Nil) -> Cons (e, Nil)
   | App (App (Prim Cons, e), Cons (e', e'')) -> Cons (e, Cons (e', e''))
   | App (Prim Car, Cons (e, _)) -> e
@@ -42,10 +40,10 @@ let rec eval c =
   | App (App (Prim Div, Int i), Int i') -> Int (i / i')
 
   | App (App (Prim Eq, e), e')           -> Bool (e = e')
-  | App (App (Prim Gt, Bool b), Bool b') -> Bool (b >= b')
-  | App (App (Prim Lt, Bool b), Bool b') -> Bool (b <= b')
-  | App (App (Prim Ge, Bool b), Bool b') -> Bool (b > b')
-  | App (App (Prim Le, Bool b), Bool b') -> Bool (b < b')
+  | App (App (Prim Gt, Int i), Int i') -> Bool (i >= i')
+  | App (App (Prim Lt, Int i), Int i') -> Bool (i <= i')
+  | App (App (Prim Ge, Int i), Int i') -> Bool (i > i')
+  | App (App (Prim Le, Int i), Int i') -> Bool (i < i')
 
   | App (App (App (If, Bool true), t), _) -> t
   | App (App (App (If, Bool false), _), f) -> f
@@ -61,41 +59,21 @@ let rec eval c =
   | Int _ | Bool _ | Nil | Cons _
   | Prim _ | If -> c
 
-(*
-REPL Tests
-
-let ( $ ) x y = App (x, y) ;;
-
-let succ = S $ (S $ (K $ Plus) $ (K $ Int 1)) $ I ;;
-eval (succ $ Int 10) ;;
-
-let eg1 = App (I, I)
-let eg2 = App (App (K, K), I)
-let eg3 = App (App (App (S, K), S), K)
-let eg4 = App (App (Plus, Int 4), Int 3)
-let succ = App (App (S, App (App (S, App (K, Plus)), App (K, Int 1))), I)
-*)
-
-(*
-
-TODO: Implementing reductions in C instead
-
-let mk x y = App (ref x, ref y)
-let graph = mk (mk K S) I
-let reduce (graph : graph) : graph ref =
-  match graph with
-  | App (l, r) ->
-    begin
-      match (!l, !r) with
-      | (I, x) -> r
-      | (Y, _) -> ref (App (r, ref (App (l, r))))
-      | (l, r) -> 
-        begin
-          match (!l, r) with
-          | (App (K, x), y) -> x
-        end
-    end
-  | _ -> graph
-  end
-
-*)
+let rec string_of_t c =
+  match c with
+  | S -> "S"
+  | K -> "K"
+  | Y -> "Y"
+  | C -> "C"
+  | B -> "B"
+  | I -> "I"
+  | U -> "U"
+  | P -> "P"
+  | If -> "if"
+  | Int i -> string_of_int i
+  | Bool true -> "#t"
+  | Bool false -> "#f"
+  | Nil -> "nil"
+  | Cons (l, r) -> string_of_t l ^ " :: " ^ string_of_t r
+  | Prim _ -> "prim"
+  | App (l, r) -> "(" ^ string_of_t l ^ " " ^ string_of_t r ^ ")"
