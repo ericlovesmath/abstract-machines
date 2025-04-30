@@ -12,31 +12,33 @@ end
 
 module Make (T : Testable) : Tester = struct
   let run_test source =
-    let fail = ref None in
-    let lines = String.split_on_char '\n' source in
-    (match lines with
-    | [] -> fail := Some "Expected test to be nonempty"
-    | output :: expr ->
-        let expr = String.concat "\n" expr in
-        if String.starts_with ~prefix:"OUTPUT: " output
-        then
-          let output = String.sub output 8 (String.length output - 8) in
-          let res = T.C.string_of_value (T.C.execute expr) in
-          (if res <> output
-            then fail := Some (Printf.sprintf "Expected %s, got %s" output res))
-        else if output = "FAIL"
-        then
-          let failed =
-            try (ignore (T.C.execute expr); false)
-            with _ -> true
-          in
-          (if not failed
-            then fail := Some "Expected program to fail")
-        else
-          fail := Some "Test in unexpected format");
-    match !fail with
-    | None -> print_char '.'; None
-    | Some msg -> print_char 'F'; Some msg
+    try
+      let lines = String.split_on_char '\n' source in
+      (match lines with
+      | [] -> failwith "Expected test to be nonempty"
+      | output :: expr ->
+          let expr = String.concat "\n" expr in
+          if String.starts_with ~prefix:"OUTPUT: " output
+          then
+            let output = String.sub output 8 (String.length output - 8) in
+            let res = T.C.string_of_value (T.C.execute expr) in
+            (if res <> output
+              then failwith (Printf.sprintf "Expected %s, got %s" output res))
+          else if output = "FAIL"
+          then
+            let failed =
+              try (ignore (T.C.execute expr); false)
+              with _ -> true
+            in
+            (if not failed
+              then failwith "Expected program to fail")
+          else
+            failwith "Test in unexpected format");
+      print_char '.';
+      None
+    with e ->
+      print_char 'F';
+      Some (Printexc.to_string e)
 
   let run_file path =
     Printf.printf "> Testing %s: " path;
@@ -48,7 +50,7 @@ module Make (T : Testable) : Tester = struct
       print_char '\n';
       List.iter (Printf.printf "   > %s\n") errors;
     with e ->
-      print_endline ("Error in " ^ path);
+      print_endline ("Error in reading file " ^ path);
       raise e
 
   let test () =

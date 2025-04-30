@@ -2,3 +2,10 @@
  (public_name abstract_machines)
  (name main)
  (libraries lib))
+
+(executable
+ (name web)
+ (libraries lib bonsai bonsai.web)
+ (preprocess
+   (pps ppx_css ppx_jane bonsai.ppx_bonsai))
+ (modes js))
