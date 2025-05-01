@@ -15,7 +15,6 @@ let graphify (ast : t) : Graph.t =
   let g : Graph.graph = Hashtbl.create 32 in
 
   (* Fixed nodes so they're not recreated each time *)
-  (* TODO: Fix prims? Add If to prims? *)
   let node_s = Graph.add_vertex g S in
   let node_k = Graph.add_vertex g K in
   let node_i = Graph.add_vertex g I in
@@ -28,6 +27,11 @@ let graphify (ast : t) : Graph.t =
   let node_true = Graph.add_vertex g (Bool true) in
   let node_false = Graph.add_vertex g (Bool false) in
   let node_nil = Graph.add_vertex g Nil in
+  let node_prims =
+    List.map
+      (fun p -> (p, Graph.add_vertex g (Prim p)))
+      [ Atom; Cons; Cdr; Car; Add; Sub; Mul; Div; Eq; Gt; Lt; Ge; Le ]
+  in
 
   let rec aux (ast : t) : Graph.vertex =
     match ast with
@@ -43,9 +47,9 @@ let graphify (ast : t) : Graph.t =
     | Bool true -> node_true
     | Bool false -> node_false
     | Nil -> node_nil
+    | Prim p -> List.assoc p node_prims
     | Int i -> Graph.add_vertex g (Int i)
     | Cons (h, t) -> Graph.add_vertex g (Cons (aux h, aux t))
-    | Prim p -> Graph.add_vertex g (Prim p)
     | App (f, x) -> Graph.add_vertex g (App (aux f, aux x))
   in
   let entry = aux ast in
