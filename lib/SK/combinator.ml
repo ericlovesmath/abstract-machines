@@ -11,69 +11,42 @@ type t =
   | App of t * t
   [@@deriving sexp]
 
-(* TODO: VERY TEMPORARY Combinator evalutor, to be replaced in C *)
-(* TODO: Make `If` lazy *)
+let graphify (ast : t) : Graph.t =
+  let g : Graph.graph = Hashtbl.create 32 in
 
-let rec eval c =
-  match c with
-  | App (App (App (S, f), g), x) -> eval (App (App (f, x), App (g, x)))
-  | App (App (App (C, f), g), x) -> eval (App (App (f, x), g))
-  | App (App (App (B, f), g), x) -> eval (App (f, App (g, x)))
-  | App (App (U, f), App (App (P, x), y)) -> eval (App (App (f, x), y))
-  | App (App (K, x), _) -> eval x
-  | App (Y, h) -> eval (App (h, App (Y, h)))
-  | App (I, x) -> eval x
+  (* Fixed nodes so they're not recreated each time *)
+  (* TODO: Fix prims? Add If to prims? *)
+  let node_s = Graph.add_vertex g S in
+  let node_k = Graph.add_vertex g K in
+  let node_i = Graph.add_vertex g I in
+  let node_y = Graph.add_vertex g Y in
+  let node_c = Graph.add_vertex g C in
+  let node_b = Graph.add_vertex g B in
+  let node_u = Graph.add_vertex g U in
+  let node_p = Graph.add_vertex g P in
+  let node_if = Graph.add_vertex g If in
+  let node_true = Graph.add_vertex g (Bool true) in
+  let node_false = Graph.add_vertex g (Bool false) in
+  let node_nil = Graph.add_vertex g Nil in
 
-  | App (Prim Atom, Int _)
-  | App (Prim Atom, Bool _)
-  | App (Prim Atom, Nil)    -> Bool true
-  | App (Prim Atom, Cons _) -> Bool false
-
-  | App (App (Prim Cons, e), Nil) -> Cons (e, Nil)
-  | App (App (Prim Cons, e), Cons (e', e'')) -> Cons (e, Cons (e', e''))
-  | App (Prim Car, Cons (e, _)) -> e
-  | App (Prim Cdr, Cons (_, e)) -> e
-
-  | App (App (Prim Add, Int i), Int i') -> Int (i + i')
-  | App (App (Prim Sub, Int i), Int i') -> Int (i - i')
-  | App (App (Prim Mul, Int i), Int i') -> Int (i * i')
-  | App (App (Prim Div, Int i), Int i') -> Int (i / i')
-
-  | App (App (Prim Eq, e), e')           -> Bool (e = e')
-  | App (App (Prim Gt, Int i), Int i') -> Bool (i >= i')
-  | App (App (Prim Lt, Int i), Int i') -> Bool (i <= i')
-  | App (App (Prim Ge, Int i), Int i') -> Bool (i > i')
-  | App (App (Prim Le, Int i), Int i') -> Bool (i < i')
-
-  | App (App (App (If, Bool true), t), _) -> t
-  | App (App (App (If, Bool false), _), f) -> f
-
-  | App (x, y) ->
-      let x' = eval x in
-      let y' = eval y in
-      if x = x' && y = y'
-      then App (x, y)
-      else eval (App (x', y'))
-
-  | S | K | Y | C | B | I | U | P
-  | Int _ | Bool _ | Nil | Cons _
-  | Prim _ | If -> c
-
-let rec string_of_t c =
-  match c with
-  | S -> "S"
-  | K -> "K"
-  | Y -> "Y"
-  | C -> "C"
-  | B -> "B"
-  | I -> "I"
-  | U -> "U"
-  | P -> "P"
-  | If -> "if"
-  | Int i -> string_of_int i
-  | Bool true -> "#t"
-  | Bool false -> "#f"
-  | Nil -> "nil"
-  | Cons (l, r) -> string_of_t l ^ " :: " ^ string_of_t r
-  | Prim _ -> "prim"
-  | App (l, r) -> "(" ^ string_of_t l ^ " " ^ string_of_t r ^ ")"
+  let rec aux (ast : t) : Graph.vertex =
+    match ast with
+    | S -> node_s
+    | K -> node_k
+    | I -> node_i
+    | Y -> node_y
+    | C -> node_c
+    | B -> node_b
+    | U -> node_u
+    | P -> node_p
+    | If -> node_if
+    | Bool true -> node_true
+    | Bool false -> node_false
+    | Nil -> node_nil
+    | Int i -> Graph.add_vertex g (Int i)
+    | Cons (h, t) -> Graph.add_vertex g (Cons (aux h, aux t))
+    | Prim p -> Graph.add_vertex g (Prim p)
+    | App (f, x) -> Graph.add_vertex g (App (aux f, aux x))
+  in
+  let entry = aux ast in
+  (entry, g)

@@ -96,6 +96,10 @@
 * Rename SKI to SK
 * Web frontend to REPL using Bonsai
 * Add Nix and Makefile
+* Test graph reduction SK machine with bunch of tests
+* Implement SK machine into pipeline, most tests work (aside from recursion)
+
+    - Note recursion is failing because of laziness issues, not with `Y`
 
 ## Working Notes
 

@@ -19,4 +19,4 @@ clean:
 	dune clean
 
 build:
-	dune build ./bin/main.exe
+	dune build

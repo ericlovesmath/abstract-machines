@@ -20,7 +20,7 @@ end)
 
 module SKTester = Tester.Make (struct
   module C = SK
-  let files = [ "basics"; "lambdas"; "higher-ordered" ]
+  let files = [ "basics"; "higher-ordered"; "lambdas"; "y-combinator" ]
 end)
 
 let () =

@@ -1,5 +1,5 @@
 include Compiler.Make (struct
-  type value = Combinator.t
+  type value = Graph.t
 
   let name = "SK"
 
@@ -11,7 +11,9 @@ include Compiler.Make (struct
     |> Debug.trace "SK Simplify" Simplify.sexp_of_t
     |> Abstract.abstract
     |> Debug.trace "SK Abstraction" Combinator.sexp_of_t
-    |> Combinator.eval
+    |> Combinator.graphify
+    |> Debug.trace "Convert to Graph" Graph.sexp_of_t
+    |> Graph.normalize
 
-  let string_of_value = Combinator.string_of_t
+  let string_of_value = Graph.string_of_t
 end)

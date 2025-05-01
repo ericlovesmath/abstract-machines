@@ -25,7 +25,7 @@ end
 
 let run s = 
   try
-    Lib.Krivine.string_of_value (Lib.Krivine.execute s)
+    Lib.SK.string_of_value (Lib.SK.execute s)
   with e ->
     Printf.sprintf "Error: %s\n" (Printexc.to_string e)
 
