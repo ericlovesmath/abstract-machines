@@ -95,6 +95,9 @@ let reduce ((v, graph) : t) : unit =
                   | Eq, Int n, Int m    -> Some (Bool (n = m))
                   | Eq, Bool b, Bool b' -> Some (Bool (b = b'))
                   | Eq, Nil, Nil        -> Some (Bool true)
+                  | Eq, Cons _, Nil     -> Some (Bool false)
+                  | Eq, Nil, Cons _     -> Some (Bool false)
+                  | Eq, Cons _, Cons _  -> failwith "TODO, Cons equality"
 
                   | Cons, _, _        -> Some (Cons (y, z))
                   | _ -> None

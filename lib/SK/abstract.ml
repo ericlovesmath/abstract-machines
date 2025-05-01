@@ -21,7 +21,10 @@ let rec abstract' (ast : Simplify.t) : t =
   (* TODO: rm *)
   | S -> S
   | K -> K
-  | Y -> Y
+  | Y ->
+      (* TODO: TEMP while I fix laziness with Y *)
+      let ( $ ) x y = App (x, y) in
+      S $ S $ K $ (S $ (K $ (S $ S $ (S $ (S $ S $ K)))) $ K)
   | C -> C
   | B -> B
   | I -> I

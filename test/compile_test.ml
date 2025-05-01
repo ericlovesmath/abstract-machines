@@ -20,7 +20,7 @@ end)
 
 module SKTester = Tester.Make (struct
   module C = SK
-  let files = [ "basics"; "higher-ordered"; "lambdas"; "y-combinator" ]
+  let files = [ "basics"; "higher-ordered"; "lambdas"; "y-combinator"; "letrec"; "fancy" ]
 end)
 
 let () =
@@ -28,4 +28,4 @@ let () =
   CEKTester.test ();
   KrivineTester.test ();
   SKTester.test ();
-  print_endline "Note: SK Tests are non-comprehensive"
+  print_endline "Note: SK Tests are non-comprehensive, missing lazy and fails"

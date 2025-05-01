@@ -100,6 +100,7 @@
 * Implement SK machine into pipeline, most tests work (aside from recursion)
 
     - Note recursion is failing because of laziness issues, not with `Y`
+    - Replaced `Y` with `SSK(S(K(SS(S(SSK))))K)` while investigating
 
 ## Working Notes
 
