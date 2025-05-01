@@ -115,6 +115,11 @@ let reduce ((v, graph) : t) : unit =
                     let new_app = add (App (xz, yz)) in
                     replace v (find new_app);
                     reduce' v
+                | B ->
+                    let yz = add (App (y, z)) in
+                    let x_yz = add (App (x, yz)) in
+                    replace v (find x_yz);
+                    reduce' v
                 | If ->
                     begin
                       match find x with
