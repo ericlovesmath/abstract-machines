@@ -28,7 +28,8 @@
               networkx
             ]))
 
-            xdot graphviz
+            # For visualization
+            xdot graphviz feh
           ];
 
           shellHook = ''

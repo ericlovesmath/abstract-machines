@@ -32,6 +32,7 @@ let rec abstract' (ast : Simplify.t) : t =
       let abs arg f = abstract' (Lam (arg, f)) in
       match abstract' body with
       | App (f, g) ->
+          (* TODO: rm *)
           let f = Simplify.t_of_sexp (sexp_of_t f) in
           let g = Simplify.t_of_sexp (sexp_of_t g) in
           App (App (S, abs arg f), abs arg g)

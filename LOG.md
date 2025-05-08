@@ -102,6 +102,24 @@
     - Note recursion is failing because of laziness issues, not with `Y`
     - Replaced `Y` with `SSK(S(K(SS(S(SSK))))K)` while investigating
 
+* Trying to work on visualization in Python
+* Add optimize pass (incomplete, but as described in Turner's paper)
+
+# Week 15
+
+* Complete optimize pass
+* True WHNF reduction, removing hacky `normalize` function
+
+    - Y combinator and C combinator works as expected!
+
+* Clean up playground files
+* Add visualization of graphs in SK machine using dot files
+
+    - This may need cleaning up, requires calling `log_graph` manually
+    - Option to show unreachable nodes or not
+
+* Interface `.mli` files
+
 ## Working Notes
 
 * Fix `letrec` SECD Issue with minimal examples
@@ -112,6 +130,7 @@
     - Fails: Map
 
 * Update README to use Makefile
+* Laziness of Cons
 
 ## Todo
 
@@ -124,3 +143,6 @@
 
 * Consider CESK Machine, Forth, P-System, Smalltalk-80, etc.
 * Typechecking and Error handling
+
+- Stupid casting
+- Laziness with single values bound to them

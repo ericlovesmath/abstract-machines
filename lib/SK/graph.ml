@@ -132,11 +132,12 @@ let log_index = ref 0
 let log_graph (graph : t) : unit =
   if !Debug.debug then
     log_index := !log_index + 1;
-    if not (Sys.file_exists "logs") then Sys.mkdir "logs" 0x755;
+    if not (Sys.file_exists "logs") then Sys.mkdir "logs" 0x777;
     let filename = Printf.sprintf "logs/graph%04d.dot" !log_index in
+    let dot = dot_of_graph ?reachable_only:(Some false) graph in
     Out_channel.with_open_text
       filename
-      (fun ch -> Out_channel.output_string ch (dot_of_graph graph))
+      (fun ch -> Out_channel.output_string ch dot)
 
 
 (** Reduce using WHNF (left spine) reduction for laziness *)
@@ -148,6 +149,7 @@ let reduce' ((root, g) : t) : unit =
   let rec whnf v =
     match find v with
     | App (f, arg) ->
+        (* log_graph (v, g); *)
         whnf f;
         begin match find f with
         | I ->
@@ -241,5 +243,7 @@ let reduce' ((root, g) : t) : unit =
   whnf root
 
 let reduce (expr : t) : t =
+  log_graph expr;
   reduce' expr;
+  log_graph expr;
   expr
