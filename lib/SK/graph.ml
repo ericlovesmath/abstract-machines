@@ -16,6 +16,7 @@ type label =
 type graph = (vertex, label) Hashtbl.t [@@deriving sexp]
 type t = vertex * graph [@@deriving sexp]
 
+
 (* TODO: Make this reset with some kind of [init] *)
 let counter = ref 0
 let add_vertex (graph : graph) (label : label) : vertex =
@@ -23,6 +24,7 @@ let add_vertex (graph : graph) (label : label) : vertex =
   incr counter;
   Hashtbl.add graph v label;
   v
+
 
 let rec string_of_t ((v, g) : t) : string =
   match Hashtbl.find g v with
@@ -42,6 +44,100 @@ let rec string_of_t ((v, g) : t) : string =
   | Cons (l, r) -> string_of_t (l, g) ^ " :: " ^ string_of_t (r, g)
   | Prim _ -> "<prim>"
   | App (l, r) -> "(" ^ string_of_t (l, g) ^ " " ^ string_of_t (r, g) ^ ")"
+
+
+(** Convert Graph to DOT file format *)
+let dot_of_graph ?(max_len = 20) ?(reachable_only = false) ((root, g) : t) : string =
+  let truncate s =
+    if String.length s <= max_len then s
+    else String.sub s 0 (max_len - 1) ^ "…"
+  in
+  let escape s =
+    let b = Buffer.create (String.length s) in
+    String.iter
+      (function
+        | '"'  -> Buffer.add_string b "\\\""
+        | '\\' -> Buffer.add_string b "\\\\"
+        | c    -> Buffer.add_char   b c)
+      s;
+    Buffer.contents b
+  in
+
+  (** Collect reachable nodes *)
+  let reached : (vertex, unit) Hashtbl.t = Hashtbl.create 256 in
+  let rec dfs v =
+    if Hashtbl.mem reached v then () else (
+      Hashtbl.add reached v ();
+      match Hashtbl.find g v with
+      | Cons (l, r) | App (l, r) -> dfs l; dfs r
+      | _                        -> ()
+    )
+  in
+  if reachable_only
+    then dfs root
+    else Hashtbl.iter (fun l _ -> Hashtbl.add reached l ()) g;
+
+  (** Emit just reachable nodes *)
+  let buf = Buffer.create 4096 in
+
+  let label_of_vertex v =
+    match Hashtbl.find g v with
+    | S -> "S" | K -> "K" | Y -> "Y" | C -> "C" | B -> "B"
+    | I -> "I" | U -> "U" | P -> "P"
+    | Int n        -> string_of_int n
+    | Bool true    -> "#t"
+    | Bool false   -> "#f"
+    | If           -> "if"
+    | Nil          -> "nil"
+    | Cons _       -> "Cons"
+    | App _        -> "App"
+    | Prim _       -> "<prim>"
+  in
+
+  let add_node v =
+    let full  = label_of_vertex v in
+    let short = truncate full in
+    Printf.bprintf buf
+      "  n%d [label=\"%s\", tooltip=\"%s\"%s];\n"
+      v (escape short) (escape full)
+      (if v = root then ", style=filled, fillcolor=lightblue" else "")
+  in
+  let add_edge v child =
+    Printf.bprintf buf "  n%d -> n%d;\n" v child
+  in
+
+  Buffer.add_string buf
+    "digraph G {\n\
+    \  rankdir=LR;\n\
+    \  node [shape=box, fontname=\"monospace\", fontsize=10, \
+            margin=\"0.06,0.04\"];\n\
+    \  edge [arrowsize=0.6];\n";
+
+  Hashtbl.iter (fun v () -> add_node v) reached;
+
+  Hashtbl.iter
+    (fun v () ->
+       match Hashtbl.find g v with
+       | Cons (l, r) | App (l, r) ->
+           add_edge v l; add_edge v r
+       | _ -> ())
+    reached;
+
+  Buffer.add_string buf "}\n";
+  Buffer.contents buf
+
+
+let log_index = ref 0
+(** Only logs graphs to [logs] folder if [Debug.debug] *)
+let log_graph (graph : t) : unit =
+  if !Debug.debug then
+    log_index := !log_index + 1;
+    if not (Sys.file_exists "logs") then Sys.mkdir "logs" 0x755;
+    let filename = Printf.sprintf "logs/graph%04d.dot" !log_index in
+    Out_channel.with_open_text
+      filename
+      (fun ch -> Out_channel.output_string ch (dot_of_graph graph))
+
 
 (** Reduce using WHNF (left spine) reduction for laziness *)
 let reduce' ((root, g) : t) : unit =

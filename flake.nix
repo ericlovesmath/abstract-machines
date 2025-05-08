@@ -21,6 +21,14 @@
             libffi pcre zstd
 
             opam
+
+            (pkgs.python3.withPackages (pkgs: with pkgs; [
+              matplotlib
+              numpy
+              networkx
+            ]))
+
+            xdot graphviz
           ];
 
           shellHook = ''
