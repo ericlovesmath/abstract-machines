@@ -15,10 +15,7 @@ let rec abstract' (ast : Simplify.t) : t =
   match ast with
   | S -> S
   | K -> K
-  | Y ->
-      (* TODO: TEMP while I fix laziness with Y *)
-      let ( $ ) x y = App (x, y) in
-      S $ S $ K $ (S $ (K $ (S $ S $ (S $ (S $ S $ K)))) $ K)
+  | Y -> Y
   | C -> C
   | B -> B
   | I -> I

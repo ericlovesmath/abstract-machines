@@ -15,7 +15,7 @@ include Compiler.Make (struct
     |> Debug.trace "SK Optimize" Combinator.sexp_of_t
     |> Combinator.graphify
     |> Debug.trace "Convert to Graph" Graph.sexp_of_t
-    |> Graph.normalize
+    |> Graph.reduce
 
   let string_of_value = Graph.string_of_t
 end)

@@ -43,102 +43,107 @@ let rec string_of_t ((v, g) : t) : string =
   | Prim _ -> "<prim>"
   | App (l, r) -> "(" ^ string_of_t (l, g) ^ " " ^ string_of_t (r, g) ^ ")"
 
-let reduce ((v, graph) : t) : unit =
-  let add = add_vertex graph in
-  let find = Hashtbl.find graph in
-  let replace = Hashtbl.replace graph in
-  let rec reduce' (v : vertex) : unit =
+(** Reduce using WHNF (left spine) reduction for laziness *)
+let reduce' ((root, g) : t) : unit =
+  let find = Hashtbl.find g in
+  let replace  = Hashtbl.replace g in
+  let add = add_vertex g in
+
+  let rec whnf v =
     match find v with
-    | Cons (h, t) -> reduce' h; reduce' t
-    | App (f, z) -> begin
-        match find f with
+    | App (f, arg) ->
+        whnf f;
+        begin match find f with
         | I ->
-            replace v (find z);
-            reduce' v
+            replace v (find arg);
+            whnf v
         | Y ->
-            let zyz = add (App (z, v)) in
-            replace v (find zyz);
-            reduce' v
-        | Prim prim ->
-            let prim_reduced =
-              match (prim, find z) with
-              | Atom, Int _
-              | Atom, Bool _
-              | Atom, Nil    -> Some (Bool true)
-              | Atom, Cons _ -> Some (Bool false)
-              | Car, Cons (h, _) -> Some (find h)
-              | Cdr, Cons (_, t) -> Some (find t)
-              | _ -> None
-            in
+            let rec_v = add (App (arg, v)) in
+            replace v (find rec_v);
+            whnf v
+        | App (g, y) ->
             begin
-              match prim_reduced with
-              | Some v' -> replace v v'; reduce' v
-              | None -> reduce' f; reduce' z
-            end
-        | App (g, y) -> begin
             match find g with
-            | K ->
-                replace v (find y);
-                reduce' v
-            | Prim prim ->
-                let prim_reduced =
-                  match (prim, find y, find z) with
+            | Prim p ->
+              begin
+                whnf y; whnf arg;
+                let result =
+                  match (p, find y, find arg) with
                   | Add, Int n, Int m -> Some (Int (n + m))
                   | Sub, Int n, Int m -> Some (Int (n - m))
                   | Mul, Int n, Int m -> Some (Int (n * m))
                   | Div, Int n, Int m -> Some (Int (n / m))
-
-                  | Lt, Int n, Int m    -> Some (Bool (n < m))
-                  | Gt, Int n, Int m    -> Some (Bool (n > m))
-                  | Le, Int n, Int m    -> Some (Bool (n <= m))
-                  | Ge, Int n, Int m    -> Some (Bool (n >= m))
-                  | Eq, Int n, Int m    -> Some (Bool (n = m))
-                  | Eq, Bool b, Bool b' -> Some (Bool (b = b'))
-                  | Eq, Nil, Nil        -> Some (Bool true)
-                  | Eq, Cons _, Nil     -> Some (Bool false)
-                  | Eq, Nil, Cons _     -> Some (Bool false)
-                  | Eq, Cons _, Cons _  -> failwith "TODO, Cons equality"
-
-                  | Cons, _, _        -> Some (Cons (y, z))
-                  | _ -> None
+                  | Lt , Int n, Int m -> Some (Bool (n <  m))
+                  | Gt , Int n, Int m -> Some (Bool (n >  m))
+                  | Le , Int n, Int m -> Some (Bool (n <= m))
+                  | Ge , Int n, Int m -> Some (Bool (n >= m))
+                  | Eq , Int n, Int m -> Some (Bool (n =  m))
+                  | Eq , Bool a, Bool b -> Some (Bool (a = b))
+                  | Eq , Nil    , Nil     -> Some (Bool true)
+                  | Eq , Cons _ , Nil
+                  | Eq , Nil    , Cons _ -> Some (Bool false)
+                  | Cons, _     , _      -> Some (Cons (y, arg))
+                  | _                     -> None
                 in
-                begin
-                  match prim_reduced with
-                  | Some v' -> replace v v'; reduce' v
-                  | None -> reduce' f; reduce' z
-                end
+                Option.iter (fun lbl -> replace v lbl; whnf v) result
+              end
+            | K ->
+                (* K x y => x *)
+                replace v (find y);
+                whnf v
             | App (h, x) -> begin
                 match find h with
                 | S ->
-                    let xz = add (App (x, z)) in
-                    let yz = add (App (y, z)) in
-                    let new_app = add (App (xz, yz)) in
-                    replace v (find new_app);
-                    reduce' v
+                    (* S x y z => x z (y z) *)
+                    let xz   = add (App (x, arg)) in
+                    let yz   = add (App (y, arg)) in
+                    let v' = add (App (xz, yz)) in
+                    replace v (find v');
+                    whnf v
                 | B ->
-                    let yz = add (App (y, z)) in
-                    let x_yz = add (App (x, yz)) in
-                    replace v (find x_yz);
-                    reduce' v
+                    (* B x y z => x (y z) *)
+                    let yz   = add (App (y, arg)) in
+                    let v' = add (App (x, yz)) in
+                    replace v (find v');
+                    whnf v
+                | C ->
+                    (* C x y z => (x z) y *)
+                    let xz   = add (App (x, arg)) in
+                    let v' = add (App (xz, y)) in
+                    replace v (find v');
+                    whnf v
                 | If ->
-                    begin
-                      match find x with
-                      | Bool b -> replace v (find (if b then y else z)); reduce' v
-                      | _ -> reduce' f; reduce' z
+                    (* if c t f => replace with t or f directly *)
+                    whnf x;
+                    begin match find x with
+                    | Bool b ->
+                        replace v (find (if b then y else arg));
+                        whnf v
+                    | _ -> ()
                     end
-                | _ -> reduce' f; reduce' z
-            end
-            | _ -> reduce' f; reduce' z
+                | _ -> ()
+              end
+            | _ -> ()
+          end
+        | Prim p -> begin
+            whnf arg;
+            let result =
+              match (p, find arg) with
+              | Atom, (Int _ | Bool _ | Nil) -> Some (Bool true)
+              | Atom, Cons _                 -> Some (Bool false)
+              | Car , Cons (h, _)            -> Some (find h)
+              | Cdr , Cons (_, t)            -> Some (find t)
+              | _                            -> None
+            in
+            Option.iter (fun lbl -> replace v lbl; whnf v) result
+          end
+        | _ -> ()
         end
-        | _ -> reduce' f; reduce' z
-    end
-    | _ -> ()
+    | Cons _ | Bool _ | Int _ | Nil | Prim _ 
+    | S | K | I | B | C | Y | U | P | If -> ()
   in
-  reduce' v
+  whnf root
 
-let rec normalize ((v, g) : t) : t =
-  let before = string_of_t (v, g) in
-  reduce (v, g);
-  let after = string_of_t (v, g) in
-  if before = after then (v, g)
-  else normalize (v, g)
+let reduce (expr : t) : t =
+  reduce' expr;
+  expr

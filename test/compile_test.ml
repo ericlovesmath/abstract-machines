@@ -27,5 +27,4 @@ let () =
   SECDTester.test ();
   CEKTester.test ();
   KrivineTester.test ();
-  SKTester.test ();
-  print_endline "Note: SK Tests are non-comprehensive, missing lazy and fails"
+  SKTester.test ()
