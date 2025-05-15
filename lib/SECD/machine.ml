@@ -35,7 +35,8 @@ let init (instrs : instr list) : t =
 let is_atomic (value : value) =
   match value with
   | Int _
-  | Bool _ -> true
+  | Bool _
+  | List [] -> true
   | List _
   | Func _ -> false
 

@@ -134,7 +134,7 @@ let log_graph (graph : t) : unit =
     log_index := !log_index + 1;
     if not (Sys.file_exists "logs") then Sys.mkdir "logs" 0x777;
     let filename = Printf.sprintf "logs/graph%04d.dot" !log_index in
-    let dot = dot_of_graph ?reachable_only:(Some false) graph in
+    let dot = dot_of_graph ?reachable_only:(Some true) graph in
     Out_channel.with_open_text
       filename
       (fun ch -> Out_channel.output_string ch dot)
@@ -243,7 +243,9 @@ let reduce' ((root, g) : t) : unit =
   whnf root
 
 let reduce (expr : t) : t =
-  log_graph expr;
+  ignore (log_graph);
   reduce' expr;
-  log_graph expr;
-  expr
+  let (v, g) = expr in
+  match Hashtbl.find g v with
+  | App _  -> failwith "Graph.reduce: Reduced expression is a function"
+  | _ -> expr

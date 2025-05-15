@@ -120,21 +120,18 @@
 
 * Interface `.mli` files
 
-## Working Notes
+# Week 15
 
-* Fix `letrec` SECD Issue with minimal examples
-
-    - Fails: Factorial, switching order of multiplication
-    - Fails: Fib, but recursive with 2 arguments
-    - Fails: Letrec in Let binding
-    - Fails: Map
-
-* Update README to use Makefile
+* Fix `letrec` SECD Issue, I'm finally free.
 * Laziness of Cons
+* Fix tests for everything because everything WORKS and the world is REVOLVING FINALLY
+* Update README to use Makefile
+* Minimal CESK Implementation
+
+## Working Notes
 
 ## Todo
 
-* CESK Implementation
 * Add examples to README
 * Mutual Recursion
 * Add top level defines (environment/machine passing)

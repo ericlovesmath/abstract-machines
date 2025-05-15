@@ -11,6 +11,20 @@
         (fib b (+ a b) (- n 1)))
     (fib 1 1 10))
 
+// OUTPUT: 89
+(letrec (fib x)             ; With two calls
+    (if (< x 2)
+        1
+        (+ (fib (- x 1)) (fib (- x 2))))
+    (fib 10))
+
+// OUTPUT: 3628800
+(letrec (f x)               ; Specific test for letrec being strange on SECD
+    (if (< x 1)
+        1
+        (* (f (- x 1)) x))
+    (f 10))
+
 // OUTPUT: 3628800
 (letrec (f x)
     (if (< x 1)

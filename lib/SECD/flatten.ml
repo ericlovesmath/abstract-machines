@@ -11,7 +11,7 @@ let flatten (ast : Assign.t) : Machine.instr list =
         let acc = aux (AP :: acc) f in
         NIL :: List.fold_left (fun acc x -> aux (CONS :: acc) x) acc xs
     | CallRec (f, xs) ->
-        let acc = aux (RAP :: acc) f in
+        let acc = aux (DUM :: RAP :: acc) f in
         NIL :: List.fold_left (fun acc x -> aux (CONS :: acc) x) acc xs
     | Lambda b -> LDF :: List (aux [RTN] b) :: acc
     | LambdaRec b -> DUM :: LDF :: List (aux [RTN] b) :: acc

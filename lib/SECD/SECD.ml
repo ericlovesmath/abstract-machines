@@ -21,3 +21,22 @@ include Compiler.Make (struct
 
   let string_of_value = Machine.string_of_value
 end)
+
+(** Runs Sexp directly from file *)
+(*
+let debugger filename =
+  let sexp =
+    In_channel.input_all
+    |> In_channel.with_open_text filename
+    |> Sexplib.Sexp.of_string
+  in
+  let is =
+    match sexp with
+    | List xs -> xs
+    | _ -> failwith "Expected Sexp"
+  in
+  is
+  |> List.map Machine.instr_of_sexp
+  |> Machine.init
+  |> Machine.eval
+*)

@@ -8,7 +8,9 @@ Implementing Abstract machines targeted by functional compilers:
 
 - **Krivine Machine**: Machine most similar to direct beta and eta reduction of the lambda calculus, reducing code to lambdas and repeatedly performing weak head normal form reductions. Call-by-Name by nature, this implementation is lazily evaluated.
 
-Instructions (execute inside folder for any `<machine>`)
+- **Graph Combinator Reduction Machine**: The coolest one. Converts AST forms to the lambda calculus, which is then converted to combinatory logic with primitive values and functions. The combinators are then converted to a graph, and performing reduction on the graph results in a lazy and efficient language, similar to the Krivine Machine without having to recompute the same values.
+
+Instructions (note that `Makefile` contains more commands):
 
 - REPL: `dune exec abstract_machines -- -machine <machine>` (Suggested to run with [rlwrap](https://github.com/hanslub42/rlwrap) for convenience)
 - Debug: `dune exec abstract_machines -- -machine <machine> -debug`
