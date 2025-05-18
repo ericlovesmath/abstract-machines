@@ -23,8 +23,14 @@ module SKTester = Tester.Make (struct
   let files = base
 end)
 
+module CESKTester = Tester.Make (struct
+  module C = CESK
+  let files = base
+end)
+
 let () =
   SECDTester.test ();
   CEKTester.test ();
   KrivineTester.test ();
-  SKTester.test ()
+  SKTester.test ();
+  CESKTester.test ();
