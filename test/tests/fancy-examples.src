@@ -1,3 +1,21 @@
+// OUTPUT: 120
+(let Y
+  (lambda (f)
+    ((lambda x (f (lambda n ((x x) n))))
+     (lambda x (f (lambda n ((x x) n))))))
+
+  (let factgen
+    (lambda self
+      (lambda n
+        (if (= n 0)
+            1
+            (* n (self (- n 1))))))
+
+  (let factorial
+    (Y factgen)
+
+  (factorial 5))))
+
 // OUTPUT: 6 :: 10 :: 14 :: nil
 (letrec (map f xs)
  (if (atom xs)

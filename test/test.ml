@@ -1,7 +1,7 @@
 open Lib
 
-let base =
-  [ "basics"; "fails"; "higher-ordered"; "lambdas"; "y-combinator"; "letrec"; "fancy" ]
+let base = [ "basics"; "fails"; "higher-ordered"; "lambdas"; "letrec"; "fancy-examples" ]
+let laziness = [ "lazy" ]
 
 module SECDTester = Tester.Make (struct
   module C = SECD
@@ -15,7 +15,7 @@ end)
 
 module KrivineTester = Tester.Make (struct
   module C = Krivine
-  let files = base @ ["lazy"]
+  let files = base @ laziness
 end)
 
 module SKTester = Tester.Make (struct

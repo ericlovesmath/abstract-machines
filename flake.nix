@@ -35,6 +35,7 @@
           shellHook = ''
             # Shorter bash prompt, comment out if not wanted
             PS1="\[\e[1;32m\]\W\[\e[0m\]\$ "
+            eval $(opam env --switch=bonsai)
           '';
         };
     };
