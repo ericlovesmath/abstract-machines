@@ -8,6 +8,7 @@ type t =
   | Fn of string list * t
   | Rec of string * string list * t
   | Call of t * t list
+  | CallCC of t
 
   | Set of string * t
   | Begin of t list

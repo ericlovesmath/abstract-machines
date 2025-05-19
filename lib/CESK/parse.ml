@@ -22,9 +22,12 @@ let rec parse (e : Frontend.Ast.t) : Machine.t =
   | Lambda (args, body) -> Fn (args, parse body)
   | LambdaRec (f, args, body) -> Rec (f, args, parse body)
 
+  (* call/cc and prompt/control related *)
+  | Call (Var "callcc", [f]) -> CallCC (parse f)
+
   (* Imperative specific *)
   | Call (Var "begin", es) -> Begin (List.map parse es)
-  | Call (Var "set", [Var v; e']) -> Set (v, parse e')
+  | Call (Var "set!", [Var v; e']) -> Set (v, parse e')
   | Call (Var "while", cond :: body) ->
 
       (*

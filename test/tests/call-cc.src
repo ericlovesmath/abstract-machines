@@ -1,0 +1,39 @@
+// OUTPUT: 42
+(callcc (lambda k (k 42)))
+
+// OUTPUT: 4
+(+ 1 (callcc (lambda k (+ 2 (k 3)))))
+
+// OUTPUT: 5
+(letrec (f x)
+    (callcc (lambda return
+        (begin
+            (if (< x 5)
+                (return (+ 1 x))
+                nil)
+            (f (- x 1)))))
+(f 10))
+
+// OUTPUT: 55
+(let (fib x)
+    (callcc (lambda return
+        (let n 0
+        (begin
+            (while #t
+                (if (= x 0)
+                    (return n)
+                    nil)
+                (set! n (+ n x))
+                (set! x (- x 1)))
+            n))))
+(fib 10))
+
+// OUTPUT: -1 :: 2 :: nil
+(let (safediv x y)
+    (callcc (lambda throw
+        (begin
+            (if (= y 0)
+                (throw -1)
+                nil)
+            (/ x y))))
+[(safediv 10 0) (safediv 10 5)])

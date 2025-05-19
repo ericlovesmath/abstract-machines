@@ -10,6 +10,7 @@ type t =
   | Fn of string list * t
   | Rec of string * string list * t
   | Call of t * t list
+  | CallCC of t
 
   | Set of string * t
   | Begin of t list
@@ -38,11 +39,11 @@ type value =
   | Bool of bool
   | List of value list
   | Closure of t * env
+  | Cont of kont
 and env = (string * addr) list
+and kont = LetKont of string * env * t * kont | Halt
 
 type store = (addr * value) list
-
-type kont = LetKont of string * env * t * kont | Halt
 type cesk = | Running of t * env * store * kont | Done of value
 
 let counter = ref 0
@@ -107,14 +108,25 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
     apply_kont k closure store'
 
   | Call (f, es) ->
-      (match eval_atomic f env store with
-      | Closure (Fn (ss, body), closure_env) ->
+      (match eval_atomic f env store, es with
+      | Cont k', [f] -> apply_kont k' (eval_atomic f env store) store
+      | Closure (Fn (ss, body), closure_env), _ ->
           let vs = List.map (fun v -> eval_atomic v env store) es in
           let addrs = List.map (fun _ -> fresh ()) vs in
           let env' = List.combine ss addrs @ closure_env in
           let store' = List.fold_left2 update_store store addrs vs in
           Running (body, env', store', k)
       | _ -> failwith "eval_step: Attempted to `Call` non-function value")
+
+  | CallCC f ->
+      let closure = eval_atomic f env store in
+      (match closure with
+      | Closure (Fn ([arg], body), closure_env) ->
+          let a = fresh () in
+          let env' = (arg, a) :: closure_env in
+          let store' = update_store store a (Cont k) in
+          Running (body, env', store', k)
+      | _ -> failwith "call/cc: argument is not a function")
 
   | Set (x, e) ->
       let a = lookup_addr x env in
@@ -140,7 +152,7 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
       let b =
         match eval_atomic e env store with
         | Int _ | Bool _ | List [] -> true
-        | Closure _ | List _ -> false
+        | Closure _ | List _ | Cont _ -> false
       in
       apply_kont k (Bool b) store
   | Cons (e, e') ->
@@ -173,3 +185,4 @@ let rec string_of_value (v : value) : string =
   | List (v :: vs) -> string_of_value v ^ " :: " ^ string_of_value (List vs)
   | Closure (_, env) ->
       "Closure in (" ^ String.concat " " (List.map fst env) ^ ")"
+  | Cont _ -> "<kont>"

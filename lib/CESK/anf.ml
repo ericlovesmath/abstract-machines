@@ -26,6 +26,15 @@ let anf (e : t) : t =
   (* Monadic Binding for Continuation Passing Style *)
   and ( let* ) e k = atomize e (fun e' -> k e')
 
+  (* CPS Binding for [atomize] on list of elements *)
+  and ( let+ ) args k =
+    match args with
+    | [] -> k []
+    | h :: t ->
+        let* h = h in
+        let+ t = t in
+        k (h :: t)
+
   and anf' (e : t) (k : t -> t) : t =
     let make_binop cons e e' =
       let* e = e in
@@ -46,38 +55,24 @@ let anf (e : t) : t =
         let* c = c in
         If (c, anf' t k, anf' f k)
 
-    | Fn (params, b) ->
-        k (Fn (params, anf' b Fun.id))
-    | Rec (f, params, b) ->
-        k (Rec (f, params, anf' b Fun.id))
+    | Fn (params, b) -> k (Fn (params, anf' b Fun.id))
+    | Rec (f, params, b) -> k (Rec (f, params, anf' b Fun.id))
 
     | Call (f, args) ->
-        (* CPS Binding for [atomize] on list of elements *)
-        let rec ( let+ ) args k =
-          match args with
-          | [] -> k []
-          | h :: t ->
-              let* h = h in
-              let+ t = t in
-              k (h :: t)
-        in
         let* f = f in
         let+ args = args in
         k (Call (f, args))
+
+    | CallCC f ->
+        (* k (CallCC (anf' f Fun.id)) *)
+        let* f = f in
+        k (CallCC f)
 
     | Set (x, e) ->
         let* e = e in
         k (Set (x, e))
 
     | Begin es ->
-        let rec ( let+ ) args k =
-          match args with
-          | [] -> k []
-          | h :: t ->
-              let* h = h in
-              let+ t = t in
-              k (h :: t)
-        in
         let+ es = es in
         k (Begin es)
 

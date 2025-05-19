@@ -58,9 +58,10 @@ let ( let- ) p f = (p <* trimP) >>= f
 let parensPT left right p =
   charP left *> strip p <* charP right
 
-(** alphabetic followed by (possibly multiple) ' *)
+(** alphabetic followed by (possibly multiple) ['] or [!] or [?] *)
 let varstrP =
-  let* keyword = ( @ ) <$> alphaP <*> many (charP '\'') in
+  let endP = stringP "!" <|> stringP "?" <|> many (charP '\'') in
+  let* keyword = ( @ ) <$> alphaP <*> endP in
   pure (implode keyword)
 
 let varlistP =
