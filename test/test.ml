@@ -2,6 +2,7 @@ open Lib
 
 let base = [ "basics"; "fails"; "higher-ordered"; "lambdas"; "letrec"; "fancy-examples" ]
 let laziness = [ "lazy" ]
+let imperative = [ "imperative" ]
 
 module SECDTester = Tester.Make (struct
   module C = SECD
@@ -25,7 +26,7 @@ end)
 
 module CESKTester = Tester.Make (struct
   module C = CESK
-  let files = base
+  let files = base @ imperative
 end)
 
 let () =
