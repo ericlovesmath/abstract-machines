@@ -10,6 +10,8 @@ Implementing Abstract machines targeted by functional compilers:
 
 - **Graph Combinator Reduction Machine**: The coolest one. Converts AST forms to the lambda calculus, which is then converted to combinatory logic with primitive values and functions. The combinators are then converted to a graph, and performing reduction on the graph results in a lazy and efficient language, similar to the Krivine Machine without having to recompute the same values.
 
+- **CESK Machine**: CEK, but with a `store` that can be thought of as a `heap`. It performs the same as CEK for pure functional code, but allows imperative instructions such as `set!` and `while` to work as well. It adds extra features that could be translated to CEK as well, such as `call/cc` for early `return`'s and generators with `yield`.
+
 Instructions (note that `Makefile` contains more commands):
 
 - REPL: `dune exec abstract_machines -- -machine <machine>` (Suggested to run with [rlwrap](https://github.com/hanslub42/rlwrap) for convenience)

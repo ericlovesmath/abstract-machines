@@ -120,7 +120,7 @@
 
 * Interface `.mli` files
 
-# Week 15
+# Week 16
 
 * Fix `letrec` SECD Issue, I'm finally free.
 * Laziness of Cons
@@ -128,7 +128,23 @@
 * Update README to use Makefile
 * Minimal CESK Implementation
 
+# Week 17
+
+* Fully integrate CESK Implementation
+* Add support for imperative features like `begin`, `set!`, and `while`
+* Deal with ANF conversion issues
+* Implement `call/cc` with example tests
+* Add a bunch of imperative and `call/cc` tests
+
 ## Working Notes
+
+* Improve Graph Reduction code
+* Add support for bindings of infinite lists
+* Add ability to inject AST forms into arbitrary passes
+* Generators, catching errors with `call/cc`
+* Add `unit` and shorthand `if` and `cond` form syntax
+* Implement `display` and `read`
+* Read up on CESK and WAM
 
 ## Todo
 
