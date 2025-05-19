@@ -11,6 +11,9 @@ type t =
   | Rec of string * string list * t
   | Call of t * t list
 
+  | Set of string * t
+  | Begin of t list
+
   | Atom of t
   | Cons of t * t
   | Cdr of t
@@ -112,6 +115,17 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
           let store' = List.fold_left2 update_store store addrs vs in
           Running (body, env', store', k)
       | _ -> failwith "eval_step: Attempted to `Call` non-function value")
+
+  | Set (x, e) ->
+      let a = lookup_addr x env in
+      let v = eval_atomic e env store in
+      let store' = update_store store a v in
+      apply_kont k v store'
+
+  (* TODO: Add a unit value, also for Begin and Set *)
+  | Begin [] -> failwith "eval_step: begin has no expressions"
+  | Begin [e] -> Running (e, env, store, k)
+  | Begin (e :: es) -> Running (e, env, store, LetKont ("_", env, Begin es, k))
 
   | Add (e, e') -> make_int_binop (fun x y -> Int (x + y)) e e'
   | Sub (e, e') -> make_int_binop (fun x y -> Int (x - y)) e e'

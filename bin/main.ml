@@ -4,9 +4,9 @@ let help = "Usage: dune exec abstract_machines -- [-machine MACHINE] [-file FILE
 
 module SECDRepl = Repl.Make(SECD)
 module CEKRepl = Repl.Make(CEK)
-module CESKRepl = Repl.Make(CEK)
 module KrivineRepl = Repl.Make(Krivine)
 module SKRepl = Repl.Make(SK)
+module CESKRepl = Repl.Make(CESK)
 
 let () =
   let machine = ref "" in
@@ -29,7 +29,7 @@ let () =
     | "cek" | "CEK" -> (module CEKRepl : Repl.S)
     | "krivine" | "Krivine" -> (module KrivineRepl : Repl.S)
     | "sk" | "SK" -> (module SKRepl : Repl.S)
-    | "cesk" | "CESK" -> (module CEKRepl : Repl.S)
+    | "cesk" | "CESK" -> (module CESKRepl : Repl.S)
     | _ -> failwith "Invalid compiler specified. Use 'secd', 'cek', 'krivine', 'sk', or 'cesk'."
   in
 

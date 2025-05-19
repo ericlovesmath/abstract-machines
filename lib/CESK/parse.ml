@@ -3,7 +3,7 @@ open Machine
 let counter = ref 0
 
 let genvar () =
-  let v = "$tmp" ^ string_of_int !counter in
+  let v = "$parse.tmp" ^ string_of_int !counter in
   counter := !counter + 1;
   v
 
@@ -21,6 +21,35 @@ let rec parse (e : Frontend.Ast.t) : Machine.t =
   | If (c, t, f) -> If (parse c, parse t, parse f)
   | Lambda (args, body) -> Fn (args, parse body)
   | LambdaRec (f, args, body) -> Rec (f, args, parse body)
+
+  (* Imperative specific *)
+  | Call (Var "begin", es) -> Begin (List.map parse es)
+  | Call (Var "set", [Var v; e']) -> Set (v, parse e')
+  | Call (Var "while", cond :: body) ->
+
+      (*
+         Explanation: We're using `set` to effectively define mutually recursive
+         definitions for `cond` and `body` to avoid issues with ANF conversion.
+         This is a desugaring pass.
+
+         (while COND BODY) -->
+           (let cond #u
+           (let body #u
+           (begin 
+             (set cond (lambda _ (if COND (body _) #u)))
+             (set body (lambda _ (begin BODY (cond _))))
+             (cond #u)))))
+      *)
+
+      let c = genvar () in
+      let b = genvar () in
+      Let (c, Int 0,
+      (Let (b, Int 0,
+      (Begin [
+        Set (c, Fn (["_"], If (parse cond, Call (Var b, [Var "_"]), Nil)));
+        Set (b, Fn (["_"], Begin (List.map parse body @ [Call (Var c, [Var "_"])])));
+        Call (Var c, [Int 0])
+      ]))))
 
   | Call (Prim Add, [e; e']) -> Add (parse e, parse e')
   | Call (Prim Sub, [e; e']) -> Sub (parse e, parse e')

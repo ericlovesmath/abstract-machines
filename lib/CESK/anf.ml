@@ -3,7 +3,7 @@ open Machine
 let counter = ref 0
 
 let genvar () =
-  let v = "$tmp" ^ string_of_int !counter in
+  let v = "$anf.tmp" ^ string_of_int !counter in
   counter := !counter + 1;
   v
 
@@ -64,6 +64,22 @@ let anf (e : t) : t =
         let* f = f in
         let+ args = args in
         k (Call (f, args))
+
+    | Set (x, e) ->
+        let* e = e in
+        k (Set (x, e))
+
+    | Begin es ->
+        let rec ( let+ ) args k =
+          match args with
+          | [] -> k []
+          | h :: t ->
+              let* h = h in
+              let+ t = t in
+              k (h :: t)
+        in
+        let+ es = es in
+        k (Begin es)
 
     | Add (e, e') -> make_binop (fun x y -> Add (x, y)) e e'
     | Sub (e, e') -> make_binop (fun x y -> Sub (x, y)) e e'

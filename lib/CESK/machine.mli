@@ -9,6 +9,9 @@ type t =
   | Rec of string * string list * t
   | Call of t * t list
 
+  | Set of string * t
+  | Begin of t list
+
   | Atom of t
   | Cons of t * t
   | Cdr of t
