@@ -22,7 +22,7 @@
             (while #t
                 (if (= x 0)
                     (return n)
-                    nil)
+                    #u)
                 (set! n (+ n x))
                 (set! x (- x 1)))
             n))))
@@ -34,6 +34,6 @@
         (begin
             (if (= y 0)
                 (throw -1)
-                nil)
+                #u)
             (/ x y))))
 [(safediv 10 0) (safediv 10 5)])

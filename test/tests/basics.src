@@ -4,6 +4,9 @@
 // OUTPUT: 1 :: nil
 (cons 1 nil)
 
+// OUTPUT: #u
+#u
+
 // OUTPUT: 52
 (* (/ (+ 5 7) 3) (- 14 1))
 

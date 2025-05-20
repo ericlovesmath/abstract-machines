@@ -1,4 +1,5 @@
 type t =
+  | Unit
   | Nil
   | Int of int
   | Bool of bool

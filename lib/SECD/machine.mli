@@ -2,7 +2,7 @@ type t
 
 type instr =
   | NIL | LDC | LD
-  | Int of int | Bool of bool | List of instr list
+  | Unit | Int of int | Bool of bool | List of instr list
   | SEL | JOIN
   | LDF | AP | RTN | DUM | RAP
   | ATOM | CONS | CDR | CAR
@@ -12,6 +12,7 @@ type instr =
 
 type value =
   | List of value list
+  | Unit
   | Int of int
   | Bool of bool
   | Func of instr list * value list list

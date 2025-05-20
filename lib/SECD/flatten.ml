@@ -2,6 +2,7 @@ let flatten (ast : Assign.t) : Machine.instr list =
   let rec aux (acc : Machine.instr list) (ast : Assign.t) : Machine.instr list=
     match ast with
     | Nil -> NIL :: acc
+    | Unit -> LDC :: Unit :: acc
     | Int i -> LDC :: Int i :: acc
     | Bool b -> LDC :: Bool b :: acc
     | If (c, t, f) -> aux (SEL :: List (aux [JOIN] t) :: List (aux [JOIN] f) :: acc) c

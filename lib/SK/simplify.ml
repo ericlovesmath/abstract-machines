@@ -3,6 +3,7 @@ open Sexplib.Std
 type t =
   | S | K | Y | C | B | I | U | P (* TODO: rm *)
   | If
+  | Unit
   | Nil
   | Int of int
   | Bool of bool
@@ -16,6 +17,7 @@ let rec simplify (ast : Uniquify.t) : t =
   match ast with
   | Y -> Y
   | If -> If
+  | Unit -> Unit
   | Nil -> Nil
   | Int i -> Int i
   | Bool b -> Bool b

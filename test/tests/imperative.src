@@ -6,6 +6,9 @@
         (set! x (* x x))
         x))
 
+// OUTPUT: #u
+(let x 10 (set! x 3))
+
 // OUTPUT: #f
 (let even 0
 (let odd 0

@@ -14,6 +14,7 @@ let make_binop (cons : t -> t -> t) : t =
 
 let rec parse (e : Frontend.Ast.t) : Machine.t =
   match e with
+  | Unit -> Unit
   | Nil -> Nil
   | Int n -> Int n
   | Bool b -> Bool b

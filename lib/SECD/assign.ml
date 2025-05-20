@@ -1,6 +1,7 @@
 open Sexplib.Std
 
 type t =
+  | Unit
   | Nil
   | Int of int
   | Bool of bool
@@ -28,6 +29,7 @@ let locate (locs : string list list) (var : string) : t =
 let assign_vars (ast : Recursion.t) : t =
   let rec aux (locs : string list list) (ast : Recursion.t) : t =
     match ast with
+    | Unit -> Unit
     | Nil -> Nil
     | Int i -> Int i
     | Bool b -> Bool b

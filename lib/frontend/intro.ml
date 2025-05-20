@@ -9,6 +9,7 @@ type prim =
   [@@deriving sexp]
 
 type t =
+  | Unit
   | Nil
   | Int of int
   | Bool of bool
@@ -24,6 +25,7 @@ type t =
   | Prim of prim
   [@@deriving sexp]
 
+let unitP = Unit <$ stringP "#u"
 let nilP = Nil <$ stringP "nil"
 
 (** primitives (reserved keywords) *)
@@ -81,7 +83,8 @@ let integerP =
 let boolP = (Bool true <$ stringP "#t") <|> (Bool false <$ stringP "#f")
 
 let rec introP st =
-  (nilP <|> integerP <|> boolP <|> primP <|> ifP <|> lambdaP <|> letP <|> letstarP <|> callP <|> listP <|> variableP) st
+  (unitP <|> nilP <|> integerP <|> boolP <|> primP <|> ifP
+   <|> lambdaP <|> letP <|> letstarP <|> callP <|> listP <|> variableP) st
 
 and ifP st =
   parensPT '(' ')' (

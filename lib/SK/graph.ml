@@ -7,6 +7,7 @@ type label =
   | If
   | Int of int
   | Bool of bool
+  | Unit
   | Nil
   | Cons of vertex * vertex
   | Prim of Frontend.Ast.prim
@@ -40,6 +41,7 @@ let rec string_of_t ((v, g) : t) : string =
   | Bool true -> "#t"
   | Bool false -> "#f"
   | If -> "if"
+  | Unit -> "#u"
   | Nil -> "nil"
   | Cons (l, r) -> string_of_t (l, g) ^ " :: " ^ string_of_t (r, g)
   | Prim _ -> "<prim>"
@@ -88,6 +90,7 @@ let dot_of_graph ?(max_len = 20) ?(reachable_only = false) ((root, g) : t) : str
     | Bool true    -> "#t"
     | Bool false   -> "#f"
     | If           -> "if"
+    | Unit         -> "#u"
     | Nil          -> "nil"
     | Cons _       -> "Cons"
     | App _        -> "App"
@@ -237,7 +240,7 @@ let reduce' ((root, g) : t) : unit =
           end
         | _ -> ()
         end
-    | Cons _ | Bool _ | Int _ | Nil | Prim _ 
+    | Cons _ | Bool _ | Int _ | Unit | Nil | Prim _ 
     | S | K | I | B | C | Y | U | P | If -> ()
   in
   whnf root

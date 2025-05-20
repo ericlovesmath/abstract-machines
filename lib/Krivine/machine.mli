@@ -7,6 +7,7 @@ type t =
   [@@deriving sexp]
 
 and const =
+  | Unit
   | Nil
   | Cons of t * t Lazy.t
   | Int of int

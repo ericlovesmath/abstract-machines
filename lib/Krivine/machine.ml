@@ -10,7 +10,8 @@ type t =
   [@@deriving sexp]
 
 and const =
-  | Nil (* NOTE: Can use Closures repr instead, but feels hacky *)
+  | Unit
+  | Nil
   | Cons of t * t Lazy.t
   | Int of int
   | Bool of bool
@@ -127,6 +128,7 @@ let rec string_of_const c =
   | Int i -> string_of_int i
   | Bool true -> "#t"
   | Bool false -> "#f"
+  | Unit -> "#u"
   | Nil -> "nil"
   | Prim _ -> "<primitive>"
   | Cons (hd, tl) ->

@@ -1,6 +1,7 @@
 open Sexplib.Std
 
 type t =
+  | Unit
   | Nil
   | Int of int
   | Bool of bool
@@ -35,6 +36,7 @@ type t =
 type addr = int
 
 type value =
+  | Unit
   | Int of int
   | Bool of bool
   | List of value list
@@ -64,6 +66,7 @@ let update_store store a v =
 
 let eval_atomic (e : t) (env : env) (store : store) : value =
   match e with
+  | Unit -> Unit
   | Nil -> List []
   | Int n -> Int n
   | Bool b -> Bool b
@@ -88,6 +91,7 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
     | _ -> failwith "eval_step: Prim called on non-integer arguments"
   in
   match c with
+  | Unit
   | Nil
   | Int _
   | Bool _
@@ -132,7 +136,7 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
       let a = lookup_addr x env in
       let v = eval_atomic e env store in
       let store' = update_store store a v in
-      apply_kont k v store'
+      apply_kont k Unit store'
 
   (* TODO: Add a unit value, also for Begin and Set *)
   | Begin [] -> failwith "eval_step: begin has no expressions"
@@ -151,7 +155,7 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
   | Atom e ->
       let b =
         match eval_atomic e env store with
-        | Int _ | Bool _ | List [] -> true
+        | Unit | Int _ | Bool _ | List [] -> true
         | Closure _ | List _ | Cont _ -> false
       in
       apply_kont k (Bool b) store
@@ -182,6 +186,7 @@ let rec string_of_value (v : value) : string =
   | Bool true -> "#t"
   | Bool false -> "#f"
   | List [] -> "nil"
+  | Unit -> "#u"
   | List (v :: vs) -> string_of_value v ^ " :: " ^ string_of_value (List vs)
   | Closure (_, env) ->
       "Closure in (" ^ String.concat " " (List.map fst env) ^ ")"

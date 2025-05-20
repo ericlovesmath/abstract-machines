@@ -7,6 +7,7 @@ type label =
   | If
   | Int of int
   | Bool of bool
+  | Unit
   | Nil
   | Cons of vertex * vertex
   | Prim of Frontend.Ast.prim

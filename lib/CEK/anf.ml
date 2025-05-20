@@ -33,6 +33,7 @@ let anf (e : t) : t =
       k (cons e e')
     in
     match e with
+    | Unit
     | Nil
     | Int _
     | Bool _

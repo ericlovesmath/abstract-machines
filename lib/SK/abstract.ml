@@ -5,6 +5,7 @@ type t =
   | S | K | Y | C | B | I | U | P | If
   | Int of int
   | Bool of bool
+  | Unit
   | Nil
   | Cons of t * t
   | Prim of Frontend.Ast.prim
@@ -22,6 +23,7 @@ let rec abstract' (ast : Simplify.t) : t =
   | U -> U
   | P -> P
   | If -> If
+  | Unit -> Unit
   | Nil -> Nil
   | Int i -> Int i
   | Bool b -> Bool b
@@ -50,6 +52,7 @@ let rec fix (ast : t) : Combinator.t =
   | U -> U
   | P -> P
   | If -> If
+  | Unit -> Unit
   | Nil -> Nil
   | Int i -> Int i
   | Bool b -> Bool b

@@ -5,6 +5,7 @@ type t =
   | If
   | Int of int
   | Bool of bool
+  | Unit
   | Nil
   | Cons of t * t
   | Prim of Frontend.Ast.prim
@@ -26,6 +27,7 @@ let graphify (ast : t) : Graph.t =
   let node_if = Graph.add_vertex g If in
   let node_true = Graph.add_vertex g (Bool true) in
   let node_false = Graph.add_vertex g (Bool false) in
+  let node_unit = Graph.add_vertex g Unit in
   let node_nil = Graph.add_vertex g Nil in
   let node_prims =
     List.map
@@ -46,6 +48,7 @@ let graphify (ast : t) : Graph.t =
     | If -> node_if
     | Bool true -> node_true
     | Bool false -> node_false
+    | Unit -> node_unit
     | Nil -> node_nil
     | Prim p -> List.assoc p node_prims
     | Int i -> Graph.add_vertex g (Int i)

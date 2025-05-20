@@ -2,7 +2,7 @@ open Sexplib.Std
 
 type instr =
   | NIL | LDC | LD
-  | Int of int | Bool of bool | List of instr list
+  | Unit | Int of int | Bool of bool | List of instr list
   | SEL | JOIN
   | LDF | AP | RTN | DUM | RAP
   | ATOM | CONS | CDR | CAR
@@ -12,6 +12,7 @@ type instr =
 
 type value =
   | List of value list
+  | Unit
   | Int of int
   | Bool of bool
   | Func of instr list * value list list
@@ -34,6 +35,7 @@ let init (instrs : instr list) : t =
 
 let is_atomic (value : value) =
   match value with
+  | Unit
   | Int _
   | Bool _
   | List [] -> true
@@ -49,6 +51,7 @@ let eval_step (state : t) : t =
 
   | _, _, NIL :: c', _                     -> push c' (List [] :: stack)
   | _, _, LDC :: Int n :: c', _            -> push c' (Int n :: stack)
+  | _, _, LDC :: Unit :: c', _             -> push c' (Unit :: stack)
   | _, _, LDC :: Bool b :: c', _           -> push c' (Bool b :: stack)
   | _, _, LD :: Int y :: Int x :: c', _    -> push c' (List.nth (List.nth env y) x :: stack)
 
@@ -107,4 +110,5 @@ let rec string_of_value (v : value) : string =
   | Int n -> string_of_int n
   | Bool true -> "#t"
   | Bool false -> "#f"
+  | Unit -> "#u"
   | Func _ -> "<func>"

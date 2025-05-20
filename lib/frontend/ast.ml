@@ -7,6 +7,7 @@ type prim =
   [@@deriving sexp]
 
 type t =
+  | Unit
   | Nil
   | Int of int
   | Bool of bool
@@ -27,6 +28,7 @@ let genvar () =
 
 let rec desugar (t : Intro.t) : t =
   match t with
+  | Unit -> Unit
   | Nil -> Nil
   | Int i -> Int i
   | List es ->

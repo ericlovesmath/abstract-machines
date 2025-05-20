@@ -1,6 +1,7 @@
 open Sexplib.Std
 
 type t =
+  | Unit
   | Nil
   | Int of int
   | Bool of bool
@@ -29,6 +30,7 @@ type t =
   [@@deriving sexp]
 
 type value =
+  | Unit
   | Int of int
   | Bool of bool
   | List of value list
@@ -40,6 +42,7 @@ type cek = Running of t * env * kont | Done of value
 
 let eval_atomic (e : t) (env : env) : value =
   match e with
+  | Unit -> Unit
   | Nil -> List []
   | Int n -> Int n
   | Bool b -> Bool b
@@ -60,6 +63,7 @@ let eval_step (c : t) (env : env) (k : kont) : cek =
       | _ -> failwith "eval_step: Prim called on non-integer arguments")
   in
   match c with
+  | Unit
   | Nil
   | Int _
   | Bool _
@@ -99,7 +103,7 @@ let eval_step (c : t) (env : env) (k : kont) : cek =
   | Atom e ->
       let b =
         match eval_atomic e env with
-        | Int _ | Bool _ | List [] -> true
+        | Unit | Int _ | Bool _ | List [] -> true
         | Closure _ | List _ -> false
       in
       apply_kont k (Bool b)
@@ -129,6 +133,7 @@ let rec string_of_value (v : value) : string =
   | Int n -> string_of_int n
   | Bool true -> "#t"
   | Bool false -> "#f"
+  | Unit -> "#u"
   | List [] -> "nil"
   | List (v :: vs) -> string_of_value v ^ " :: " ^ string_of_value (List vs)
   | Closure (_, envref) ->

@@ -13,6 +13,7 @@ module VarMap = Map.Make(String)
 let uniquify (ast : Frontend.Ast.t) : Frontend.Ast.t =
   let rec aux (m : var VarMap.t) (ast : Frontend.Ast.t) : Frontend.Ast.t =
     match ast with
+    | Unit -> Unit
     | Nil -> Nil
     | Int i -> Int i
     | Bool b -> Bool b

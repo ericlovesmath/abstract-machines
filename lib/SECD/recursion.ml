@@ -1,6 +1,7 @@
 open Sexplib.Std
 
 type t =
+  | Unit
   | Nil
   | Int of int
   | Bool of bool
@@ -15,6 +16,7 @@ type t =
 
 let rec find_recs (ast : Frontend.Ast.t) : string list =
   match ast with
+  | Unit
   | Nil
   | Int _
   | Bool _
@@ -33,6 +35,7 @@ let tag (ast : Frontend.Ast.t) : t =
   let recs = find_recs ast in
   let rec aux (ast : Frontend.Ast.t) : t = 
     match ast with
+    | Unit -> Unit
     | Nil -> Nil
     | Int i -> Int i
     | Bool b -> Bool b

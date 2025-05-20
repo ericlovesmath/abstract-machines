@@ -135,6 +135,7 @@
 * Deal with ANF conversion issues
 * Implement `call/cc` with example tests
 * Add a bunch of imperative and `call/cc` tests
+* Add `#u` to all machines (now more relevant due to `set!`)
 
 ## Working Notes
 
@@ -142,7 +143,7 @@
 * Add support for bindings of infinite lists
 * Add ability to inject AST forms into arbitrary passes
 * Generators, catching errors with `call/cc`
-* Add `unit` and shorthand `if` and `cond` form syntax
+* Shorthand `if` and `cond` form syntax
 * Implement `display` and `read`
 * Read up on CESK and WAM
 

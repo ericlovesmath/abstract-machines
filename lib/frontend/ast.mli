@@ -5,6 +5,7 @@ type prim =
   [@@deriving sexp]
 
 type t =
+  | Unit
   | Nil
   | Int of int
   | Bool of bool

@@ -3,6 +3,7 @@ type t =
   | If
   | Int of int
   | Bool of bool
+  | Unit
   | Nil
   | Cons of t * t
   | Prim of Frontend.Ast.prim

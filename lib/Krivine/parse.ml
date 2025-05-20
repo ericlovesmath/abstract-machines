@@ -9,6 +9,7 @@ let y_combinator =
 
 let rec parse (e : Frontend.Ast.t) : Machine.t =
   match e with
+  | Unit -> Cst Unit
   | Nil -> Cst Nil
   | Int n -> Cst (Int n)
   | Bool b -> Cst (Bool b)

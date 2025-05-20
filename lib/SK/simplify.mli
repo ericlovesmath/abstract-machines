@@ -1,6 +1,7 @@
 type t =
   | S | K | Y | C | B | I | U | P (* TODO: rm *)
   | If
+  | Unit
   | Nil
   | Int of int
   | Bool of bool
