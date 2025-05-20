@@ -138,7 +138,6 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
       let store' = update_store store a v in
       apply_kont k Unit store'
 
-  (* TODO: Add a unit value, also for Begin and Set *)
   | Begin [] -> failwith "eval_step: begin has no expressions"
   | Begin [e] -> Running (e, env, store, k)
   | Begin (e :: es) -> Running (e, env, store, LetKont ("_", env, Begin es, k))

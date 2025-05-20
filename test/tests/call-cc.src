@@ -9,8 +9,7 @@
     (callcc (lambda return
         (begin
             (if (< x 5)
-                (return (+ 1 x))
-                nil)
+                (return (+ 1 x)))
             (f (- x 1)))))
 (f 10))
 
@@ -21,8 +20,7 @@
         (begin
             (while #t
                 (if (= x 0)
-                    (return n)
-                    #u)
+                    (return n))
                 (set! n (+ n x))
                 (set! x (- x 1)))
             n))))
@@ -33,7 +31,6 @@
     (callcc (lambda throw
         (begin
             (if (= y 0)
-                (throw -1)
-                #u)
+                (throw -1))
             (/ x y))))
 [(safediv 10 0) (safediv 10 5)])

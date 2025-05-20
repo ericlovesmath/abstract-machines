@@ -32,11 +32,10 @@
 // OUTPUT: 0 :: 2 :: 4 :: 6 :: 8 :: nil
 (letrec*
     (filter f xs)
-        (if (atom xs)
-            nil
-        (if (f (car xs))
-            (cons (car xs) (filter f (cdr xs)))
-        (filter f (cdr xs))))
+        (cond
+            ((atom xs) nil)
+            ((f (car xs)) (cons (car xs) (filter f (cdr xs))))
+            (#t (filter f (cdr xs))))
 
     (take n xs)
         (if (= n 0)

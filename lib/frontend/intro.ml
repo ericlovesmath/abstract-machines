@@ -83,15 +83,15 @@ let integerP =
 let boolP = (Bool true <$ stringP "#t") <|> (Bool false <$ stringP "#f")
 
 let rec introP st =
-  (unitP <|> nilP <|> integerP <|> boolP <|> primP <|> ifP
+  (unitP <|> nilP <|> integerP <|> boolP <|> primP <|> ifP <|> condP
    <|> lambdaP <|> letP <|> letstarP <|> callP <|> listP <|> variableP) st
 
 and ifP st =
   parensPT '(' ')' (
     let- _ = stringP "if" in
     let- c = introP in
-    let- t = introP in
-    let* f = introP in
+    let* t = introP in
+    let* f = (trimP *> introP) <|> pure Unit in
     pure (If (c, t, f))
   ) st
 
@@ -133,6 +133,20 @@ and letstarP st =
     match letkind with
     | `Let -> pure (LetStar (val_and_binds, body))
     | `LetRec -> pure (LetRecStar (val_and_binds, body))
+  ) st
+
+and condP st =
+  parensPT '(' ')' (
+    let- _ = stringP "cond" in
+    let caseP =
+      parensPT '(' ')' (
+          let- cond = introP in
+          let* bind = introP in
+          pure (cond, bind)
+      )
+    in
+    let* cases = sepBy1 trimP caseP in
+    pure (List.fold_right (fun (c, b) acc -> If (c, b, acc)) cases Unit)
   ) st
 
 and callP st =

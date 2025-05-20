@@ -135,15 +135,15 @@
 * Deal with ANF conversion issues
 * Implement `call/cc` with example tests
 * Add a bunch of imperative and `call/cc` tests
-* Add `#u` to all machines (now more relevant due to `set!`)
+* Add `#u` to all machines (now more relevant)
+* Add shorthand `if` with no `else` case (infer `#u`) and `cond` form
 
 ## Working Notes
 
 * Improve Graph Reduction code
 * Add support for bindings of infinite lists
 * Add ability to inject AST forms into arbitrary passes
-* Generators, catching errors with `call/cc`
-* Shorthand `if` and `cond` form syntax
+* Examples of generators, catching errors with `call/cc`
 * Implement `display` and `read`
 * Read up on CESK and WAM
 
