@@ -26,6 +26,23 @@
             n))))
 (fib 10))
 
+// OUTPUT: 945
+(let (even n) (= (* 2 (/ n 2)) n)
+(let c 1
+(begin
+  (let i 0
+  (let continue #u
+  (while (< i 10)
+    (callcc
+      (lambda (k)
+        (begin
+          (set! continue k)
+          (set! i (+ i 1))
+          (if (even i)
+              continue
+              (set! c (* c i)))))))))
+  c)))
+
 // OUTPUT: -1 :: 2 :: nil
 (let (safediv x y)
     (callcc (lambda throw

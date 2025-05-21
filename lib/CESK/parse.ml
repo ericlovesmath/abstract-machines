@@ -47,12 +47,12 @@ let rec parse (e : Frontend.Ast.t) : Machine.t =
 
       let c = genvar () in
       let b = genvar () in
-      Let (c, Int 0,
-      (Let (b, Int 0,
+      Let (c, Unit,
+      (Let (b, Unit,
       (Begin [
-        Set (c, Fn (["_"], If (parse cond, Call (Var b, [Var "_"]), Nil)));
-        Set (b, Fn (["_"], Begin (List.map parse body @ [Call (Var c, [Var "_"])])));
-        Call (Var c, [Int 0])
+        Set (c, Fn (["_"], If (parse cond, Call (Var b, [Unit]), Unit)));
+        Set (b, Fn (["_"], Begin (List.map parse body @ [Call (Var c, [Unit])])));
+        Call (Var c, [Unit])
       ]))))
 
   | Call (Prim Add, [e; e']) -> Add (parse e, parse e')
