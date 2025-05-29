@@ -163,7 +163,8 @@ and listP st =
   ((fun l -> List l) <$> parensPT '[' ']' (sepBy trimP introP)) st
 
 let parse s =
-  match (strip introP) (explode s) with
+  let cleanP = trimP <|> (() <$ many emptyP) in
+  match (cleanP *> introP <* cleanP) (explode s) with
   | Some (res, []) -> res
   | Some _ -> failwith "Intro.parse: Parsed stream incomplete"
   | None -> failwith "Intro.parse: Parser failed"

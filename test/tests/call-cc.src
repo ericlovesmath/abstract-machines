@@ -5,6 +5,7 @@
 (+ 1 (callcc (lambda k (+ 2 (k 3)))))
 
 // OUTPUT: 5
+; Simulating return
 (letrec (f x)
     (callcc (lambda return
         (begin
@@ -27,6 +28,7 @@
 (fib 10))
 
 // OUTPUT: 945
+; Simulating continue / break
 (let (even n) (= (* 2 (/ n 2)) n)
 (let c 1
 (begin
@@ -42,6 +44,32 @@
               continue
               (set! c (* c i)))))))))
   c)))
+
+// OUTPUT: 3
+; Monadic Delimited Continuations
+(let metak #u
+
+(let (reset thunk)
+  (let oldmetak metak
+    (callcc
+      (lambda (k)
+        (begin
+        (set! metak (lambda (v)
+            (begin
+             (set! metak oldmetak)
+             (k v))))
+        (let result (thunk #u)
+          (metak result))))))
+
+(let (shift f)
+  (callcc
+    (lambda (k)
+      (let capturedk (lambda (v) (reset (lambda n (k v))))
+        (metak (f capturedk)))))
+
+(reset (lambda n
+  (+ 1 (shift (lambda (k) 
+                (k 2)))))))))
 
 // OUTPUT: -1 :: 2 :: nil
 (let (safediv x y)
