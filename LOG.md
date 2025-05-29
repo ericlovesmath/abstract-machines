@@ -154,6 +154,7 @@
 
 * Move state to REPL
 * Fix toplevel lambda bindings for Krivine
+* Add true toplevel with `define` syntax, works for Krivine
 
 
 ## Working Notes

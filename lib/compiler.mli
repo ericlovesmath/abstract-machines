@@ -14,7 +14,7 @@ module type Compilable = sig
 
   val name : string
   val init : state
-  val execute : state -> Frontend.Ast.t -> state * value
+  val execute : state -> Frontend.Ast.top -> state * value
   val string_of_value : value -> string
 end
 

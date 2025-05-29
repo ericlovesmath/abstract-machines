@@ -17,5 +17,10 @@ type t =
   | Prim of prim
   [@@deriving sexp]
 
-(** Parses [Intro.t] into the shared frontend AST that all backends expect *)
-val desugar : Intro.t -> t
+type top =
+  | Define of string * t
+  | Expr of t
+  [@@deriving sexp]
+
+(** Parses [Intro.top] into the shared frontend AST that all backends expect *)
+val desugar_top : Intro.top -> top

@@ -22,5 +22,11 @@ type t =
   | Prim of prim
   [@@deriving sexp]
 
-(** Parses string [s] into [Intro.t] S-exp, assumes one expression only *)
-val parse : string -> t
+type top =
+  (* TODO: Assert, Use, etc. *)
+  | Define of string * string list * t
+  | Expr of t
+  [@@deriving sexp]
+
+(** Parses string [s] into [Intro.top] S-exp *)
+val parse : string -> top

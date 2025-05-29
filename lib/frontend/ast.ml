@@ -19,6 +19,11 @@ type t =
   | Prim of prim
   [@@deriving sexp]
 
+type top =
+  | Define of string * t
+  | Expr of t
+  [@@deriving sexp]
+
 let counter = ref 0
 
 let genvar () =
@@ -85,3 +90,9 @@ and desugar_prim (p : Intro.prim) =
   | Lt -> Prim Lt
   | Ge -> Prim Ge
   | Le -> Prim Le
+
+let desugar_top (t : Intro.top) : top =
+  match t with
+  | Expr t -> Expr (desugar t)
+  | Define (v, [], bind) -> Define (v, desugar bind)
+  | Define (v, args, bind) -> Define (v, desugar (Let (v, args, bind, Var v)))

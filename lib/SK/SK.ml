@@ -5,8 +5,13 @@ include Compiler.Make (struct
   let name = "SK"
   let init = false
 
+  let no_top = function
+    | Frontend.Ast.Expr t -> t
+    | Define _ -> failwith "define not implemented yet"
+
   let execute _ program =
     program
+    |> no_top
     |> Uniquify.uniquify
     |> Debug.trace "SK Uniquify" Uniquify.sexp_of_t
     |> Simplify.simplify

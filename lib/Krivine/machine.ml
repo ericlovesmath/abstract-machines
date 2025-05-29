@@ -122,15 +122,7 @@ let rec force cl =
       | _ -> failwith "Non-boolean in if condition")
   | closure -> Closure closure
 
-(* TODO: Bad solution for REPL *)
-let eval env t =
-  let closure = evaluate (Cl (t, env)) [] in
-  let env' = 
-    match t with
-    | Push (Grab (v, _), _) -> (v, closure) :: env
-    | _ -> env
-  in
-  (env', closure)
+let eval env t = evaluate (Cl (t, env)) []
 
 let rec string_of_const c =
   match c with

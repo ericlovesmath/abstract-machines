@@ -25,6 +25,11 @@ type t =
   | Prim of prim
   [@@deriving sexp]
 
+type top =
+  | Define of string * string list * t
+  | Expr of t
+  [@@deriving sexp]
+
 let unitP = Unit <$ stringP "#u"
 let nilP = Nil <$ stringP "nil"
 
@@ -162,9 +167,21 @@ and callP st =
 and listP st =
   ((fun l -> List l) <$> parensPT '[' ']' (sepBy trimP introP)) st
 
+let top_defineP st =
+  parensPT '(' ')' (
+    let- _ = stringP "define" in
+    let- args = varlistP in
+    let* bind = introP in
+    match args with
+    | [] -> fail
+    | f :: args -> pure (Define (f, args, bind))
+  ) st
+
+let top_exprP = (fun e -> Expr e) <$> introP
+
 let parse s =
   let cleanP = trimP <|> (() <$ many emptyP) in
-  match (cleanP *> introP <* cleanP) (explode s) with
+  match (cleanP *> (top_defineP <|> top_exprP) <* cleanP) (explode s) with
   | Some (res, []) -> res
   | Some _ -> failwith "Intro.parse: Parsed stream incomplete"
   | None -> failwith "Intro.parse: Parser failed"

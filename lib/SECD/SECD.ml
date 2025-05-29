@@ -5,11 +5,16 @@ include Compiler.Make (struct
   let name = "SECD"
   let init = false
 
+  let no_top = function
+    | Frontend.Ast.Expr t -> t
+    | Define _ -> failwith "define not implemented yet"
+
   let sexp_of_instrs instrs =
     Sexplib.Sexp.List (List.map Machine.sexp_of_instr instrs)
 
   let execute _ program =
     program
+    |> no_top
     |> Uniquify.uniquify
     |> Debug.trace "uniquify" Frontend.Ast.sexp_of_t
     |> Recursion.tag

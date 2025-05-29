@@ -20,7 +20,7 @@ and closure = Cl of t * env
 and env = (string * closure) list
 
 (** Evaluate using Krivine Machine, result in WHNF *)
-val eval : env -> t -> env * closure
+val eval : env -> t -> closure
 
 (** Forces evaluation of WHNF to Normal Form *)
 val force : closure -> const

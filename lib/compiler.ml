@@ -16,7 +16,7 @@ module type Compilable = sig
 
   val name : string
   val init : state
-  val execute : state -> Ast.t -> state * value
+  val execute : state -> Ast.top -> state * value
   val string_of_value : value -> string
 end
 
@@ -31,8 +31,8 @@ module Make (C : Compilable) : Compiler = struct
   let execute state program =
     program
     |> Intro.parse
-    |> Debug.trace "parse frontend" Intro.sexp_of_t
-    |> Ast.desugar
-    |> Debug.trace "desugaring" Ast.sexp_of_t
+    |> Debug.trace "parse frontend" Intro.sexp_of_top
+    |> Ast.desugar_top
+    |> Debug.trace "desugaring" Ast.sexp_of_top
     |> C.execute state
 end
