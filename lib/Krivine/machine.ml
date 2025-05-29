@@ -121,7 +121,18 @@ let rec force cl =
       | _ -> failwith "Non-boolean in if condition")
   | _ -> failwith "Unexpected closure during forcing"
 
-let eval t = evaluate (Cl (t, [])) []
+(* TODO: Bad solution for REPL *)
+let eval state t =
+  let env = Option.value state ~default:[] in
+  let closure = evaluate (Cl (t, env)) [] in
+  let env' = 
+    match t with
+    | Push (Grab (v, _), _) ->
+        Printf.printf "BINDING: %s\n" v;
+        (v, closure) :: env
+    | _ -> env
+  in
+  (Some env', closure)
 
 let rec string_of_const c =
   match c with

@@ -1,4 +1,5 @@
 include Compiler.Make (struct
+  type state = bool
   type value = Machine.value
 
   let name = "SECD"
@@ -6,7 +7,7 @@ include Compiler.Make (struct
   let sexp_of_instrs instrs =
     Sexplib.Sexp.List (List.map Machine.sexp_of_instr instrs)
 
-  let execute program =
+  let execute _ program =
     program
     |> Uniquify.uniquify
     |> Debug.trace "uniquify" Frontend.Ast.sexp_of_t
@@ -18,6 +19,7 @@ include Compiler.Make (struct
     |> Debug.trace "flatten" sexp_of_instrs
     |> Machine.init
     |> Machine.eval
+    |> fun v -> (None, v)
 
   let string_of_value = Machine.string_of_value
 end)

@@ -138,16 +138,33 @@
 * Add `#u` to all machines (now more relevant)
 * Add shorthand `if` with no `else` case (infer `#u`) and `cond` form
 
+# Week 18
+
+* Start work on real REPL, completed Krivine
+* Monadic Delimited Continuation example (reset/shift)
+* Read:
+
+    - Monadic Delimited Continuations
+    - Making COLAs with Pepsi and Coke (Smalltalk Whitepaper and Slides)
+    - Bidirectional Type Checking
+    - Warren Abstract Machine
+    - Some of caml-instructions, gave up
+
+(WAM seems more interesting, but should finish REPL and do real define syntax)
+
+
 ## Working Notes
 
 * Improve Graph Reduction code
 * Add support for bindings of infinite lists
 * Add ability to inject AST forms into arbitrary passes
 * Examples of generators, catching errors with `call/cc`
-* Implement `display` and `read`
+* Implement `display` and `read` for CESK
+* Real REPL environment instead of expression evaluator
 * Read up on CESK and WAM
+* Do a bunch of reading
 
-## Todo
+## TODO
 
 * Add examples to README
 * Mutual Recursion
@@ -155,8 +172,8 @@
 
     * Actual Base implementation with real REPL
 
-* Consider CESK Machine, Forth, P-System, Smalltalk-80, etc.
+* Consider Forth, P-System, Smalltalk-80, etc.
 * Typechecking and Error handling
 
-- Stupid casting
-- Laziness with single values bound to them
+- Stupid casting code
+- Laziness with single values bound to them in SK Reduction

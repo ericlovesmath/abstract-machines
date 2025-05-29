@@ -1,4 +1,5 @@
 module type Compiler = sig
+  type state
   type value
 
   val name : string
@@ -7,10 +8,11 @@ module type Compiler = sig
 end
 
 module type Compilable = sig
+  type state
   type value
 
   val name : string
-  val execute : Frontend.Ast.t -> value
+  val execute : state option -> Frontend.Ast.t -> state option * value
   val string_of_value : value -> string
 end
 

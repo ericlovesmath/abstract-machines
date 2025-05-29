@@ -15,6 +15,7 @@ Some cool language features (may apply to subset of machines):
 See `test/tests/*.src` files for examples!
 
 ```scheme
+; Example code, runs on all machines
 (letrec (map f xs)
  (if (atom xs)
    nil
