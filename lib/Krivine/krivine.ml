@@ -3,6 +3,7 @@ include Compiler.Make (struct
   type value = Machine.const
 
   let name = "Krivine"
+  let init = []
 
   let execute state program =
     let (state', res) =

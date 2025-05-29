@@ -144,13 +144,16 @@
 * Monadic Delimited Continuation example (reset/shift)
 * Read:
 
-    - Monadic Delimited Continuations
     - Making COLAs with Pepsi and Coke (Smalltalk Whitepaper and Slides)
+    - Monadic Delimited Continuations
     - Bidirectional Type Checking
     - Warren Abstract Machine
     - Some of caml-instructions, gave up
 
-(WAM seems more interesting, but should finish REPL and do real define syntax)
+# Week 19
+
+* Move state to REPL
+* Fix toplevel lambda bindings for Krivine
 
 
 ## Working Notes

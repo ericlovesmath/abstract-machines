@@ -13,6 +13,9 @@ module Make(C : Compiler) : S = struct
   (** Enables (hopefully temporary) stdlib *)
   let base = ref false
 
+  (** Stores state to have true toplevel REPL *)
+  let state = ref C.init
+
   (** Executes [f] but prints [err] on error, for REPL purposes *)
   let ignore_err f =
       try
@@ -69,7 +72,8 @@ module Make(C : Compiler) : S = struct
   let print_execute program =
     program
     |> wrap_base
-    |> C.execute
+    |> C.execute !state
+    |> fun (state', res) -> state := state'; res
     |> C.string_of_value
     |> print_endline
 

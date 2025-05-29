@@ -3,6 +3,7 @@ include Compiler.Make (struct
   type value = Machine.value
 
   let name = "SECD"
+  let init = false
 
   let sexp_of_instrs instrs =
     Sexplib.Sexp.List (List.map Machine.sexp_of_instr instrs)
@@ -19,7 +20,7 @@ include Compiler.Make (struct
     |> Debug.trace "flatten" sexp_of_instrs
     |> Machine.init
     |> Machine.eval
-    |> fun v -> (None, v)
+    |> fun v -> (false, v)
 
   let string_of_value = Machine.string_of_value
 end)

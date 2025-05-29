@@ -16,8 +16,9 @@ and const =
   | Int of int
   | Bool of bool
   | Prim of Frontend.Ast.prim
+  | Closure of closure
 
-type closure = Cl of t * env
+and closure = Cl of t * env
   [@@deriving sexp]
 and env = (string * closure) list
 
@@ -119,20 +120,17 @@ let rec force cl =
       | Bool true -> force (Cl (t, env))
       | Bool false -> force (Cl (f, env))
       | _ -> failwith "Non-boolean in if condition")
-  | _ -> failwith "Unexpected closure during forcing"
+  | closure -> Closure closure
 
 (* TODO: Bad solution for REPL *)
-let eval state t =
-  let env = Option.value state ~default:[] in
+let eval env t =
   let closure = evaluate (Cl (t, env)) [] in
   let env' = 
     match t with
-    | Push (Grab (v, _), _) ->
-        Printf.printf "BINDING: %s\n" v;
-        (v, closure) :: env
+    | Push (Grab (v, _), _) -> (v, closure) :: env
     | _ -> env
   in
-  (Some env', closure)
+  (env', closure)
 
 let rec string_of_const c =
   match c with
@@ -146,3 +144,4 @@ let rec string_of_const c =
       (match hd, Lazy.force tl with
       | Cst hd, Cst tl -> string_of_const hd ^ " :: " ^ string_of_const tl
       | _ -> failwith "Unforced Cons converted to string")
+  | Closure _ -> "<lambda>"

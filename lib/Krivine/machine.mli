@@ -13,13 +13,14 @@ and const =
   | Int of int
   | Bool of bool
   | Prim of Frontend.Ast.prim
+  | Closure of closure
 
-type closure = Cl of t * env
+and closure = Cl of t * env
   [@@deriving sexp]
 and env = (string * closure) list
 
 (** Evaluate using Krivine Machine, result in WHNF *)
-val eval : env option -> t -> env option * closure
+val eval : env -> t -> env * closure
 
 (** Forces evaluation of WHNF to Normal Form *)
 val force : closure -> const

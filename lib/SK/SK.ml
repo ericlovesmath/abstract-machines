@@ -3,6 +3,7 @@ include Compiler.Make (struct
   type value = Graph.t
 
   let name = "SK"
+  let init = false
 
   let execute _ program =
     program
@@ -17,7 +18,7 @@ include Compiler.Make (struct
     |> Combinator.graphify
     |> Debug.trace "Convert to Graph" Graph.sexp_of_t
     |> Graph.reduce
-    |> fun v -> (None, v)
+    |> fun v -> (false, v)
 
   let string_of_value = Graph.string_of_t
 end)

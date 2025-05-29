@@ -3,7 +3,8 @@ module type Compiler = sig
   type value
 
   val name : string
-  val execute : string -> value
+  val init : state
+  val execute : state -> string -> state * value
   val string_of_value : value -> string
 end
 
@@ -12,7 +13,8 @@ module type Compilable = sig
   type value
 
   val name : string
-  val execute : state option -> Frontend.Ast.t -> state option * value
+  val init : state
+  val execute : state -> Frontend.Ast.t -> state * value
   val string_of_value : value -> string
 end
 

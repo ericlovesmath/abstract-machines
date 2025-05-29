@@ -3,6 +3,7 @@ include Compiler.Make (struct
   type value = Machine.value
 
   let name = "CESK"
+  let init = false
 
   let execute _ program =
     program
@@ -11,7 +12,7 @@ include Compiler.Make (struct
     |> Anf.anf
     |> Debug.trace "anf" Machine.sexp_of_t
     |> Machine.eval
-    |> fun v -> (None, v)
+    |> fun v -> (false, v)
 
   let string_of_value = Machine.string_of_value
 end)

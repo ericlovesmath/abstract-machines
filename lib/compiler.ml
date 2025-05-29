@@ -5,7 +5,8 @@ module type Compiler = sig
   type value
 
   val name : string
-  val execute : string -> value
+  val init : state
+  val execute : state -> string -> state * value
   val string_of_value : value -> string
 end
 
@@ -14,7 +15,8 @@ module type Compilable = sig
   type value
 
   val name : string
-  val execute : state option -> Ast.t -> state option * value
+  val init : state
+  val execute : state -> Ast.t -> state * value
   val string_of_value : value -> string
 end
 
@@ -23,20 +25,14 @@ module Make (C : Compilable) : Compiler = struct
   type value = C.value
 
   let name = C.name
-
-  let mb_state = ref None
-
-  let execute program =
-    let (mb_state', res) =
-      program
-      |> Intro.parse
-      |> Debug.trace "parse frontend" Intro.sexp_of_t
-      |> Ast.desugar
-      |> Debug.trace "desugaring" Ast.sexp_of_t
-      |> C.execute !mb_state
-    in
-    mb_state := mb_state';
-    res
-
+  let init = C.init
   let string_of_value = C.string_of_value
+
+  let execute state program =
+    program
+    |> Intro.parse
+    |> Debug.trace "parse frontend" Intro.sexp_of_t
+    |> Ast.desugar
+    |> Debug.trace "desugaring" Ast.sexp_of_t
+    |> C.execute state
 end
