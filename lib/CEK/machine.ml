@@ -120,13 +120,13 @@ let eval_step (c : t) (env : env) (k : kont) : cek =
       | List (_ :: tl) -> apply_kont k (List tl)
       | _ -> failwith "eval_step: Cdr failed")
 
-let eval (code : t) : value =
+let eval (state: (string * value) list) (code : t) : value =
   let rec aux state =
     match state with
     | Running (c, e, k) -> aux (eval_step c e k)
     | Done v -> v
   in
-  aux (Running (code, [], Halt))
+  aux (Running (code, state, Halt))
 
 let rec string_of_value (v : value) : string =
   match v with

@@ -153,9 +153,22 @@
 # Week 19
 
 * Move state to REPL
-* Fix toplevel lambda bindings for Krivine
-* Add true toplevel with `define` syntax, works for Krivine
+* Add toplevel `assert`
+* Add true toplevel with `define` (recursive) syntax:
 
+    - Krivine works, but has exponential slowdown from copying env
+    - SECD fails for lambda bindings, unknown exactly why
+    - CEK works
+    - CESK TODO
+    - SK TODO
+
+* TODO: The error "nth" from SECD is unhelpful
+- TODO: Add tests for repl and sequential code
+- TODO: Run test file
+- TODO: Better `assert` errors
+- TODO: Use `assert` to run tests instead of special form
+- TODO: Figure out how to fix quadratic blowup in Krivine with lambdas
+- TODO: Fix base with toplevel `use`
 
 ## Working Notes
 

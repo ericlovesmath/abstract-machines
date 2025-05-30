@@ -28,9 +28,10 @@ type t =
   [@@deriving sexp]
 
 type value
+type env = (string * value) list
 
 (** Evaluate using CEK Machine, assumes input in ANF *)
-val eval : t -> value
+val eval : env -> t -> value
 
 (** Converts output of [eval] to string *)
 val string_of_value : value -> string
