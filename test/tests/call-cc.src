@@ -4,19 +4,21 @@
 // OUTPUT: 4
 (+ 1 (callcc (lambda k (+ 2 (k 3)))))
 
+// OUTPUT: 4
+(+ 1 (letcc k (+ 2 (k 3))))
+
 // OUTPUT: 5
 ; Simulating return
 (letrec (f x)
-    (callcc (lambda return
-        (begin
-            (if (< x 5)
-                (return (+ 1 x)))
-            (f (- x 1)))))
+    (letcc return (begin
+        (if (< x 5)
+            (return (+ 1 x)))
+        (f (- x 1))))
 (f 10))
 
 // OUTPUT: 55
 (let (fib x)
-    (callcc (lambda return
+    (letcc return
         (let n 0
         (begin
             (while #t
@@ -24,7 +26,7 @@
                     (return n))
                 (set! n (+ n x))
                 (set! x (- x 1)))
-            n))))
+            n)))
 (fib 10))
 
 // OUTPUT: 945
@@ -35,47 +37,41 @@
   (let i 0
   (let continue #u
   (while (< i 10)
-    (callcc
-      (lambda (k)
-        (begin
-          (set! continue k)
-          (set! i (+ i 1))
-          (if (even i)
-              continue
-              (set! c (* c i)))))))))
+    (letcc k (begin
+      (set! continue k)
+      (set! i (+ i 1))
+      (if (even i)
+          continue
+          (set! c (* c i))))))))
   c)))
 
 // OUTPUT: 3
 ; Monadic Delimited Continuations
-(let metak #u
+(let*
+    metak #u
 
-(let (reset thunk)
-  (let oldmetak metak
-    (callcc
-      (lambda (k)
-        (begin
-        (set! metak (lambda (v)
-            (begin
-             (set! metak oldmetak)
-             (k v))))
-        (let result (thunk #u)
-          (metak result))))))
+    (reset thunk)
+      (let oldmetak metak
+        (letcc k (begin
+          (set! metak
+            (lambda v (begin
+              (set! metak oldmetak)
+              (k v))))
+          (metak (thunk #u)))))
 
-(let (shift f)
-  (callcc
-    (lambda (k)
-      (let capturedk (lambda (v) (reset (lambda n (k v))))
-        (metak (f capturedk)))))
+    (shift f)
+      (letcc k
+         (let (capturedk v) (reset (lambda n (k v)))
+            (metak (f capturedk))))
 
 (reset (lambda n
-  (+ 1 (shift (lambda (k) 
-                (k 2)))))))))
+  (+ 1 (shift (lambda k
+    (k 2)))))))
 
 // OUTPUT: -1 :: 2 :: nil
 (let (safediv x y)
-    (callcc (lambda throw
-        (begin
-            (if (= y 0)
-                (throw -1))
-            (/ x y))))
+    (letcc throw (begin
+        (if (= y 0)
+            (throw -1))
+        (/ x y)))
 [(safediv 10 0) (safediv 10 5)])

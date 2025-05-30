@@ -154,6 +154,7 @@
 
 * Move state to REPL
 * Add toplevel `assert`
+* `letcc` desugaring
 * Add true toplevel with `define` (recursive) syntax:
 
     - Krivine works, but has exponential slowdown from copying env

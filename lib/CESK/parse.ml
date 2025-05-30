@@ -25,6 +25,7 @@ let rec parse (e : Frontend.Ast.t) : Machine.t =
 
   (* call/cc and prompt/control related *)
   | Call (Var "callcc", [f]) -> CallCC (parse f)
+  | Call (Var "letcc", [Var k; f]) -> CallCC (Fn ([k], parse f))
 
   (* Imperative specific *)
   | Call (Var "begin", es) -> Begin (List.map parse es)
