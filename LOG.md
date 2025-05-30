@@ -155,6 +155,7 @@
 * Move state to REPL
 * Add toplevel `assert`
 * `letcc` desugaring
+* Better SECD/CEK errors
 * Add true toplevel with `define` (recursive) syntax:
 
     - Krivine works, but has exponential slowdown from copying env
@@ -163,9 +164,8 @@
     - CESK TODO
     - SK TODO
 
-* TODO: The error "nth" from SECD is unhelpful
-- TODO: Add tests for repl and sequential code
-- TODO: Run test file
+- TODO: Add tests for REPL/sequential code
+- TODO: Run test files with toplevel `use`
 - TODO: Better `assert` errors
 - TODO: Use `assert` to run tests instead of special form
 - TODO: Figure out how to fix quadratic blowup in Krivine with lambdas

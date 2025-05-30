@@ -46,9 +46,12 @@ let eval_atomic (e : t) (env : env) : value =
   | Nil -> List []
   | Int n -> Int n
   | Bool b -> Bool b
-  | Fn _ -> Closure (e, ref env)
+  | Fn _
   | Rec _ -> Closure (e, ref env)
-  | Var v -> List.assoc v env
+  | Var v ->
+      (match List.assoc_opt v env with
+      | Some value -> value
+      | None -> failwith ("eval_atomic: Failed to find '" ^ v ^ "' in env"))
   | _ -> failwith "eval_atomic: Expected atomic expression"
 
 let apply_kont (k : kont) (v : value) : cek =

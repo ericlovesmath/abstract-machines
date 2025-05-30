@@ -51,11 +51,15 @@ let eval_step (state : t) : t =
   match (stack, env, code, dump) with
   | _, _, [], _ -> state
 
-  | _, _, NIL :: c', _                     -> push c' (List [] :: stack)
-  | _, _, LDC :: Int n :: c', _            -> push c' (Int n :: stack)
-  | _, _, LDC :: Unit :: c', _             -> push c' (Unit :: stack)
-  | _, _, LDC :: Bool b :: c', _           -> push c' (Bool b :: stack)
-  | _, _, LD :: Int y :: Int x :: c', _    -> push c' (List.nth (List.nth env y) x :: stack)
+  | _, _, NIL :: c', _                  -> push c' (List [] :: stack)
+  | _, _, LDC :: Int n :: c', _         -> push c' (Int n :: stack)
+  | _, _, LDC :: Unit :: c', _          -> push c' (Unit :: stack)
+  | _, _, LDC :: Bool b :: c', _        -> push c' (Bool b :: stack)
+  | _, _, LD :: Int y :: Int x :: c', _ -> (
+      try
+        push c' (List.nth (List.nth env y) x :: stack)
+      with Not_found ->
+        failwith (Printf.sprintf "Unbound De Brujin Index: (%d %d)" x y))
 
   (* Builtin Unary Operations *)
   | v :: s', _, ATOM :: c', _              -> push c' (Bool (is_atomic v) :: s')
