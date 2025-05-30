@@ -93,6 +93,10 @@ and desugar_prim (p : Intro.prim) =
 
 let desugar_top (t : Intro.top) : top =
   match t with
-  | Expr t -> Expr (desugar t)
+  | Expr e -> Expr (desugar e)
+  (* TODO: Assert should have better error than 0/0 *)
+  | Assert e -> Expr (If (desugar e, Unit, Call (Prim Div, [Int 0; Int 0])))
   | Define (v, [], bind) -> Define (v, desugar bind)
-  | Define (v, args, bind) -> Define (v, desugar (Let (v, args, bind, Var v)))
+  (* TODO: Don't use letrec if not needed *)
+  (* TODO: Why does many bindings make this slow? *)
+  | Define (v, args, bind) -> Define (v, desugar (LetRec (v, args, bind, Var v)))

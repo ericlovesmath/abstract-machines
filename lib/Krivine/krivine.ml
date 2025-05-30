@@ -21,6 +21,8 @@ include Compiler.Make (struct
       res
       |> Debug.trace "final closure" Machine.sexp_of_closure
       |> Machine.force
+      (* TODO: Identify how to not exponentially blow up enclosed variables *)
+      |> Debug.trace "forced closure" Machine.sexp_of_const
     in
     match program with
     | Expr _ -> (state, res')

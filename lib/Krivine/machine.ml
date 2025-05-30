@@ -17,6 +17,7 @@ and const =
   | Bool of bool
   | Prim of Frontend.Ast.prim
   | Closure of closure
+  [@@deriving sexp]
 
 and closure = Cl of t * env
   [@@deriving sexp]

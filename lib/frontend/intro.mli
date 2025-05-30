@@ -25,6 +25,7 @@ type t =
 type top =
   (* TODO: Assert, Use, etc. *)
   | Define of string * string list * t
+  | Assert of t
   | Expr of t
   [@@deriving sexp]
 
