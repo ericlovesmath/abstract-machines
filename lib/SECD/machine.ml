@@ -22,6 +22,7 @@ type dump =
   | Stack of value list
   | Env of value list list
   | Code of instr list
+[@@deriving sexp]
 
 type t = {
   stack : value list;
@@ -29,9 +30,10 @@ type t = {
   code : instr list;
   dump : dump list;
 }
+[@@deriving sexp]
 
-let init (instrs : instr list) : t =
-  { stack = []; env = []; code = instrs; dump = [] }
+let init (state : value list) (instrs : instr list) : t =
+  { stack = []; env = [state]; code = instrs; dump = [] }
 
 let is_atomic (value : value) =
   match value with

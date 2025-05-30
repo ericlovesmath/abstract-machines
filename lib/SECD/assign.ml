@@ -26,7 +26,7 @@ let locate (locs : string list list) (var : string) : t =
   in
   aux locs 0
 
-let assign_vars (ast : Recursion.t) : t =
+let assign_vars (state : string list) (ast : Recursion.t) : t =
   let rec aux (locs : string list list) (ast : Recursion.t) : t =
     match ast with
     | Unit -> Unit
@@ -44,4 +44,4 @@ let assign_vars (ast : Recursion.t) : t =
     | Call (f, args) -> Call (aux locs f, List.map (aux locs) args)
     | CallRec (f, args) -> CallRec (aux locs f, List.map (aux locs) args)
   in
-  aux [] ast
+  aux [state] ast

@@ -19,7 +19,7 @@ type value =
   [@@deriving sexp]
 
 (** Creates SECD Machine from SECD code *)
-val init : instr list -> t
+val init : value list -> instr list -> t
 
 (** Evaluates SECD Machine until it terminates, returns value at top of stack *)
 val eval : t -> value

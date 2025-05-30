@@ -13,4 +13,4 @@ type t =
   [@@deriving sexp]
 
 (** Replaces [Var v] with [Loc x y] in the SECD Env stack *)
-val assign_vars : Recursion.t -> t
+val assign_vars : string list -> Recursion.t -> t

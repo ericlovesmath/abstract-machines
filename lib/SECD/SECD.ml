@@ -1,31 +1,35 @@
 include Compiler.Make (struct
-  type state = bool
+  type state = (string * Machine.value) list
   type value = Machine.value
 
   let name = "SECD"
-  let init = false
-
-  let no_top = function
-    | Frontend.Ast.Expr t -> t
-    | Define _ -> failwith "define not implemented yet"
+  let init = []
 
   let sexp_of_instrs instrs =
     Sexplib.Sexp.List (List.map Machine.sexp_of_instr instrs)
 
-  let execute _ program =
-    program
-    |> no_top
-    |> Uniquify.uniquify
-    |> Debug.trace "uniquify" Frontend.Ast.sexp_of_t
-    |> Recursion.tag
-    |> Debug.trace "tag lambdarec" Recursion.sexp_of_t
-    |> Assign.assign_vars
-    |> Debug.trace "assign homes" Assign.sexp_of_t
-    |> Flatten.flatten
-    |> Debug.trace "flatten" sexp_of_instrs
-    |> Machine.init
-    |> Machine.eval
-    |> fun v -> (false, v)
+  let execute state program =
+    let expr =
+      match program with
+      | Frontend.Ast.Expr e -> e
+      | Define (_, e) -> e
+    in
+    let res = 
+      expr
+      |> Uniquify.uniquify
+      |> Debug.trace "uniquify" Frontend.Ast.sexp_of_t
+      |> Recursion.tag
+      |> Debug.trace "tag lambdarec" Recursion.sexp_of_t
+      |> Assign.assign_vars (List.map fst state)
+      |> Debug.trace "assign homes" Assign.sexp_of_t
+      |> Flatten.flatten
+      |> Debug.trace "flatten" sexp_of_instrs
+      |> Machine.init (List.map snd state)
+      |> Machine.eval
+    in
+    match program with
+    | Expr _ -> (state, res)
+    | Define (v, _) -> ((v, res) :: state, res)
 
   let string_of_value = Machine.string_of_value
 end)

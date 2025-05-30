@@ -18,7 +18,7 @@ let uniquify (ast : Frontend.Ast.t) : Frontend.Ast.t =
     | Int i -> Int i
     | Bool b -> Bool b
     | Prim p -> Prim p
-    | Var v -> Var (VarMap.find v m)
+    | Var v -> Var (Option.value (VarMap.find_opt v m) ~default:v)
     | If (c, t, f) -> If (aux m c, aux m t, aux m f)
     | Call (f, args) -> Call (aux m f, List.map (aux m) args)
     | Lambda (args, body) ->
