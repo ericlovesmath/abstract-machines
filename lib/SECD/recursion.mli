@@ -13,5 +13,6 @@ type t =
   [@@deriving sexp]
 
 (** Annotates [Call]'s with [CallRec]'s when calling a recursive function.
-  Used to determine usage of [AP] or [RAP] in [machine.ml] *)
-val tag : Frontend.Ast.t -> t
+  Used to determine usage of [AP] or [RAP] in [machine.ml]
+  NOTE: We pass in previously bound strings and assume all are recursive *)
+val tag : string list -> Frontend.Ast.t -> t

@@ -18,7 +18,7 @@ include Compiler.Make (struct
       expr
       |> Uniquify.uniquify
       |> Debug.trace "uniquify" Frontend.Ast.sexp_of_t
-      |> Recursion.tag
+      |> Recursion.tag (List.map fst state)
       |> Debug.trace "tag lambdarec" Recursion.sexp_of_t
       |> Assign.assign_vars (List.map fst state)
       |> Debug.trace "assign homes" Assign.sexp_of_t

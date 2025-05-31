@@ -31,8 +31,8 @@ let rec find_recs (ast : Frontend.Ast.t) : string list =
       f :: find_recs body @ find_recs arg
   | Call (f, args) -> List.concat_map find_recs (f :: args)
 
-let tag (ast : Frontend.Ast.t) : t =
-  let recs = find_recs ast in
+let tag (bound : string list) (ast : Frontend.Ast.t) : t =
+  let recs = find_recs ast @ bound in
   let rec aux (ast : Frontend.Ast.t) : t = 
     match ast with
     | Unit -> Unit
