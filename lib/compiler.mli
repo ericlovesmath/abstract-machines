@@ -4,7 +4,7 @@ module type Compiler = sig
 
   val name : string
   val init : state
-  val execute : state -> string -> state * value
+  val execute : state -> string -> state * value * string
   val string_of_value : value -> string
 end
 

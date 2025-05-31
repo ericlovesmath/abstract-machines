@@ -29,5 +29,5 @@ type top =
   | Expr of t
   [@@deriving sexp]
 
-(** Parses string [s] into [Intro.top] S-exp *)
-val parse : string -> top
+(** Parses string [s] into [Intro.top] S-exp, returns remaining stream *)
+val parse : string -> (top * string)

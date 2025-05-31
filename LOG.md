@@ -153,23 +153,23 @@
 # Week 19
 
 * Move state to REPL
-* Add toplevel `assert`
 * `letcc` desugaring
 * Better SECD/CEK errors
+* Add toplevel `assert`
+* Support `:load <file>` with toplevel syntax, multiple expressions evaluated in one input
 * Add true toplevel with `define` (recursive) syntax:
 
-    - Krivine works, but has exponential slowdown from copying env
-    - SECD fails for lambda bindings, unknown exactly why
-    - CEK works
+    - Krivine: Works, but has exponential slowdown from copying environment each eval
+    - SECD: No issues, assumes all previous bounds are recursive for simplicity
+    - CEK: No issues
     - CESK TODO
     - SK TODO
 
+* Add fun `base.src` for simple stdlib
+
 - TODO: Add tests for REPL/sequential code
-- TODO: Run test files with toplevel `use`
 - TODO: Better `assert` errors
 - TODO: Use `assert` to run tests instead of special form
-- TODO: Figure out how to fix quadratic blowup in Krivine with lambdas
-- TODO: Fix base with toplevel `use`
 
 ## Working Notes
 

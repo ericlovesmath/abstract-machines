@@ -192,6 +192,5 @@ let toplevelP =
 let parse s =
   let cleanP = trimP <|> (() <$ many emptyP) in
   match (cleanP *> toplevelP <* cleanP) (explode s) with
-  | Some (res, []) -> res
-  | Some _ -> failwith "Intro.parse: Parsed stream incomplete"
+  | Some (res, rem) -> (res, implode rem)
   | None -> failwith "Intro.parse: Parser failed"
