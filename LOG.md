@@ -163,12 +163,13 @@
     - SECD: No issues, assumes all previous bounds are recursive for simplicity
     - CEK: No issues
     - CESK: No issues
-    - SK: TODO
+    - SK: No issues, duplicated bindings for defaults
 
 * Add fun `base.src` for simple stdlib
 
+- TODO: Clean up all the REPL related code
 - TODO: Add tests for REPL/sequential code
-- TODO: Better `assert` errors
+- TODO: Better `assert` errors with `error` primitive
 - TODO: Use `assert` to run tests instead of special form
 
 ## Working Notes

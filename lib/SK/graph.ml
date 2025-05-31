@@ -45,7 +45,7 @@ let rec string_of_t ((v, g) : t) : string =
   | Nil -> "nil"
   | Cons (l, r) -> string_of_t (l, g) ^ " :: " ^ string_of_t (r, g)
   | Prim _ -> "<prim>"
-  | App (l, r) -> "(" ^ string_of_t (l, g) ^ " " ^ string_of_t (r, g) ^ ")"
+  | App _ -> "<lambda>"
 
 
 (** Convert Graph to DOT file format *)
@@ -248,7 +248,4 @@ let reduce' ((root, g) : t) : unit =
 let reduce (expr : t) : t =
   ignore (log_graph);
   reduce' expr;
-  let (v, g) = expr in
-  match Hashtbl.find g v with
-  | App _  -> failwith "Graph.reduce: Reduced expression is a function"
-  | _ -> expr
+  expr

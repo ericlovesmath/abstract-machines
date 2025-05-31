@@ -33,7 +33,7 @@ let uniquify (ast : Frontend.Ast.t) : t =
     | Int i -> Int i
     | Bool b -> Bool b
     | Prim p -> Prim p
-    | Var v -> Var (VarMap.find v m)
+    | Var v -> Var (Option.value (VarMap.find_opt v m) ~default:v)
     | If (c, t, f) -> App (App (App (If, aux m c), aux m t), aux m f)
     | Call (f, args) ->
         List.fold_left (fun acc arg -> App (acc, (aux m arg))) (aux m f) args

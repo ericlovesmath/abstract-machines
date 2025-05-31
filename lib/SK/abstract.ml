@@ -59,6 +59,6 @@ let rec fix (ast : t) : Combinator.t =
   | App (f, x) -> App (fix f, fix x)
   | Prim p -> Prim p
   | Cons (h, t) -> Cons (fix h, fix t)
-  | Var v -> failwith ("abstract.fix: Variable " ^ v ^ "not abstracted")
+  | Var v -> Var v
 
 let abstract e = fix (abstract' e)

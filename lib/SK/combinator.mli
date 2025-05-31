@@ -3,6 +3,7 @@ type t =
   | If
   | Int of int
   | Bool of bool
+  | Var of string
   | Unit
   | Nil
   | Cons of t * t
@@ -10,4 +11,4 @@ type t =
   | App of t * t
   [@@deriving sexp]
 
-val graphify : t -> Graph.t
+val graphify : ((string * Graph.vertex) list * Graph.graph) -> t -> Graph.t

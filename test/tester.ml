@@ -21,13 +21,14 @@ module Make (T : Testable) : Tester = struct
           if String.starts_with ~prefix:"OUTPUT: " output
           then
             let output = String.sub output 8 (String.length output - 8) in
-            let res = T.C.string_of_value (snd (T.C.execute T.C.init expr)) in
+            let (_, value, _) = T.C.execute T.C.init expr in
+            let res = T.C.string_of_value value in
             (if res <> output
               then failwith (Printf.sprintf "Expected %s, got %s" output res))
           else if output = "FAIL"
           then
             let failed =
-              try (ignore (snd (T.C.execute T.C.init expr)); false)
+              try (ignore (T.C.execute T.C.init expr); false)
               with _ -> true
             in
             (if not failed

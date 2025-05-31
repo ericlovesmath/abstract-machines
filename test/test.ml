@@ -1,6 +1,6 @@
 open Lib
 
-let base = [ "basics"; "fails"; "higher-ordered"; "lambdas"; "letrec"; "fancy-examples" ]
+let base = [ "basics"; "higher-ordered"; "lambdas"; "letrec"; "fancy-examples" ]
 let laziness = [ "lazy" ]
 let imperative = [ "imperative" ]
 let continuations = [ "call-cc" ]

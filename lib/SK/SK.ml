@@ -1,29 +1,33 @@
 include Compiler.Make (struct
-  type state = bool
+  type state = (string * Graph.vertex) list * Graph.graph
   type value = Graph.t
 
   let name = "SK"
-  let init = false
+  let init = ([], Hashtbl.create 32)
 
-  let no_top = function
-    | Frontend.Ast.Expr t -> t
-    | Define _ -> failwith "define not implemented yet"
-
-  let execute _ program =
-    program
-    |> no_top
-    |> Uniquify.uniquify
-    |> Debug.trace "SK Uniquify" Uniquify.sexp_of_t
-    |> Simplify.simplify
-    |> Debug.trace "SK Simplify" Simplify.sexp_of_t
-    |> Abstract.abstract
-    |> Debug.trace "SK Abstraction" Combinator.sexp_of_t
-    |> Optimize.optimize
-    |> Debug.trace "SK Optimize" Combinator.sexp_of_t
-    |> Combinator.graphify
-    |> Debug.trace "Convert to Graph" Graph.sexp_of_t
-    |> Graph.reduce
-    |> fun v -> (false, v)
+  let execute state program =
+    let expr =
+      match program with
+      | Frontend.Ast.Expr e -> e
+      | Define (_, e) -> e
+    in
+    let (vertex, graph) =
+      expr
+      |> Uniquify.uniquify
+      |> Debug.trace "SK Uniquify" Uniquify.sexp_of_t
+      |> Simplify.simplify
+      |> Debug.trace "SK Simplify" Simplify.sexp_of_t
+      |> Abstract.abstract
+      |> Debug.trace "SK Abstraction" Combinator.sexp_of_t
+      |> Optimize.optimize
+      |> Debug.trace "SK Optimize" Combinator.sexp_of_t
+      |> Combinator.graphify state
+      |> Debug.trace "Convert to Graph" Graph.sexp_of_t
+      |> Graph.reduce
+    in
+    match program with
+    | Expr _ -> (state, (vertex, graph))
+    | Define (v, _) -> (((v, vertex) :: fst state, graph), (vertex, graph))
 
   let string_of_value = Graph.string_of_t
 end)

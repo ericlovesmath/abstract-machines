@@ -5,6 +5,7 @@ type t =
   | If
   | Int of int
   | Bool of bool
+  | Var of string
   | Unit
   | Nil
   | Cons of t * t
@@ -12,8 +13,7 @@ type t =
   | App of t * t
   [@@deriving sexp]
 
-let graphify (ast : t) : Graph.t =
-  let g : Graph.graph = Hashtbl.create 32 in
+let graphify ((binds, g) : (string * Graph.vertex) list * Graph.graph) (ast : t) : Graph.t =
 
   (* Fixed nodes so they're not recreated each time *)
   let node_s = Graph.add_vertex g S in
@@ -54,6 +54,10 @@ let graphify (ast : t) : Graph.t =
     | Int i -> Graph.add_vertex g (Int i)
     | Cons (h, t) -> Graph.add_vertex g (Cons (aux h, aux t))
     | App (f, x) -> Graph.add_vertex g (App (aux f, aux x))
+    | Var v ->
+        match List.assoc_opt v binds with
+        | Some v -> v
+        | None -> failwith ("Combinator.graphify: failed to find " ^ v)
   in
   let entry = aux ast in
   (entry, g)
