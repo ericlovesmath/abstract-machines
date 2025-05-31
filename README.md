@@ -12,7 +12,7 @@ Some cool language features (may apply to subset of machines):
 - Imperative languages with first-class functions and closures
 - `call/cc` and first-class (delimited) continuations
 
-See `test/tests/*.src` files for examples!
+See `test/tests/*.scm` files for examples!
 
 ```scheme
 ; Example code, runs on all machines
@@ -34,7 +34,7 @@ Instructions (note that `Makefile` contains more commands):
 
 - REPL: `dune exec abstract_machines -- -machine <machine>` (Suggested to run with [rlwrap](https://github.com/hanslub42/rlwrap) for convenience)
 - Debug: `dune exec abstract_machines -- -machine <machine> -debug`
-- Tests: `dune test` (need to `dune clean && dune build` when modifying `tests/*.src` files)
+- Tests: `dune test` (need to `dune clean && dune build` when modifying `tests/*.scm` files)
 
 ## Description of Machines
 

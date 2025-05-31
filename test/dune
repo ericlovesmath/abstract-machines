@@ -1,7 +1,7 @@
 (install
  (section share)
- (files (glob_files tests/*.src)))
+ (files (glob_files tests/*.scm)))
 
 (tests
-  (names tester test)
-  (libraries lib str))
+  (names test)
+  (libraries lib))

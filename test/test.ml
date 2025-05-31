@@ -1,38 +1,35 @@
 open Lib
+open Compiler
 
-let base = [ "basics"; "higher-ordered"; "lambdas"; "letrec"; "fancy-examples" ]
-let laziness = [ "lazy" ]
-let imperative = [ "imperative" ]
-let continuations = [ "call-cc" ]
+let test (module C : Compiler) (files : string list) =
 
-module SECDTester = Tester.Make (struct
-  module C = SECD
-  let files = base
-end)
+  let run_test file =
+    let state = ref C.init in
 
-module CEKTester = Tester.Make (struct
-  module C = CEK
-  let files = base
-end)
+    let rec test program =
+      let (state', _, rem) = C.execute !state program in
+      state := state';
+      if rem <> "" then test rem
+    in
 
-module KrivineTester = Tester.Make (struct
-  module C = Krivine
-  let files = base @ laziness
-end)
+    let read (file : string) =
+      In_channel.(with_open_text ("tests/" ^ file ^ ".scm") input_all)
+    in
 
-module SKTester = Tester.Make (struct
-  module C = SK
-  let files = base
-end)
+    print_endline ("- " ^ file);
+    test (read file)
+  in
 
-module CESKTester = Tester.Make (struct
-  module C = CESK
-  let files = base @ imperative @ continuations
-end)
+  print_endline ("Running " ^ C.name ^ " tests...");
+  List.iter run_test files;
+  print_endline ""
 
-let () =
-  SECDTester.test ();
-  CEKTester.test ();
-  KrivineTester.test ();
-  SKTester.test ();
-  CESKTester.test ();
+let base = [ "basics"; "lambdas"; "higher-ordered"; "toplevel"; "letrec"; "fancy-examples" ]
+
+let _ =
+  test (module SECD : Compiler)    base;
+  test (module CEK : Compiler)     base;
+  test (module CESK : Compiler)    (base @ [ "imperative"; "call-cc" ]);
+  test (module Krivine : Compiler) (base @ [ "lazy" ]);
+  test (module SK : Compiler)      base;
+  print_endline "All tests pass!"

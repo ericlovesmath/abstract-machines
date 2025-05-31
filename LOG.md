@@ -167,11 +167,13 @@
 
 * Add fun `base.src` for simple stdlib
 * Fix bug related to equality of lists on SK and Krivine
+* Move all tests to just read and execute files! Yay!!!
 
+    - Added tests to test sequences and `define`
+
+- TODO: Update README
 - TODO: Clean up all the REPL related code
-- TODO: Add tests for REPL/sequential code
 - TODO: Better `assert` errors with `error` primitive
-- TODO: Use `assert` to run tests instead of special form
 
 ## Working Notes
 
