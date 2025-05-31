@@ -162,8 +162,8 @@
     - Krivine: Works, but has exponential slowdown from copying environment each eval
     - SECD: No issues, assumes all previous bounds are recursive for simplicity
     - CEK: No issues
-    - CESK TODO
-    - SK TODO
+    - CESK: No issues
+    - SK: TODO
 
 * Add fun `base.src` for simple stdlib
 

@@ -46,7 +46,9 @@ and env = (string * addr) list
 and kont = LetKont of string * env * t * kont | Halt
 
 type store = (addr * value) list
-type cesk = | Running of t * env * store * kont | Done of value
+
+(** Note: [Done] contains the env/store just for persistence in REPL *)
+type cesk = | Running of t * env * store * kont | Done of env * store * value
 
 let counter = ref 0
 let fresh () =
@@ -75,9 +77,9 @@ let eval_atomic (e : t) (env : env) (store : store) : value =
   | Var v -> lookup_store (lookup_addr v env) store
   | _ -> failwith "eval_atomic: Expected atomic expression"
 
-let apply_kont (k : kont) (v : value) (store : store) : cesk =
+let apply_kont (k : kont) (v : value) (env : env) (store : store) : cesk =
   match k with
-  | Halt -> Done v
+  | Halt -> Done (env, store, v)
   | LetKont (s, env, c, k) ->
       let a = fresh () in
       let env' = (s, a) :: env in
@@ -87,7 +89,7 @@ let apply_kont (k : kont) (v : value) (store : store) : cesk =
 let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
   let make_int_binop f e e' =
     match (eval_atomic e env store, eval_atomic e' env store) with
-    | Int n, Int m -> apply_kont k (f n m) store
+    | Int n, Int m -> apply_kont k (f n m) env store
     | _ -> failwith "eval_step: Prim called on non-integer arguments"
   in
   match c with
@@ -96,7 +98,7 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
   | Int _
   | Bool _
   | Fn _
-  | Var _ -> apply_kont k (eval_atomic c env store) store
+  | Var _ -> apply_kont k (eval_atomic c env store) env store
   | If (cond, t, f) ->
       (match eval_atomic cond env store with
       | Bool true -> Running (t, env, store, k)
@@ -109,11 +111,11 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
     let env' = (f, a) :: env in
     let closure = Closure (Fn (es, body), env') in
     let store' = update_store store a closure in
-    apply_kont k closure store'
+    apply_kont k closure env store'
 
   | Call (f, es) ->
       (match eval_atomic f env store, es with
-      | Cont k', [f] -> apply_kont k' (eval_atomic f env store) store
+      | Cont k', [f] -> apply_kont k' (eval_atomic f env store) env store
       | Closure (Fn (ss, body), closure_env), _ ->
           let vs = List.map (fun v -> eval_atomic v env store) es in
           let addrs = List.map (fun _ -> fresh ()) vs in
@@ -136,7 +138,7 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
       let a = lookup_addr x env in
       let v = eval_atomic e env store in
       let store' = update_store store a v in
-      apply_kont k Unit store'
+      apply_kont k Unit env store'
 
   | Begin [] -> failwith "eval_step: begin has no expressions"
   | Begin [e] -> Running (e, env, store, k)
@@ -150,34 +152,34 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
   | Gt (e, e')  -> make_int_binop (fun x y -> Bool (x > y)) e e'
   | Le (e, e')  -> make_int_binop (fun x y -> Bool (x <= y)) e e'
   | Ge (e, e')  -> make_int_binop (fun x y -> Bool (x >= y)) e e'
-  | Eq (e, e')  -> apply_kont k (Bool (eval_atomic e env store = eval_atomic e' env store)) store
+  | Eq (e, e')  -> apply_kont k (Bool (eval_atomic e env store = eval_atomic e' env store)) env store
   | Atom e ->
       let b =
         match eval_atomic e env store with
         | Unit | Int _ | Bool _ | List [] -> true
         | Closure _ | List _ | Cont _ -> false
       in
-      apply_kont k (Bool b) store
+      apply_kont k (Bool b) env store
   | Cons (e, e') ->
     (match (eval_atomic e env store, eval_atomic e' env store) with
-      | x, List xs -> apply_kont k (List (x :: xs)) store
+      | x, List xs -> apply_kont k (List (x :: xs)) env store
       | _ -> failwith "eval_step: Cons failed")
   | Car e ->
     (match eval_atomic e env store with
-      | List (h :: _) -> apply_kont k h store
+      | List (h :: _) -> apply_kont k h env store
       | _ -> failwith "eval_step: Car failed")
   | Cdr e ->
     (match eval_atomic e env store with
-      | List (_ :: tl) -> apply_kont k (List tl) store
+      | List (_ :: tl) -> apply_kont k (List tl) env store
       | _ -> failwith "eval_step: Cdr failed")
 
-let eval (code : t) : value =
-  let rec aux state =
+let eval ((env, store) : env * store) (code : t) : (env * store) * value =
+  let rec loop state =
     match state with
-    | Running (c, e, s, k) -> aux (eval_step c e s k)
-    | Done v -> v
+    | Running (c, e, s, k) -> loop (eval_step c e s k)
+    | Done (e, s, v) -> ((e, s), v)
   in
-  aux (Running (code, [], [], Halt))
+  loop (Running (code, env, store, Halt))
 
 let rec string_of_value (v : value) : string =
   match v with
@@ -187,6 +189,5 @@ let rec string_of_value (v : value) : string =
   | List [] -> "nil"
   | Unit -> "#u"
   | List (v :: vs) -> string_of_value v ^ " :: " ^ string_of_value (List vs)
-  | Closure (_, env) ->
-      "Closure in (" ^ String.concat " " (List.map fst env) ^ ")"
+  | Closure _ -> "<closure>"
   | Cont _ -> "<kont>"

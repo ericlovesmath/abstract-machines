@@ -32,9 +32,14 @@ type t =
   [@@deriving sexp]
 
 type value
+type addr
+type env = (string * addr) list
+type store = (addr * value) list
+
+val fresh : unit -> addr
 
 (** Evaluate using CEK Machine, assumes input in ANF *)
-val eval : t -> value
+val eval : env * store -> t -> (env * store) * value
 
 (** Converts output of [eval] to string *)
 val string_of_value : value -> string

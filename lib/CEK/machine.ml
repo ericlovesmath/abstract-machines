@@ -139,5 +139,4 @@ let rec string_of_value (v : value) : string =
   | Unit -> "#u"
   | List [] -> "nil"
   | List (v :: vs) -> string_of_value v ^ " :: " ^ string_of_value (List vs)
-  | Closure (_, envref) ->
-      "Closure in (" ^ String.concat " " (List.map fst !envref) ^ ")"
+  | Closure _ -> "<closure>"
