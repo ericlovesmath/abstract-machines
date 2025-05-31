@@ -183,6 +183,24 @@ let reduce' ((root, g) : t) : unit =
                   | Eq , Nil    , Nil     -> Some (Bool true)
                   | Eq , Cons _ , Nil
                   | Eq , Nil    , Cons _ -> Some (Bool false)
+
+                  | Eq , Cons (h, t) , Cons (h', t') ->
+                      let eq_prim = g in
+                      let eq_head = add (App (eq_prim, h)) in
+                      let eq_heads = add (App (eq_head, h')) in
+                      let eq_tail = add (App (eq_prim, t)) in
+                      let eq_tails = add (App (eq_tail, t')) in
+
+                      (* Use If to implement AND *)
+                      let if_node = add If in
+                      let false_node = add (Bool false) in
+                      let if_cond = add (App (if_node, eq_heads)) in
+                      let if_then = add (App (if_cond, eq_tails)) in
+                      let result = add (App (if_then, false_node)) in
+
+                      replace v (find result);
+                      Some (find v)
+
                   | Cons, _     , _      -> Some (Cons (y, arg))
                   | _                     -> None
                 in

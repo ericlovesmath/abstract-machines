@@ -89,7 +89,10 @@ and reduce_prim prim stack =
       | Nil, Nil       -> enclose (Bool true)
       | Cons _, Nil    -> enclose (Bool false)
       | Nil, Cons _    -> enclose (Bool false)
-      | Cons (l, r), Cons (l', r') -> enclose (Bool (l = l' && r = r'))
+      | Cons (l, r), Cons (l', r') ->
+          if l <> l'
+            then enclose (Bool false)
+            else reduce_prim Eq [Cl (Lazy.force r, []); Cl (Lazy.force r', [])]
       | _ -> failwith "Type error in equality comparison")
 
   (* List operations *)

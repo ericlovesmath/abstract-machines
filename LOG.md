@@ -166,6 +166,7 @@
     - SK: No issues, duplicated bindings for defaults
 
 * Add fun `base.src` for simple stdlib
+* Fix bug related to equality of lists on SK and Krivine
 
 - TODO: Clean up all the REPL related code
 - TODO: Add tests for REPL/sequential code
