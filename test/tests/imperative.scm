@@ -6,7 +6,7 @@
             (set! x (* x 2))
             (set! x (* x x))
             x)))
-(assert (= one 484))
+(assert (= one 484) "imperative 1")
 
 ; "Mutual Recursion"
 (define even
@@ -17,7 +17,7 @@
         (set! odd (lambda x (if (= x 0) #f (even (- x 1)))))
     even))))
 
-(assert (even 10))
+(assert (even 10) "imperative 2")
 
 ; While loops
 (assert
@@ -25,7 +25,8 @@
     (begin
       (while (> x 5)
         (set! x (- x 1)))
-      (= x 5))))
+      (= x 5)))
+  "imperative while")
 
 
 (define (fact x)
@@ -35,7 +36,7 @@
             (set! n (* n x))
             (set! x (- x 1)))
         n)))
-(assert (= (fact 10) 3628800))
+(assert (= (fact 10) 3628800) "imperative factorial")
 
 
 (define (log b n)
@@ -45,7 +46,7 @@
             (set! n (/ n b))
             (set! c (+ c 1)))
         c)))
-(assert (= (log 3 59049) 10))
+(assert (= (log 3 59049) 10) "imperative log")
 
 
 (define (fib n)
@@ -57,7 +58,7 @@
             (set! a swp)
             (set! n (- n 1)))
         a)))
-(assert (= (fib 10) 89))
+(assert (= (fib 10) 89) "imperative fib")
 
 
 (define (even x) (= (* (/ x 2) 2) x))
@@ -70,4 +71,4 @@
                     (set! n (+ (* 3 n) 1)))
                 (set! c (+ c 1)))
             c)))
-(assert (= (collatz 19) 20))
+(assert (= (collatz 19) 20) "imperative collatz")

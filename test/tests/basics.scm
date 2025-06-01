@@ -1,5 +1,4 @@
 ; Testing basic syntax and expressions
-
 (assert (= (+ 1 2) 3))
 
 (assert (= (cons 1 nil) [1]))
@@ -25,7 +24,7 @@
 3))
 
 ; error is a special form, the string is fake and not a real value
-(if #t 1 (error "hi"))
+(assert (= (if #t 1 (error "hi")) 1))
 
 ; assert can have a custom error form
 (assert #t "custom error")

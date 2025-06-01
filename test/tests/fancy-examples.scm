@@ -15,7 +15,8 @@
     (let factorial
       (Y factgen)
   
-    (= (factorial 5) 120)))))
+    (= (factorial 5) 120))))
+  "fancy y-combinator factorial")
 
 
 (define (map f xs)
@@ -23,7 +24,7 @@
    nil
    (cons (f (car xs)) (map f (cdr xs)))))
 
-(assert (= (map (lambda x (* x 2)) [3 5 7]) [6 10 14]))
+(assert (= (map (lambda x (* x 2)) [3 5 7]) [6 10 14]) "fancy map even")
 
 
 ; Some funny [fold] functions
@@ -32,9 +33,11 @@
    init
    (f (car xs) (fold f init (cdr xs)))))
 
+(define (len xs)  (fold (lambda (x acc) (+ acc 1)) 0 xs))
+(define (sum xs)  (fold (lambda (x acc) (+ acc x)) 0 xs))
+(define (prod xs) (fold (lambda (x acc) (* acc x)) 1 xs))
+
 (assert
-  (let* (len xs)  (fold (lambda (x acc) (+ acc 1)) 0 xs)
-        (sum xs)  (fold (lambda (x acc) (+ acc x)) 0 xs)
-        (prod xs) (fold (lambda (x acc) (* acc x)) 1 xs)
-        list      [3 5 7 8]
-  (= [(len list) (sum list) (prod list)] [4 23 840])))
+  (let* list [3 5 7 8]
+  (= [(len list) (sum list) (prod list)] [4 23 840]))
+  "fancy folds")

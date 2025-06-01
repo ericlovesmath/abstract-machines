@@ -1,9 +1,9 @@
 ; call/cc, let/cc, and simulation control flow!
-(assert (= (callcc (lambda k (k 42))) 42))
+(assert (= (callcc (lambda k (k 42))) 42) "call/cc 1")
 
-(assert (= (+ 1 (callcc (lambda k (+ 2 (k 3))))) 4))
+(assert (= (+ 1 (callcc (lambda k (+ 2 (k 3))))) 4) "call/cc 2")
 
-(assert (= (+ 1 (letcc k (+ 2 (k 3)))) 4))
+(assert (= (+ 1 (letcc k (+ 2 (k 3)))) 4) "call/cc 3")
 
 ; Simulating return
 (define (f x)
@@ -11,7 +11,7 @@
         (if (< x 5)
             (return (+ 1 x)))
         (f (- x 1)))))
-(assert (= (f 10) 5))
+(assert (= (f 10) 5) "call/cc return")
 
 (define (fib x)
     (letcc return
@@ -23,7 +23,7 @@
                 (set! n (+ n x))
                 (set! x (- x 1)))
             n))))
-(assert (= (fib 10) 55))
+(assert (= (fib 10) 55) "call/cc fib")
 
 ; Simulating continue / break
 (define (even n) (= (* 2 (/ n 2)) n))
@@ -39,7 +39,8 @@
         (if (even i)
             continue
             (set! c (* c i))))))))
-    (= c 945))))
+    (= c 945)))
+  "call/cc continue break")
 
 ; Monadic Delimited Continuations!!
 (assert (= 3
@@ -62,7 +63,8 @@
   
   (reset (lambda n
     (+ 1 (shift (lambda k
-      (k 2)))))))))
+      (k 2))))))))
+  "call/cc reset shift")
 
 ; Random example of throw
 (define (safediv x y)
@@ -70,4 +72,4 @@
         (if (= y 0)
             (throw -1))
         (/ x y))))
-(assert (and (= (safediv 10 0) -1) (= (safediv 10 5) 2)))
+(assert (and (= (safediv 10 0) -1) (= (safediv 10 5) 2)) "call/cc throw")

@@ -8,7 +8,9 @@
       (lambda x (+ x 1))
       (lambda x (* x 2)))
 
-    (= (f 10) 21))))
+    (= (f 10) 21)))
+
+  "higher-ordered compose")
 
 
 ; Nicer let* syntax
@@ -19,4 +21,6 @@
     (dual switch) (if (= switch 0) plus minus)
   (and
     (= ((dual 0) 5 3) 8)
-    (= ((dual 1) 5 3) 2))))
+    (= ((dual 1) 5 3) 2)))
+
+  "higher-ordered let*")
