@@ -47,19 +47,11 @@ module Make(C : Compiler) : S = struct
           print_endline @@
             ":h(elp) -> View this message\n" ^
             ":q(uit) -> Exit REPL\n" ^
-            ":m(ulti) -> Toggle multiline mode, uses double newlines to run\n" ^
-            ":l(oad) <file> -> Executes contents of <file> as a string"
+            ":m(ulti) -> Toggle multiline mode, uses double newlines to run"
       | c when List.mem c [":m"; ":multi"] ->
           multiline := not !multiline;
           print_endline @@
             "Set multiline mode to " ^ string_of_bool !multiline;
-      | c when String.starts_with ~prefix:":l" c
-            || String.starts_with ~prefix:":load" c ->
-          ignore_err (fun () ->
-            match String.split_on_char ' ' input with
-            | [_; fname] ->
-                print_execute In_channel.(with_open_text fname input_all)
-            | _ -> failwith "Unexpected :l syntax, See :h(elp)");
       | c when String.starts_with ~prefix:":" c ->
           print_endline "Error: Unexpected meta command, See :h(elp)";
       | "" -> ()

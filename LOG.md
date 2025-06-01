@@ -172,6 +172,7 @@
     - Added tests to test sequences and `define`
 
 * Add `error` form and `assert` with optional error messages
+* Add `use` toplevel form to just read file and dump contents in REPL
 
 - TODO: Update README
 - TODO: Clean up all the REPL related code

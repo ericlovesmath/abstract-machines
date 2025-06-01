@@ -12,12 +12,8 @@ let test (module C : Compiler) (files : string list) =
       if rem <> "" then test rem
     in
 
-    let read (file : string) =
-      In_channel.(with_open_text ("tests/" ^ file ^ ".scm") input_all)
-    in
-
     print_endline ("- " ^ file);
-    test (read file)
+    test ("(use \"tests/" ^ file ^ ".scm\")")
   in
 
   print_endline ("Running " ^ C.name ^ " tests...");

@@ -201,7 +201,19 @@ let toplevelP =
 
   let exprP = (fun e -> Expr e) <$> introP in
 
-  defineP <|> assertP <|> exprP
+  (* Reads file and dumps into stream. Technically parses [(use "base.scm"]
+     if "base.scm" starts with [)], but I don't care :P *)
+  let useP =
+    let* msg =
+      parensPT '(' ')' (
+        stringP "use" *> trimP *> charP '"' *> many (satisfy (( <> ) '"')) <* charP '"'
+      )
+    in
+    let contents = In_channel.(with_open_text (implode msg) input_all) in
+    fun st -> Some (Expr Unit, explode contents @ st)
+  in
+
+  defineP <|> assertP <|> exprP <|> useP
 
 let parse s =
   let cleanP = trimP <|> (() <$ many emptyP) in
