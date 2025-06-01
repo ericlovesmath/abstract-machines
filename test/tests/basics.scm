@@ -23,3 +23,9 @@
     )
 
 3))
+
+; error is a special form, the string is fake and not a real value
+(if #t 1 (error "hi"))
+
+; assert can have a custom error form
+(assert #t "custom error")

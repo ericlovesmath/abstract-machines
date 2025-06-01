@@ -8,6 +8,7 @@ type instr =
   | ATOM | CONS | CDR | CAR
   | ADD | SUB | MUL | DIV
   | EQ | GT | LT | GE | LE
+  | ERROR of string
   [@@deriving sexp]
 
 type value =
@@ -50,6 +51,8 @@ let eval_step (state : t) : t =
   let push code stack = { state with code = code; stack = stack } in
   match (stack, env, code, dump) with
   | _, _, [], _ -> state
+
+  | _, _, ERROR s :: _, _               -> raise (Compiler.RuntimeErr s)
 
   | _, _, NIL :: c', _                  -> push c' (List [] :: stack)
   | _, _, LDC :: Int n :: c', _         -> push c' (Int n :: stack)

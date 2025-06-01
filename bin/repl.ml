@@ -62,6 +62,7 @@ module Make(C : Compiler) : S = struct
             | _ -> failwith "Unexpected :l syntax, See :h(elp)");
       | c when String.starts_with ~prefix:":" c ->
           print_endline "Error: Unexpected meta command, See :h(elp)";
+      | "" -> ()
       | _ ->
           ignore_err (fun () -> print_execute input);
     end;

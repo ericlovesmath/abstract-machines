@@ -29,6 +29,8 @@ type t =
   | Le of t * t
   | Ge of t * t
   | Eq of t * t
+
+  | Error of string
   [@@deriving sexp]
 
 type value

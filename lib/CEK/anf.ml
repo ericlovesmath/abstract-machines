@@ -9,7 +9,7 @@ let genvar () =
 
 let is_atomic (e : t) : bool =
   match e with
-  | Nil | Int _ | Bool _ | Var _ | Fn _ -> true
+  | Nil | Int _ | Bool _ | Var _ | Fn _ | Error _ -> true
   | _ -> false
 
 let anf (e : t) : t =
@@ -33,6 +33,7 @@ let anf (e : t) : t =
       k (cons e e')
     in
     match e with
+    | Error _
     | Unit
     | Nil
     | Int _

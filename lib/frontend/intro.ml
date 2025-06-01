@@ -6,6 +6,7 @@ type prim =
   | Add | Sub | Mul | Div
   | Eq | Gt | Lt | Ge | Le
   | And | Or | Not | Neq
+  | Error of string
   [@@deriving sexp]
 
 type t =
@@ -27,7 +28,7 @@ type t =
 
 type top =
   | Define of string * string list * t
-  | Assert of t
+  | Assert of string option * t
   | Expr of t
   [@@deriving sexp]
 
@@ -88,8 +89,15 @@ let integerP =
 
 let boolP = (Bool true <$ stringP "#t") <|> (Bool false <$ stringP "#f")
 
+let errorP =
+  parensPT '(' ')' (
+    let- _ = stringP "error" in
+    let* msg = charP '"' *> many (satisfy (( <> ) '"')) <* charP '"' in
+    pure (Prim (Error (implode msg)))
+  )
+
 let rec introP st =
-  (unitP <|> nilP <|> integerP <|> boolP <|> primP <|> ifP <|> condP
+  (unitP <|> nilP <|> integerP <|> boolP <|> primP <|> errorP <|> ifP <|> condP
    <|> lambdaP <|> letP <|> letstarP <|> callP <|> listP <|> variableP) st
 
 and ifP st =
@@ -180,9 +188,15 @@ let toplevelP =
     ) st
   in
 
+  (* assertP can have an optional string descriptor *)
   let assertP =
-    let x = (stringP "assert" *> trimP *> introP) in
-    (fun e -> Assert e) <$> parensPT '(' ')' x
+    let msgP = charP '"' *> many (satisfy (( <> ) '"')) <* charP '"' in
+    parensPT '(' ')' (
+      let- _ = stringP "assert" in
+      let* expr = introP in
+      let* msg = ((fun x -> Some (implode x)) <$> (trimP *> msgP)) <|> pure None in
+      pure (Assert (msg, expr))
+    )
   in
 
   let exprP = (fun e -> Expr e) <$> introP in

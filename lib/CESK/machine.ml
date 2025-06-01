@@ -31,6 +31,8 @@ type t =
   | Le of t * t
   | Ge of t * t
   | Eq of t * t
+
+  | Error of string
   [@@deriving sexp]
 
 type addr = int
@@ -68,6 +70,7 @@ let update_store store a v =
 
 let eval_atomic (e : t) (env : env) (store : store) : value =
   match e with
+  | Error s -> raise (Compiler.RuntimeErr s)
   | Unit -> Unit
   | Nil -> List []
   | Int n -> Int n
@@ -93,6 +96,7 @@ let eval_step (c : t) (env : env) (store : store) (k : kont) : cesk =
     | _ -> failwith "eval_step: Prim called on non-integer arguments"
   in
   match c with
+  | Error _
   | Unit
   | Nil
   | Int _

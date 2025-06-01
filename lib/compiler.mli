@@ -1,3 +1,5 @@
+exception RuntimeErr of string
+
 module type Compiler = sig
   type state
   type value

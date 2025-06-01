@@ -4,6 +4,7 @@ type prim =
   | Atom | Cons | Cdr | Car
   | Add | Sub | Mul | Div
   | Eq | Gt | Lt | Ge | Le
+  | Error of string
   [@@deriving sexp]
 
 type t =
@@ -90,12 +91,14 @@ and desugar_prim (p : Intro.prim) =
   | Lt -> Prim Lt
   | Ge -> Prim Ge
   | Le -> Prim Le
+  | Error s -> Prim (Error s)
 
 let desugar_top (t : Intro.top) : top =
   match t with
   | Expr e -> Expr (desugar e)
   (* TODO: Assert should have better error than 0/0 *)
-  | Assert e -> Expr (If (desugar e, Unit, Call (Prim Div, [Int 0; Int 0])))
+  | Assert (None, e) -> Expr (If (desugar e, Unit, Prim (Error "assert failed")))
+  | Assert (Some s, e) -> Expr (If (desugar e, Unit, Prim (Error s)))
   | Define (v, [], bind) -> Define (v, desugar bind)
   (* TODO: Don't use letrec if not needed *)
   (* TODO: Why does many bindings make this slow? *)

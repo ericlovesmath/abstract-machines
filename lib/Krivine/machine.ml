@@ -107,6 +107,8 @@ and reduce_prim prim stack =
       | Cons _ -> enclose (Bool false)
       | _ -> failwith "Type error in atom check")
 
+  | Error s, [] -> raise (Compiler.RuntimeErr s)
+
   | _ -> failwith "Malformed primitive application"
 
 

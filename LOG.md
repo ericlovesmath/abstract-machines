@@ -171,6 +171,8 @@
 
     - Added tests to test sequences and `define`
 
+* Add `error` form and `assert` with optional error messages
+
 - TODO: Update README
 - TODO: Clean up all the REPL related code
 - TODO: Better `assert` errors with `error` primitive

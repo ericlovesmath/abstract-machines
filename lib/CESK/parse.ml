@@ -90,3 +90,5 @@ let rec parse (e : Frontend.Ast.t) : Machine.t =
   | Prim Cons -> make_binop (fun x y -> Cons (x, y))
   | Prim Car  -> let x = genvar () in Fn ([x], Car (Var x))
   | Prim Cdr  -> let x = genvar () in Fn ([x], Cdr (Var x))
+
+  | Prim (Error s)  -> Error s

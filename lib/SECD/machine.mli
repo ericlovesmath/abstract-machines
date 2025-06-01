@@ -8,6 +8,7 @@ type instr =
   | ATOM | CONS | CDR | CAR
   | ADD | SUB | MUL | DIV
   | EQ | GT | LT | GE | LE
+  | ERROR of string
   [@@deriving sexp]
 
 type value =

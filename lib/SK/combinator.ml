@@ -50,6 +50,7 @@ let graphify ((binds, g) : (string * Graph.vertex) list * Graph.graph) (ast : t)
     | Bool false -> node_false
     | Unit -> node_unit
     | Nil -> node_nil
+    | Prim (Error s) -> Graph.add_vertex g (Prim (Error s))
     | Prim p -> List.assoc p node_prims
     | Int i -> Graph.add_vertex g (Int i)
     | Cons (h, t) -> Graph.add_vertex g (Cons (aux h, aux t))

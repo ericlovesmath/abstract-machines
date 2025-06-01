@@ -3,6 +3,7 @@ type prim =
   | Add | Sub | Mul | Div
   | Eq | Gt | Lt | Ge | Le
   | And | Or | Not | Neq
+  | Error of string
   [@@deriving sexp]
 
 type t =
@@ -25,7 +26,7 @@ type t =
 type top =
   (* TODO: Assert, Use, etc. *)
   | Define of string * string list * t
-  | Assert of t
+  | Assert of string option * t
   | Expr of t
   [@@deriving sexp]
 

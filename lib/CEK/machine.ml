@@ -27,6 +27,8 @@ type t =
   | Le of t * t
   | Ge of t * t
   | Eq of t * t
+
+  | Error of string
   [@@deriving sexp]
 
 type value =
@@ -42,6 +44,7 @@ type cek = Running of t * env * kont | Done of value
 
 let eval_atomic (e : t) (env : env) : value =
   match e with
+  | Error s -> raise (Compiler.RuntimeErr s)
   | Unit -> Unit
   | Nil -> List []
   | Int n -> Int n
@@ -66,6 +69,7 @@ let eval_step (c : t) (env : env) (k : kont) : cek =
       | _ -> failwith "eval_step: Prim called on non-integer arguments")
   in
   match c with
+  | Error _
   | Unit
   | Nil
   | Int _

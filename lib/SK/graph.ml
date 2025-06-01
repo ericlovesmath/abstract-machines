@@ -258,6 +258,7 @@ let reduce' ((root, g) : t) : unit =
           end
         | _ -> ()
         end
+    | Prim (Error s) -> raise (Compiler.RuntimeErr s)
     | Cons _ | Bool _ | Int _ | Unit | Nil | Prim _ 
     | S | K | I | B | C | Y | U | P | If -> ()
   in

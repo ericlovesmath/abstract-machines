@@ -2,6 +2,7 @@ type prim =
   | Atom | Cons | Cdr | Car
   | Add | Sub | Mul | Div
   | Eq | Gt | Lt | Ge | Le
+  | Error of string
   [@@deriving sexp]
 
 type t =

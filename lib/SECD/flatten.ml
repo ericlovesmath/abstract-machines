@@ -31,5 +31,6 @@ let flatten (ast : Assign.t) : Machine.instr list =
     | Prim Gt -> GT :: acc
     | Prim Le -> LE :: acc
     | Prim Ge -> GE :: acc
+    | Prim (Error s) -> (ERROR s) :: acc
   in
   aux [] ast
