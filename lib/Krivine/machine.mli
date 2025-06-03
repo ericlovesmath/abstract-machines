@@ -2,6 +2,7 @@ type t =
   | Access of string
   | Grab of string * t
   | Push of t * t
+  | Fix of string * t
   | If of t * t * t
   | Cst of const
   [@@deriving sexp]

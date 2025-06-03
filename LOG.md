@@ -159,9 +159,9 @@
 * Support `:load <file>` with toplevel syntax, multiple expressions evaluated in one input
 * Add true toplevel with `define` (recursive) syntax:
 
-    - Krivine: Works, but has exponential slowdown from copying environment each eval
     - SECD: No issues, assumes all previous bounds are recursive for simplicity
     - CEK: No issues
+    - Krivine: Works, but has exponential slowdown from copying environment each eval
     - CESK: No issues
     - SK: No issues, duplicated bindings for defaults
 
@@ -173,10 +173,11 @@
 
 * Add `error` form and `assert` with optional error messages
 * Add `use` toplevel form to just read file and dump contents in REPL
+* Fix Krivine's explonential slowdown by only binding free variables and
+* Replace Y-combinator in Krivine with Fixpoint env
 
 - TODO: Update README
 - TODO: Clean up all the REPL related code
-- TODO: Better `assert` errors with `error` primitive
 
 ## Working Notes
 

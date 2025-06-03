@@ -4,6 +4,7 @@ type t =
   | Access of string
   | Grab of string * t
   | Push of t * t
+  | Fix of string * t
     (* TODO: If is a Prim when Lazy *)
   | If of t * t * t
   | Cst of const
@@ -23,6 +24,19 @@ and closure = Cl of t * env
   [@@deriving sexp]
 and env = (string * closure) list
 
+module VarSet = Set.Make(String)
+
+let rec free_vars =
+  function
+  | Access x     -> VarSet.singleton x
+  | Grab (x, t)  -> VarSet.remove x (free_vars t)
+  | Fix (f, t)   -> VarSet.remove f (free_vars t)
+  | Push (t, t') -> VarSet.union (free_vars t) (free_vars t')
+  | Cst _        -> VarSet.empty
+  | If (c, t, f) -> VarSet.union (free_vars c) (VarSet.union (free_vars t) (free_vars f))
+
+let trim_env env vars =
+  List.filter (fun (x, _) -> VarSet.mem x vars) env
 
 (* Transition rules *)
 let rec evaluate (Cl (t, env)) s =
@@ -32,10 +46,16 @@ let rec evaluate (Cl (t, env)) s =
       | Some cl -> evaluate cl s
       | None -> failwith ("Unbound variable: " ^ x))
 
-  | Grab (x, t) -> (
-      match s with
-      | [] -> Cl (Grab (x, t), env)
-      | cl :: s' -> evaluate (Cl (t, (x, cl) :: env)) s')
+  | Grab (x, t) -> 
+      let trimmed_env = trim_env env (free_vars t) in
+      (match s with
+      | [] -> Cl (Grab (x, t), trimmed_env)
+      | cl :: s' -> evaluate (Cl (t, (x, cl) :: trimmed_env)) s')
+
+  | Fix (f, t) ->
+      let trimmed_env = trim_env env (free_vars t) in
+      let rec_env = (f, Cl (Fix (f, t), trimmed_env)) :: trimmed_env in
+      evaluate (Cl (t, rec_env)) s
 
   | Push (t, t') -> evaluate (Cl (t, env)) (Cl (t', env) :: s)
 

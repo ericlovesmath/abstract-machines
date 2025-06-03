@@ -1,12 +1,5 @@
 open Machine
 
-let y_combinator =
-  Grab
-    ( "f",
-      Push
-        ( Grab ("x", Push (Access "f", Push (Access "x", Access "x"))),
-          Grab ("x", Push (Access "f", Push (Access "x", Access "x"))) ) )
-
 let rec parse (e : Frontend.Ast.t) : Machine.t =
   match e with
   | Unit -> Cst Unit
@@ -21,5 +14,4 @@ let rec parse (e : Frontend.Ast.t) : Machine.t =
   | Lambda (args, body) ->
       List.fold_right (fun arg acc -> Grab (arg, acc)) args (parse body)
   | LambdaRec (f, args, body) ->
-      (* TODO: Native `ref` based isn't working for some reason *)
-      Push (y_combinator, Grab (f, parse (Lambda (args, body))))
+      Fix (f, parse (Lambda (args, body)))
