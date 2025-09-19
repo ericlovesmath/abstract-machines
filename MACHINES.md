@@ -105,3 +105,17 @@ Abstract machines for functional programming languages
 
 * STGi Implementation on Hackage
   [Link](http://hackage.haskell.org/package/stgi)
+
+## WAM
+
+https://github.com/Trismegiste/WamBundle
+https://github.com/acharal/wam
+https://www.researchgate.net/publication/220986765_Warren's_Abstract_Machine_A_Tutorial_Reconstruction
+https://www.researchgate.net/publication/299437390_A_Friendly_Interactive_Tutorial_of_the_Warren_Abstract_Machine
+
+https://github.com/HigherOrderCO/HVM
+https://legacy.cs.indiana.edu/~dyb/pubs/monadicDC.pdf
+
+https://www.piumarta.com/papers/colas-slides.pdf
+https://www.piumarta.com/papers/colas-whitepaper.pdf
+http://www.figuk.plus.com/build/heart.htm
