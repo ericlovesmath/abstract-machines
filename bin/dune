@@ -3,9 +3,9 @@
  (name main)
  (libraries lib))
 
-; (executable
-;  (name web)
-;  (libraries lib bonsai bonsai.web)
-;  (preprocess
-;    (pps ppx_css ppx_jane bonsai.ppx_bonsai))
-;  (modes js))
+(executable
+ (name web)
+ (libraries bonsai.web lib)
+ (preprocess
+   (pps ppx_css bonsai.ppx_bonsai))
+ (modes exe js))

@@ -157,6 +157,7 @@
 * Better SECD/CEK errors
 * Add toplevel `assert`
 * Support `:load <file>` with toplevel syntax, multiple expressions evaluated in one input
+
 * Add true toplevel with `define` (recursive) syntax:
 
     - SECD: No issues, assumes all previous bounds are recursive for simplicity
@@ -172,12 +173,13 @@
     - Added tests to test sequences and `define`
 
 * Add `error` form and `assert` with optional error messages
-* Add `use` toplevel form to just read file and dump contents in REPL
-* Fix Krivine's explonential slowdown by only binding free variables and
-* Replace Y-combinator in Krivine with Fixpoint env
+* Add `use` toplevel form to just read file and dump contents in REPL, remove `:load`
+* Fix Krivine's exponential slowdown by only binding free variables and
+* Replace Y-combinator in Krivine with new Fixpoint environment
 
 - TODO: Update README
 - TODO: Clean up all the REPL related code
+- TODO Records / Modules - https://r7rs.org/
 
 ## Working Notes
 

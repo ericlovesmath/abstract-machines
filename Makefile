@@ -14,7 +14,7 @@ visualize:
 	feh --scale-down ./logs/*.svg
 
 web:
-	dune build ./bin/web.bc.js
+	dune build --profile release ./bin/web.bc.js
 	xdg-open ./bin/index.html
 
 test: clean build

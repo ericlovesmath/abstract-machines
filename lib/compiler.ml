@@ -1,26 +1,5 @@
+include Compiler_intf
 open Frontend
-
-exception RuntimeErr of string
-
-module type Compiler = sig
-  type state
-  type value
-
-  val name : string
-  val init : state
-  val execute : state -> string -> state * value * string
-  val string_of_value : value -> string
-end
-
-module type Compilable = sig
-  type state
-  type value
-
-  val name : string
-  val init : state
-  val execute : state -> Ast.top -> state * value
-  val string_of_value : value -> string
-end
 
 module Make (C : Compilable) : Compiler = struct
   type state = C.state
@@ -31,8 +10,8 @@ module Make (C : Compilable) : Compiler = struct
   let string_of_value = C.string_of_value
 
   let execute state program =
-    let (expr, rem) = Intro.parse program in
-    let (state, value) =
+    let expr, rem = Intro.parse program in
+    let state, value =
       expr
       |> Debug.trace "parse frontend" Intro.sexp_of_top
       |> Ast.desugar_top
